@@ -649,7 +649,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "fantasy-console"
+name = "fantasy-console-desktop"
 version = "0.0.0"
 dependencies = [
  "serde",
