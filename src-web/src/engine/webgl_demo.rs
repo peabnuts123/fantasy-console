@@ -6,7 +6,7 @@ use core::panic;
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
-use web_sys::{window, WebGl2RenderingContext, WebGlProgram, WebGlShader, WebGlUniformLocation};
+use web_sys::{window, WebGl2RenderingContext, WebGlContextAttributes, WebGlProgram, WebGlShader, WebGlUniformLocation};
 
 struct WebGLDemoLoopContext {
     gl: WebGl2RenderingContext,
@@ -31,8 +31,10 @@ pub fn main() {
     let canvas_width = canvas.width();
     let canvas_height = canvas.height();
 
+    let mut context_options = WebGlContextAttributes::new();
+    context_options.antialias(false);
     let gl = canvas
-        .get_context("webgl2")
+        .get_context_with_context_options("webgl2", &context_options )
         .expect("Failed to get WebGL2 context: A")
         .expect("Failed to get WebGL2 context: B")
         .dyn_into::<WebGl2RenderingContext>()

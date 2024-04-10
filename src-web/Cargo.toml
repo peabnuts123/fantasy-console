@@ -37,6 +37,7 @@ features = [
   'WebGlProgram',
   'WebGlShader',
   'Window',
+  'WebGlContextAttributes',
 ]
 
 
