@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "sass": "^1.74.1",
     "typescript": "^5.0.2",
     "vite": "^5.0.0",
     "vite-plugin-run": "^0.5.1",

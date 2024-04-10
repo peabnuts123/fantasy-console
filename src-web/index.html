@@ -2,21 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="/src/styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Fantasy Console</title>
-    <script type="module" src="/src/main.ts" defer></script>
+
+    <link rel="stylesheet" href="src/styles/index.scss" />
   </head>
 
   <body>
-    <div class="container">
-      <h1>Fantasy Console</h1>
+    <div class="app">
+      <div class="header">
+        <h1 class="header__title">Fantasy Console</h1>
+        <h2 class="header__subtitle">you impressed?</h2>
+      </div>
 
-      <p>This is it. You impressed?</p>
-
-      <button id="something-button" type="button">Do Something</button>
-
-      <canvas id="canvas" width="640" height="480"></canvas>
+      <div class="canvas__container">
+        <canvas id="canvas" class="canvas" width="640" height="480"></canvas>
+      </div>
     </div>
+
+    <script type="module" src="src/index.ts"></script>
   </body>
 </html>
