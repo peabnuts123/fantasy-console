@@ -5,4 +5,3 @@ somethingButton?.addEventListener('click', () => {
   FantasyConsole.greet();
 });
 
-FantasyConsole.init();
