@@ -1,7 +1,7 @@
 {
   "build": {
     "beforeDevCommand": "cd src-web && npm start",
-    "beforeBuildCommand": "cd src-web && npm run build:wasm -- --release && npm run build",
+    "beforeBuildCommand": "cd src-web && npm run build:wasm--release && npm run build",
     "devPath": "http://localhost:1420",
     "distDir": "../src-web/dist",
     "withGlobalTauri": true

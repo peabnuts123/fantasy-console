@@ -4,3 +4,5 @@ const somethingButton = document.querySelector("#something-button") as HTMLButto
 somethingButton?.addEventListener('click', () => {
   FantasyConsole.greet();
 });
+
+FantasyConsole.init();

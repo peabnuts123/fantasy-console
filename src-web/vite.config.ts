@@ -28,7 +28,7 @@ export default defineConfig(async (env) => {
       run([
         {
           name: 'build wasm',
-          run: ['npm', 'run', 'build:wasm', '--', '--dev'],
+          run: ['npm', 'run', 'build:wasm--dev'],
           pattern: ['src/**/*.rs'],
         },
       ])
