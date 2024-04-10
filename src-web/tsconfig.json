@@ -13,6 +13,11 @@
     "isolatedModules": true,
     "noEmit": true,
 
+    "baseUrl": ".",
+    "paths": {
+      "@engine/*": ["pkg/*"]
+    },
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
