@@ -15,12 +15,14 @@
 }
 
 .container {
-  margin: 0;
+  margin-left: auto;
+  margin-right: auto;
   padding-top: 10vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  text-align: center;
+  align-items: center;
+  max-width: 800px;
 }
 
 .logo {
