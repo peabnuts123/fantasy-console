@@ -7,7 +7,7 @@
     "start": "vite",
     "build": "tsc && vite build",
     "build:wasm": "wasm-pack build",
-    "build:wasm--dev": "npm run build:wasm -- --dev",
+    "build:wasm--dev": "npm run build:wasm",
     "build:wasm--release": "npm run build:wasm -- --release --no-default-features",
     "preview": "vite preview"
   },

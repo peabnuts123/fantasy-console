@@ -30,6 +30,7 @@ version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "gl_matrix",
+ "glam",
  "js-sys",
  "wasm-bindgen",
  "wasm-bindgen-test",
@@ -55,6 +56,12 @@ checksum = "df64d0245c589931a0b5a385a63e7db2aeff209bdd471df0417e0f230a4c33ae"
 dependencies = [
  "rand",
 ]
+
+[[package]]
+name = "glam"
+version = "0.27.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e05e7e6723e3455f4818c7b26e855439f7546cf617ef669d1adedb8669e5cb9"
 
 [[package]]
 name = "js-sys"
