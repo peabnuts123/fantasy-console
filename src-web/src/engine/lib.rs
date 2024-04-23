@@ -20,21 +20,27 @@ fn init() {
 
 #[wasm_bindgen]
 pub struct Engine {
-    scene: Scene,
+    scene: Option<Scene>,
     renderer: Renderer,
     angle: f32,
 }
 
-/* Poorly named, I'm sorry. It was originally just an array */
 #[wasm_bindgen]
 impl Engine {
     #[wasm_bindgen(constructor)]
     pub fn new(canvas_width: u16, canvas_height: u16) -> Self {
         Self {
-            scene: example_scene::load_scene(),
+            scene: None,
             renderer: Renderer::new(canvas_width, canvas_height),
             angle: 0.0,
         }
+    }
+
+    #[wasm_bindgen]
+    pub async fn load_scene(&mut self) -> Result<(), String>{
+        let scene = example_scene::load_scene().await?;
+        self.scene = Some(scene);
+        Ok(())
     }
 
     /// Fetch underlying frame buffer
@@ -48,7 +54,7 @@ impl Engine {
         self.renderer.clear_buffers();
 
         // Render each mesh
-        for object in &self.scene.objects {
+        for object in &self.scene.as_ref().unwrap().objects {
             self.renderer.render_object(object, self.angle);
         }
 

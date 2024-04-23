@@ -14,8 +14,13 @@ default = ["console_error_panic_hook"]
 [dependencies]
 wasm-bindgen = "0.2.84"
 js-sys = "0.3.69"
-gl_matrix = "0.0.2"
 glam = "0.27.0"
+wasm-bindgen-futures = "0.4.42"
+
+[dependencies.tobj]
+version = "4.0.2"
+default-features = false
+features = ["async"]
 
 [dependencies.console_error_panic_hook]
 # The `console_error_panic_hook` crate provides better debugging of panics by
@@ -29,16 +34,6 @@ optional = true
 version = "0.3.69"
 features = [
   'console',
-  'Document',
-  'Element',
-  'HtmlCanvasElement',
-  'WebGlBuffer',
-  'WebGl2RenderingContext',
-  'WebGlUniformLocation',
-  'WebGlProgram',
-  'WebGlShader',
-  'Window',
-  'WebGlContextAttributes',
 ]
 
 

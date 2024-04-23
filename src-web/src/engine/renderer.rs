@@ -70,15 +70,15 @@ impl Renderer {
     // @TODO make renderer have more of a `render scene` function or something
     pub fn clear_buffers(&mut self) {
         // Clear frame buffer
-        self.rainbow_demo();
-        // let pixel_data_len = self.pixel_data.len();
-        // let mut i: usize = 0;
-        // while i < pixel_data_len {
-        //     self.pixel_data[i] = CLEAR_COLOR[0]; /* R */
-        //     self.pixel_data[i + 1] = CLEAR_COLOR[1]; /* G */
-        //     self.pixel_data[i + 2] = CLEAR_COLOR[2]; /* B */
-        //     i += 4;
-        // }
+        // self.rainbow_demo(); // 🌈 Fun for the whole family
+        let pixel_data_len = self.pixel_data.len();
+        let mut i: usize = 0;
+        while i < pixel_data_len {
+            self.pixel_data[i] = CLEAR_COLOR[0]; /* R */
+            self.pixel_data[i + 1] = CLEAR_COLOR[1]; /* G */
+            self.pixel_data[i + 2] = CLEAR_COLOR[2]; /* B */
+            i += 4;
+        }
 
         // Clear depth buffer
         for i in 0..self.depth_data.len() {

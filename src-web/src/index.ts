@@ -13,6 +13,9 @@ async function main() {
   // Construct 3d rendering engine
   const engine = new Engine(canvas.width, canvas.height);
 
+  // Load demo scene
+  await engine.load_scene();
+
   const frameBuffer = engine.buffer;
 
   // Initialise all Alpha to 0xFF
