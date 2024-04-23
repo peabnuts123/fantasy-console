@@ -1,4 +1,4 @@
-import { WasmUint8Array } from '@engine/fantasy_console';
+import { Engine } from '@engine/fantasy_console';
 
 // @NOTE v8 custom property
 // Increase stack trace size for better view of Rust panics
@@ -11,7 +11,7 @@ async function main() {
   const ctx = canvas.getContext('2d');
 
   // Construct 3d rendering engine
-  const engine = new WasmUint8Array(canvas.width, canvas.height);
+  const engine = new Engine(canvas.width, canvas.height);
 
   const frameBuffer = engine.buffer;
 
