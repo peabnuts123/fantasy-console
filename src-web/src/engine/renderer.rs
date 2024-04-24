@@ -23,6 +23,7 @@ pub struct Renderer {
     pixel_data: Vec<u8>,
     depth_data: Vec<f32>,
     offset: u16,
+    pub camera_position: Vec3,
 }
 
 impl Renderer {
@@ -33,6 +34,7 @@ impl Renderer {
             pixel_data: vec![0; (canvas_width as usize) * (canvas_height as usize) * 4 /* rgba */],
             depth_data: vec![0.0; (canvas_width as usize) * (canvas_height as usize)],
             offset: 0,
+            camera_position: Vec3::ZERO,
         }
     }
 
@@ -105,9 +107,9 @@ impl Renderer {
             let mut v2 = mesh.vertices[triangle.indices[2]] + object.position;
 
             // Apply rotation to vertices
-            v0 = spin * (v0 - rotation_point) + rotation_point;
-            v1 = spin * (v1 - rotation_point) + rotation_point;
-            v2 = spin * (v2 - rotation_point) + rotation_point;
+            v0 = spin * (v0 - rotation_point) + rotation_point - self.camera_position;
+            v1 = spin * (v1 - rotation_point) + rotation_point - self.camera_position;
+            v2 = spin * (v2 - rotation_point) + rotation_point - self.camera_position;
 
             // Rendering calculations based on
             // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution.html

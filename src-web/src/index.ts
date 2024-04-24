@@ -4,7 +4,18 @@ import { Engine } from '@engine/fantasy_console';
 // Increase stack trace size for better view of Rust panics
 (Error as any).stackTraceLimit = 50;
 
-// FantasyConsole.run_gl_demo();
+enum KeyCode {
+  W = 0,
+  A = 1,
+  S = 2,
+  D = 3,
+}
+const NativeCodeToKeyCodeMap: Record<string, KeyCode> = {
+  'KeyW': KeyCode.W,
+  'KeyA': KeyCode.A,
+  'KeyS': KeyCode.S,
+  'KeyD': KeyCode.D,
+}
 
 async function main() {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -30,9 +41,13 @@ async function main() {
   let imageData = new ImageData(frameBuffer, canvas.width, canvas.height);
 
   let framesDrawn = 0;
+  let lastFrameTime = performance.now();
   const draw: FrameRequestCallback = () => {
     // Draw the next frame into the frame buffer
-    engine.set_image_data();
+    let currentFrameTime = performance.now();
+    let deltaT = currentFrameTime - lastFrameTime;
+    engine.update(deltaT / 1000);
+    lastFrameTime = currentFrameTime;
 
     // Write frame buffer to canvas
     ctx!.putImageData(imageData, 0, 0);
@@ -43,13 +58,30 @@ async function main() {
     framesDrawn++;
   }
 
+  // Begin drawing
+  requestAnimationFrame(draw);
+
   // Count number of frames drawn per second
   setInterval(() => {
     console.log(`Frames drawn: ${framesDrawn}`);
     framesDrawn = 0;
   }, 1000);
 
-  requestAnimationFrame(draw);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.repeat) return;
+
+    const keyCode = NativeCodeToKeyCodeMap[event.code];
+    if (keyCode !== undefined) {
+      engine.on_key_press(keyCode);
+    }
+  });
+  document.addEventListener('keyup', (event) => {
+    const keyCode = NativeCodeToKeyCodeMap[event.code];
+    if (keyCode !== undefined) {
+      engine.on_key_release(keyCode);
+    }
+  });
 }
 
 void main();
