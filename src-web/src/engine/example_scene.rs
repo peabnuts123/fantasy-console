@@ -1,17 +1,13 @@
-use std::{f32::consts::PI, rc::Rc};
+use std::rc::Rc;
 
 use glam::Vec3;
-use js_sys::{Math, Uint8Array};
+use js_sys::Uint8Array;
 use tobj::LoadError;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
 use crate::types::{
-    Object,
-    Scene,
-    Mesh,
-    Triangle,
-    COLOR_LOVELY_PINK,
+    Mesh, Object, Scene, Triangle, COLOR_LOVELY_PINK, COLOR_WHITE
 };
 
 #[wasm_bindgen(module = "/src/engine/util.ts")]
@@ -21,7 +17,8 @@ extern "C" {
 }
 
 const MODEL_URI_BASE: &str = "/models";
-const MODEL_RESOURCE: &str = "burgerCheese.obj";
+const MODEL_RESOURCE: &str = "kitchen.obj";
+// const MODEL_RESOURCE: &str = "burgerCheese.obj";
 
 async fn get_file_data(url: String) -> Result<Vec<u8>, String> {
     let result: Result<JsValue, JsValue> = get_resource(url).await;
@@ -33,8 +30,8 @@ async fn get_file_data(url: String) -> Result<Vec<u8>, String> {
     }
 }
 
-pub async fn load_scene() -> Result<Scene, String> {
-    let obj_bytes = get_file_data(format!("{}/{}", MODEL_URI_BASE, MODEL_RESOURCE)).await?;
+async fn load_obj(path: String, scale: f32) -> Result<Mesh, String> {
+    let obj_bytes = get_file_data(path).await?;
     let obj_data_result = tobj::load_obj_buf_async(
             &mut obj_bytes.as_slice(),
             &tobj::GPU_LOAD_OPTIONS,
@@ -80,9 +77,9 @@ pub async fn load_scene() -> Result<Scene, String> {
         vertices.extend(
             model.mesh.positions.chunks_exact(3)
                 .map(|chunk| Vec3 {
-                    x: chunk[0],
-                    y: chunk[1],
-                    z: chunk[2],
+                    x: chunk[0] * scale,
+                    y: chunk[1] * scale,
+                    z: chunk[2] * scale,
                 })
         );
         triangles.extend(
@@ -94,38 +91,127 @@ pub async fn load_scene() -> Result<Scene, String> {
                         (chunk[1] as usize) + index_offset,
                         (chunk[0] as usize) + index_offset,
                     ],
-                    color,
+                    color: COLOR_WHITE,
+                    // color,
                 })
         );
     }
 
     console::log_1(&format!("Loaded {} vertices and {} triangles", vertices.len(), triangles.len()).into());
 
-    let mesh = Rc::new(Mesh {
+    Ok(Mesh {
         vertices,
         triangles,
-    });
+    })
+}
 
-    let num_objects = 25;
+pub async fn load_scene() -> Result<Scene, String> {
+    /* Loaded OBJ mesh */
+    let obj_path = format!("{MODEL_URI_BASE}/{MODEL_RESOURCE}").to_string();
+    let mesh = Rc::new(load_obj(obj_path, 0.5).await?);
+
+    /* Single triangle */
+    // let mesh = Rc::new(Mesh {
+    //     vertices : vec![
+    //         Vec3::new(-1.0, -1.0, 0.0),
+    //         Vec3::new(1.0, -1.0, 0.0),
+    //         Vec3::new(0.0, 1.0, 0.0),
+    //     ],
+    //     triangles: vec![
+    //         Triangle {
+    //             indices: [0, 1, 2],
+    //             color: COLOR_LOVELY_PINK,
+    //         },
+    //     ],
+    // });
+
+    // Big cube
+    // let cube_size: f32 = 2.0;
+    // let mesh = Rc::new(Mesh {
+    //     vertices: vec![
+    //         Vec3::new(-cube_size, cube_size, cube_size),
+    //         Vec3::new(-cube_size, cube_size, -cube_size),
+    //         Vec3::new(cube_size, cube_size, -cube_size),
+    //         Vec3::new(cube_size, cube_size, cube_size),
+    //         Vec3::new(-cube_size, -cube_size, cube_size),
+    //         Vec3::new(-cube_size, -cube_size, -cube_size),
+    //         Vec3::new(cube_size, -cube_size, -cube_size),
+    //         Vec3::new(cube_size, -cube_size, cube_size)
+    //     ],
+    //     triangles: vec![
+    //         /* OUTWARDS BOX */
+    //         // // TOP
+    //         // Triangle { indices: [0, 1, 2], color: COLOR_RED, },
+    //         // Triangle { indices: [0, 2, 3], color: COLOR_RED, },
+    //         // // FRONT
+    //         // Triangle { indices: [1, 5, 6], color: COLOR_GREEN, },
+    //         // Triangle { indices: [1, 6, 2], color: COLOR_GREEN, },
+    //         // // RIGHT
+    //         // Triangle { indices: [2, 6, 7], color: COLOR_BLUE, },
+    //         // Triangle { indices: [2, 7, 3], color: COLOR_BLUE, },
+    //         // // BACK
+    //         // Triangle { indices: [3, 7, 4], color: COLOR_MAGENTA, },
+    //         // Triangle { indices: [3, 4, 0], color: COLOR_MAGENTA, },
+    //         // // LEFT
+    //         // Triangle { indices: [0, 4, 5], color: COLOR_YELLOW, },
+    //         // Triangle { indices: [0, 5, 1], color: COLOR_YELLOW, },
+    //         // // BOTTOM
+    //         // Triangle { indices: [4, 7, 6], color: COLOR_CYAN, },
+    //         // Triangle { indices: [4, 6, 5], color: COLOR_CYAN, },
+
+    //         /* INWARDS BOX */
+    //         // TOP
+    //         Triangle { indices: [0, 2, 1], color: COLOR_RED, },
+    //         Triangle { indices: [0, 3, 2], color: COLOR_RED, },
+    //         // FRONT
+    //         Triangle { indices: [1, 6, 5], color: COLOR_GREEN, },
+    //         Triangle { indices: [1, 2, 6], color: COLOR_GREEN, },
+    //         // RIGHT
+    //         Triangle { indices: [2, 7, 6], color: COLOR_BLUE, },
+    //         Triangle { indices: [2, 3, 7], color: COLOR_BLUE, },
+    //         // BACK
+    //         Triangle { indices: [3, 4, 7], color: COLOR_MAGENTA, },
+    //         Triangle { indices: [3, 0, 4], color: COLOR_MAGENTA, },
+    //         // LEFT
+    //         Triangle { indices: [0, 5, 4], color: COLOR_YELLOW, },
+    //         Triangle { indices: [0, 1, 5], color: COLOR_YELLOW, },
+    //         // BOTTOM
+    //         Triangle { indices: [4, 6, 7], color: COLOR_CYAN, },
+    //         Triangle { indices: [4, 5, 6], color: COLOR_CYAN, },
+    //     ]
+    // });
+
+
+
+
     let mut scene = Scene {
-        objects: Vec::with_capacity(num_objects),
+        objects: Vec::new(),
     };
 
     let scene_origin: Vec3 = Vec3::new(0.0, 0.0, 5.0);
 
-    let variance = 3.5;
-    let variance_offset = variance / 2.0;
-    for _ in 0..num_objects {
-        scene.objects.push(Object {
-            position: Vec3::new(
-                (Math::random() * variance - variance_offset) as f32,
-                (Math::random() * variance - variance_offset) as f32,
-                (Math::random() * variance - variance_offset) as f32
-            ) + scene_origin,
-            rotation: Math::random() as f32 * PI,
-            mesh: mesh.clone(),
-        });
-    }
+    // Randomly generated objects
+    // let variance = 10.0;
+    // let variance_offset = variance / 2.0;
+    // let num_objects = 50;
+    // for _ in 0..num_objects {
+    //     scene.objects.push(Object {
+    //         position: Vec3::new(
+    //             (Math::random() * variance - variance_offset) as f32,
+    //             (Math::random() * variance - variance_offset) as f32,
+    //             (Math::random() * variance - variance_offset) as f32
+    //         ) + scene_origin,
+    //         rotation: Math::random() as f32 * PI,
+    //         mesh: mesh.clone(),
+    //     });
+    // }
+
+    // @NOTE single object at `scene_origin`
+    scene.objects.push(Object {
+        position: scene_origin,
+        rotation: 0.0,
+        mesh: mesh.clone(),
+    });
 
     Ok(scene)
 }

@@ -9,17 +9,22 @@ enum KeyCode {
   A = 1,
   S = 2,
   D = 3,
+  Shift = 4,
+  Space = 5,
 }
 const NativeCodeToKeyCodeMap: Record<string, KeyCode> = {
   'KeyW': KeyCode.W,
   'KeyA': KeyCode.A,
   'KeyS': KeyCode.S,
   'KeyD': KeyCode.D,
+  'ShiftLeft': KeyCode.Shift,
+  'ShiftRight': KeyCode.Shift,
+  'Space': KeyCode.Space,
 }
 
 async function main() {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d')!;
 
   // Construct 3d rendering engine
   const engine = new Engine(canvas.width, canvas.height);
@@ -40,6 +45,11 @@ async function main() {
   // Initialize a new ImageData object
   let imageData = new ImageData(frameBuffer, canvas.width, canvas.height);
 
+  let mouseInputDelta = {
+    x: 0,
+    y: 0,
+  };
+
   let framesDrawn = 0;
   let lastFrameTime = performance.now();
   const draw: FrameRequestCallback = () => {
@@ -50,12 +60,18 @@ async function main() {
     lastFrameTime = currentFrameTime;
 
     // Write frame buffer to canvas
-    ctx!.putImageData(imageData, 0, 0);
+    ctx.putImageData(imageData, 0, 0);
 
     requestAnimationFrame(draw);
 
     // Count number of frames drawn
     framesDrawn++;
+
+    engine.set_mouse_value(mouseInputDelta.x, mouseInputDelta.y);
+
+    // Reset mouse input
+    mouseInputDelta.x = 0;
+    mouseInputDelta.y = 0;
   }
 
   // Begin drawing
@@ -71,6 +87,7 @@ async function main() {
   document.addEventListener('keydown', (event) => {
     if (event.repeat) return;
 
+    // console.log(`[DEBUG] Key code: ${event.code}`);
     const keyCode = NativeCodeToKeyCodeMap[event.code];
     if (keyCode !== undefined) {
       engine.on_key_press(keyCode);
@@ -82,6 +99,30 @@ async function main() {
       engine.on_key_release(keyCode);
     }
   });
+
+
+  // Pointer lock stuff
+  canvas.addEventListener("click", async () => {
+    if (!document.pointerLockElement) {
+      await canvas.requestPointerLock();
+    }
+  });
+
+  document.addEventListener("pointerlockchange", lockChangeAlert, false);
+  function lockChangeAlert() {
+    if (document.pointerLockElement === canvas) {
+      console.log("The pointer lock status is now locked");
+      document.addEventListener("mousemove", onMouseMove, false);
+    } else {
+      console.log("The pointer lock status is now unlocked");
+      document.removeEventListener("mousemove", onMouseMove, false);
+    }
+  }
+
+  function onMouseMove(e: MouseEvent) {
+    mouseInputDelta.x += e.movementX;
+    mouseInputDelta.y += e.movementY;
+  }
 }
 
 void main();

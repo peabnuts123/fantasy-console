@@ -5,6 +5,8 @@ pub mod keycodes {
     pub const A: u8 = 1;
     pub const S: u8 = 2;
     pub const D: u8 = 3;
+    pub const SHIFT: u8 = 4;
+    pub const SPACE: u8 = 5;
 }
 
 /// Current state of all the inputs on the keyboard device
@@ -13,12 +15,20 @@ pub struct RawKeyboardInputState {
     pub down: bool,
     pub left: bool,
     pub right: bool,
+    pub a: bool,
+    pub b: bool,
+}
+
+pub struct RawMouseInputState {
+    pub delta_x: f32,
+    pub delta_y: f32,
 }
 
 /// Current state of all the inputs on all the input devices.
 /// This is used to compute the input state of the console
 pub struct RawInputState {
     pub keyboard: RawKeyboardInputState,
+    pub mouse: RawMouseInputState,
 }
 
 /// An "analogue" 2D input e.g. a joystick
@@ -38,4 +48,6 @@ pub struct Input2D {
 /// State of the virtual input device
 pub struct InputState {
     pub dpad: Input2D,
+    pub a: bool,
+    pub b: bool,
 }
