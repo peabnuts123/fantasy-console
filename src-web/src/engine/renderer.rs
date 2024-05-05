@@ -1,13 +1,14 @@
 use std::{
     cmp::{max, min},
-    f32::consts::PI,
+    f32::consts::PI, ops::{Add, Mul, Sub},
 };
 
-use glam::{FloatExt, Quat, Vec3};
-use crate::types::{Color, Object};
+use glam::{FloatExt, Mat4, Quat, Vec3, Vec4};
+use crate::{types::{Color, Object, COLOR_BLUE, COLOR_GREEN, COLOR_LOVELY_PINK, COLOR_RED}};
 
 const CAMERA_FOV_V: f32 = 50.0 * PI / 180.0;
 const CAMERA_NEAR: f32 = 0.1;
+const CAMERA_FAR: f32 = 100.0;
 
 const LIGHT_ANGLE: Vec3 = Vec3::new(-1.0, -1.0, 2.0);
 
@@ -24,6 +25,77 @@ pub const VEC_RIGHT: Vec3 = Vec3::new(1.0, 0.0, 0.0);
 pub const VEC_FORWARD: Vec3 = Vec3::new(0.0, 0.0, 1.0);
 pub const VEC_BACKWARD: Vec3 = Vec3::new(0.0, 0.0, -1.0);
 
+enum ClipAxis {
+    X,
+    Y,
+    Z,
+}
+
+struct Interpolator<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy> {
+    step_x: T,
+    step_y: T,
+    left: T,
+    current_value_for_line: T,
+}
+
+impl<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy> Interpolator<T> {
+    fn new_perspective_correct(
+        c0: T, c1: T, c2: T,
+        v0: Vec4, v1: Vec4, v2: Vec4,
+        one_over_dx: f32
+    ) -> Self {
+        // @NOTE z coordinates have already been inverted
+        Self::new(
+            c0 * v0.w, c1 * v1.w, c2 * v2.w,
+            v0, v1, v2,
+            one_over_dx,
+        )
+    }
+
+    fn new(
+        c0: T, c1: T, c2: T,
+        v0: Vec4, v1: Vec4, v2: Vec4,
+        one_over_dx: f32
+    ) -> Self {
+        Interpolator {
+            step_x: (
+                (c1 - c2) * (v0.y - v2.y)
+                - (c0 - c2) * (v1.y - v2.y)
+            ) * one_over_dx,
+            step_y: (
+                (c1 - c2) * (v0.x - v2.x)
+                - (c0 - c2) * (v1.x - v2.x)
+            ) * (-one_over_dx),
+            left: c0,
+            current_value_for_line: c0,
+        }
+    }
+
+    fn reset_left(&mut self, c: T, y_start_offset: f32, left_delta_x: f32) {
+        self.left = c + (self.step_y * y_start_offset) + (self.step_x * (y_start_offset * left_delta_x));
+        // @NOTE Also reset line value
+        self.current_value_for_line = self.left;
+    }
+
+    fn step(&mut self) {
+        self.current_value_for_line = self.current_value_for_line + self.step_x;
+    }
+
+    fn step_line(&mut self, left_delta_x: f32) {
+        self.left = self.left + self.step_y + (self.step_x * left_delta_x);
+        // self.right = self.right + self.step_y + (self.step_x * right_delta_x);
+        self.current_value_for_line = self.left;
+    }
+
+    fn value(&self) -> T {
+        self.current_value_for_line
+    }
+
+    fn value_perspective_correct(&self, z: f32) -> T {
+        self.value() * z
+    }
+}
+
 
 pub struct Renderer {
     canvas_width: u16,
@@ -33,18 +105,36 @@ pub struct Renderer {
     offset: u16,
     pub camera_position: Vec3,
     pub camera_rotation: Vec3,
+    projection_matrix: Mat4,
+    screen_space_matrix: Mat4,
 }
 
 impl Renderer {
     pub fn new(canvas_width: u16, canvas_height: u16) -> Self {
+        let half_canvas_width = canvas_width as f32 * 0.5;
+        let half_canvas_height = canvas_height as f32 * 0.5;
+        let aspect_ratio = half_canvas_width / half_canvas_height;
+
         Self {
             canvas_width,
             canvas_height,
             pixel_data: vec![0; (canvas_width as usize) * (canvas_height as usize) * 4 /* rgba */],
             depth_data: vec![0.0; (canvas_width as usize) * (canvas_height as usize)],
             offset: 0,
-            camera_position: Vec3::ZERO,
+            camera_position: Vec3::new(0.0, 0.0, -25.0),
             camera_rotation: Vec3::ZERO,
+            projection_matrix: Mat4::from_cols(
+                Vec4::new(1.0 / ((CAMERA_FOV_V * 0.5).tan() * aspect_ratio), 0.0, 0.0, 0.0),
+                Vec4::new(0.0, 1.0 / (CAMERA_FOV_V * 0.5).tan().tan(), 0.0, 0.0),
+                Vec4::new(0.0, 0.0, (CAMERA_FAR + CAMERA_NEAR) / (CAMERA_FAR - CAMERA_NEAR), -(2.0 * CAMERA_FAR * CAMERA_NEAR) / (CAMERA_FAR - CAMERA_NEAR)),
+                Vec4::new(0.0, 0.0, 1.0, 0.0),
+            ).transpose(),
+            screen_space_matrix: Mat4::from_cols(
+                Vec4::new(half_canvas_width, 0.0, 0.0, half_canvas_width - 0.5),
+                Vec4::new(0.0, -half_canvas_height, 0.0, half_canvas_height - 0.5),
+                Vec4::new(0.0, 0.0, 1.0, 0.0),
+                Vec4::new(0.0, 0.0, 0.0, 1.0),
+            ).transpose(),
         }
     }
 
@@ -79,7 +169,6 @@ impl Renderer {
         self.offset += 1;
     }
 
-    // @TODO make renderer have more of a `render scene` function or something
     pub fn clear_buffers(&mut self) {
         // Clear frame buffer
         // self.rainbow_demo(); // 🌈 Fun for the whole family
@@ -98,7 +187,239 @@ impl Renderer {
         }
     }
 
+    /* Render Object using scanline rasterization */
     pub fn render_object(&mut self, object: &Object, angle: f32) {
+        let mesh = &object.mesh;
+
+        // Object (local) to world (global) coordinates
+        let object_matrix = Mat4::from_translation(object.position) * Mat4::from_rotation_y(angle + object.rotation) * Mat4::from_rotation_x(angle + object.rotation);
+
+        // World to camera-relative coordinates (i.e. apply offset by camera position, rotation)
+        let camera_rotation: Mat4 = Mat4::from_euler(glam::EulerRot::ZXY, self.camera_rotation.z, self.camera_rotation.x, self.camera_rotation.y);
+        let camera_matrix = camera_rotation * Mat4::from_translation(-self.camera_position);
+
+        // Full projection matrix for object + camera + perspective projection
+        let model_view_matrix = self.projection_matrix * camera_matrix * object_matrix;
+
+        // @TODO gotta be a better way of doing this. Can we just use `camera_matrix`?
+        let light_angle = camera_rotation.transform_vector3(LIGHT_ANGLE);
+
+        // @NOTE used by clipping
+        let mut temp_vertex_buffer: Vec<Vec4> = Vec::new();
+
+        for triangle_index in 0..mesh.triangles.len() {
+            let triangle = &mesh.triangles[triangle_index];
+
+            // Transform vertices to clip space coordinates
+            let v0 = model_view_matrix * Vec4::from((mesh.vertices[triangle.indices[0]], 1.0));
+            let v1 = model_view_matrix * Vec4::from((mesh.vertices[triangle.indices[1]], 1.0));
+            let v2 = model_view_matrix * Vec4::from((mesh.vertices[triangle.indices[2]], 1.0));
+
+            /* Clipping */
+
+            // If triangle needs no clipping, just draw it
+            if is_inside_frustum(&v0) && is_inside_frustum(&v1) && is_inside_frustum(&v2) {
+                self.render_triangle(v0, v1, v2, triangle.color, light_angle);
+                continue;
+            }
+
+            let mut vertices: Vec<Vec4> = Vec::new();
+            vertices.push(v0);
+            vertices.push(v1);
+            vertices.push(v2);
+
+            // Clip triangle successively against each axis
+            // As the triangle is clipped, it turns into a polygon with more than 3 edges
+            // If the entire triangle is clipped, skip drawing entirely
+            if
+                clip_polygon_to_axis(&mut vertices, &ClipAxis::X, &mut temp_vertex_buffer) &&
+                clip_polygon_to_axis(&mut vertices, &ClipAxis::Y, &mut temp_vertex_buffer) &&
+                clip_polygon_to_axis(&mut vertices, &ClipAxis::Z, &mut temp_vertex_buffer)
+            {
+                // Draw clipped triangle as a triangle fan
+                let initial_vertex = vertices[0];
+
+                for i in 1..(vertices.len() - 1)
+                {
+                    self.render_triangle(initial_vertex, vertices[i], vertices[i + 1], triangle.color, light_angle);
+                }
+            }
+        }
+    }
+
+    fn render_triangle(&mut self, v0: Vec4, v1: Vec4, v2: Vec4, color: Color, light_angle: Vec3) {
+        // Transform vertices to screen space coordinates
+        let mut v0_raster = perspective_divide(self.screen_space_matrix * v0);
+        let mut v1_raster = perspective_divide(self.screen_space_matrix * v1);
+        let mut v2_raster = perspective_divide(self.screen_space_matrix * v2);
+
+        let triangle_normal: Vec3 = (v2 - v0).truncate().cross((v1 - v0).truncate()).normalize();
+
+        // Arbitrary set minimum lightness to 20%
+        let lightness = 0.2_f32.max(light_angle.angle_between(triangle_normal) / PI);
+        // let lightness = 1.0;
+
+        /* Backface culling */
+        if triangle_signed_area_double(v0_raster, v1_raster, v2_raster) < 0.0 {
+            return;
+        }
+
+        // Make sure vertices are sorted by their Y coordinate
+        if v2_raster.y < v1_raster.y {
+            (v2_raster, v1_raster) = (v1_raster, v2_raster);
+        }
+        if v1_raster.y < v0_raster.y {
+            (v1_raster, v0_raster) = (v0_raster, v1_raster);
+        }
+        if v2_raster.y < v1_raster.y {
+            (v2_raster, v1_raster) = (v1_raster, v2_raster);
+        }
+
+        // Interpolation constant
+        let one_over_dx: f32 = 1.0 / ((v1_raster.x - v2_raster.x) * (v0_raster.y - v2_raster.y)
+            - (v0_raster.x - v2_raster.x) * (v1_raster.y - v2_raster.y));
+
+        /* Draw first half of triangle */
+        let mut left_delta_x = (v2_raster.x - v0_raster.x) / (v2_raster.y - v0_raster.y);
+        let mut right_delta_x = (v1_raster.x - v0_raster.x) / (v1_raster.y - v0_raster.y);
+
+        let triangle_sign = triangle_signed_area_double(v0_raster, v1_raster, v2_raster);
+        if triangle_sign >= 0.0 {
+            (left_delta_x, right_delta_x) = (right_delta_x, left_delta_x);
+        }
+
+        let y_start_offset = v0_raster.y.ceil() - v0_raster.y;
+
+        let mut x_start = v0_raster.x + left_delta_x * y_start_offset;
+        let mut x_end = v0_raster.x + right_delta_x * y_start_offset;
+
+        /* Interpolators */
+        // - 1 / z
+        let mut one_over_z_interpolator = Interpolator::<f32>::new(
+            1.0 / v0_raster.w, 1.0 / v1_raster.w, 1.0 / v2_raster.w,
+            v0_raster, v1_raster, v2_raster,
+            one_over_dx,
+        );
+        one_over_z_interpolator.reset_left(1.0 / v0_raster.w, y_start_offset, left_delta_x);
+
+        // - Color
+        // @TODO @DEBUG REMOVE
+        // let mut color_interpolator = Interpolator::<Vec3>::new(
+        //     v0_color, v1_color, v2_color,
+        //     v0_raster, v1_raster, v2_raster,
+        //     one_over_dx,
+        // );
+        // color_interpolator.reset_left(v0_color, y_start_offset, left_delta_x);
+
+        for y in (v0_raster.y.ceil() as u16)..(v1_raster.y.ceil() as u16) {
+            for x in (x_start.ceil() as u16)..(x_end.ceil() as u16) {
+
+                let depth_z = 1.0 / one_over_z_interpolator.value();
+
+                if depth_z > CAMERA_NEAR {
+                    let pixel_index = (y as usize) * (self.canvas_width as usize) + (x as usize);
+
+                    if depth_z < self.depth_data[pixel_index] {
+                        // Pixel is nearest so far, draw it
+                        self.depth_data[pixel_index] = depth_z;
+
+                        let pixel_color_index: usize = pixel_index * 4;
+
+                        /* Draw debug interpolated color @TODO @REMOVE */
+                        // let c: Vec3 = color_interpolator.value();
+                        // self.pixel_data[pixel_color_index]     = c.x as u8;  /* R */
+                        // self.pixel_data[pixel_color_index + 1] = c.y as u8;  /* G */
+                        // self.pixel_data[pixel_color_index + 2] = c.z as u8;  /* B */
+
+                        self.pixel_data[pixel_color_index]     = ((color[0] as f32) * lightness) as u8; /* R */
+                        self.pixel_data[pixel_color_index + 1] = ((color[1] as f32) * lightness) as u8; /* G */
+                        self.pixel_data[pixel_color_index + 2] = ((color[2] as f32) * lightness) as u8; /* B */
+
+                        /* Visualise depth buffer */
+                        // self.pixel_data[pixel_color_index]     = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* R */
+                        // self.pixel_data[pixel_color_index + 1] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* G */
+                        // self.pixel_data[pixel_color_index + 2] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* B */
+                    }
+                }
+
+                // Interpolators
+                one_over_z_interpolator.step();
+                // color_interpolator.step();
+            }
+
+            x_start = x_start + left_delta_x;
+            x_end = x_end + right_delta_x;
+
+            // Interpolators
+            one_over_z_interpolator.step_line(left_delta_x);
+            // color_interpolator.step_line(left_delta_x);
+        }
+
+        /* Draw second half of triangle */
+        // Reset stateful counters
+        let v1_y_start_offset = v1_raster.y.ceil() - v1_raster.y;
+        if triangle_sign >= 0.0 {
+            // Update left edge of triangle
+            left_delta_x = (v2_raster.x - v1_raster.x) / (v2_raster.y - v1_raster.y);
+            x_start = v1_raster.x + left_delta_x * v1_y_start_offset;
+
+            // Interpolators
+            one_over_z_interpolator.reset_left(1.0 / v1_raster.w, v1_y_start_offset, left_delta_x);
+            // color_interpolator.reset_left(v1_color, v1_y_start_offset, left_delta_x);
+        } else {
+            // Update right edge of triangle
+            right_delta_x = (v2_raster.x - v1_raster.x) / (v2_raster.y - v1_raster.y);
+            x_end = v1_raster.x + right_delta_x * v1_y_start_offset;
+
+            // @NOTE no need to reset interpolators for right edge
+        }
+
+        for y in (v1_raster.y.ceil() as u16)..(v2_raster.y.ceil() as u16) {
+            for x in (x_start.ceil() as u16)..(x_end.ceil() as u16) {
+
+                let depth_z = 1.0 / one_over_z_interpolator.value();
+
+                if depth_z > CAMERA_NEAR {
+                    let pixel_index = (y as usize) * (self.canvas_width as usize) + (x as usize);
+
+                    if depth_z < self.depth_data[pixel_index] {
+                        // Pixel is nearest so far, draw it
+                        self.depth_data[pixel_index] = depth_z;
+
+                        let pixel_color_index: usize = pixel_index * 4;
+
+                        /* Draw debug interpolated color @TODO @REMOVE */
+                        // let c: Vec3 = color_interpolator.value();
+                        // self.pixel_data[pixel_color_index]     = c.x as u8;  /* R */
+                        // self.pixel_data[pixel_color_index + 1] = c.y as u8;  /* G */
+                        // self.pixel_data[pixel_color_index + 2] = c.z as u8;  /* B */
+
+                        self.pixel_data[pixel_color_index]     = ((color[0] as f32) * lightness) as u8; /* R */
+                        self.pixel_data[pixel_color_index + 1] = ((color[1] as f32) * lightness) as u8; /* G */
+                        self.pixel_data[pixel_color_index + 2] = ((color[2] as f32) * lightness) as u8; /* B */
+
+                        /* Visualise depth buffer */
+                        // self.pixel_data[pixel_color_index]     = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* R */
+                        // self.pixel_data[pixel_color_index + 1] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* G */
+                        // self.pixel_data[pixel_color_index + 2] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* B */
+                    }
+                }
+
+                // Interpolators
+                one_over_z_interpolator.step();
+                // color_interpolator.step();
+            }
+
+            x_start = x_start + left_delta_x;
+            x_end = x_end + right_delta_x;
+
+            // Interpolators
+            one_over_z_interpolator.step_line(left_delta_x);
+            // color_interpolator.step_line(left_delta_x);
+        }
+    }
+
+    pub fn render_object_edge_function_rasterized(&mut self, object: &Object, angle: f32) {
         let mesh = &object.mesh;
         let canvas_w = self.canvas_width as f32;
         let canvas_h = self.canvas_height as f32;
@@ -107,23 +428,24 @@ impl Renderer {
         let near_plane_width = CAMERA_NEAR * camera_fov_h_half.tan() * 2.0;
         let near_plane_height = CAMERA_NEAR * camera_fov_v_half.tan() * 2.0;
 
-        let rotation_point = object.position;
         let spin: Quat = Quat::from_rotation_y(angle + object.rotation) * Quat::from_rotation_x((angle + object.rotation) / 4.0);
 
         let camera_rotation = Quat::from_euler(glam::EulerRot::ZXY, self.camera_rotation.z, self.camera_rotation.x, self.camera_rotation.y);
 
         let light_angle = camera_rotation * LIGHT_ANGLE;
 
+        let position_offset = object.position - self.camera_position;
+
         for triangle_index in 0..mesh.triangles.len() {
             let triangle = &mesh.triangles[triangle_index];
-            let mut v0 = mesh.vertices[triangle.indices[0]] + object.position;
-            let mut v1 = mesh.vertices[triangle.indices[1]] + object.position;
-            let mut v2 = mesh.vertices[triangle.indices[2]] + object.position;
+            let mut v0 = mesh.vertices[triangle.indices[0]];
+            let mut v1 = mesh.vertices[triangle.indices[1]];
+            let mut v2 = mesh.vertices[triangle.indices[2]];
 
             // Apply rotation to vertices, offset camera position
-            v0 = camera_rotation * (spin * (v0 - rotation_point) + rotation_point - self.camera_position);
-            v1 = camera_rotation * (spin * (v1 - rotation_point) + rotation_point - self.camera_position);
-            v2 = camera_rotation * (spin * (v2 - rotation_point) + rotation_point - self.camera_position);
+            v0 = camera_rotation * (spin * v0 + position_offset);
+            v1 = camera_rotation * (spin * v1 + position_offset);
+            v2 = camera_rotation * (spin * v2 + position_offset);
 
             // Cull triangles that are behind the camera
             if v0.z < CAMERA_NEAR && v1.z < CAMERA_NEAR && v2.z < CAMERA_NEAR {
@@ -168,12 +490,12 @@ impl Renderer {
                 let v1 = vertices[i - 1];
                 let v2 = vertices[i];
 
-                self.render_triangle(v0, v1, v2, triangle.color, near_plane_width, near_plane_height, canvas_w, canvas_h, light_angle);
+                self.render_triangle_edge_function_rasterized(v0, v1, v2, triangle.color, near_plane_width, near_plane_height, canvas_w, canvas_h, light_angle);
             }
         }
     }
 
-    fn render_triangle(&mut self, v0: Vec3, v1: Vec3, v2: Vec3, color: Color, near_plane_width: f32, near_plane_height: f32, canvas_w: f32, canvas_h: f32, light_angle: Vec3) {
+    fn render_triangle_edge_function_rasterized(&mut self, v0: Vec3, v1: Vec3, v2: Vec3, color: Color, near_plane_width: f32, near_plane_height: f32, canvas_w: f32, canvas_h: f32, light_angle: Vec3) {
         // Rendering calculations based on
         // https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/overview-rasterization-algorithm.html
 
@@ -192,7 +514,7 @@ impl Renderer {
 
         let v0_raster = Vec3::new(v0_ndc.x * canvas_w, v0_ndc.y * canvas_h, /* @NOTE pre-calculate reciprocal */ 1.0 / v0.z);
         let v1_raster = Vec3::new(v1_ndc.x * canvas_w, v1_ndc.y * canvas_h, /* @NOTE pre-calculate reciprocal */ 1.0 / v1.z);
-        let v2_raster: Vec3 = Vec3::new(v2_ndc.x * canvas_w, v2_ndc.y * canvas_h, /* @NOTE pre-calculate reciprocal */ 1.0 / v2.z);
+        let v2_raster = Vec3::new(v2_ndc.x * canvas_w, v2_ndc.y * canvas_h, /* @NOTE pre-calculate reciprocal */ 1.0 / v2.z);
 
 
         let triangle_normal: Vec3 = (v2 - v0).cross(v1 - v0).normalize();
@@ -222,34 +544,47 @@ impl Renderer {
         ];
 
         let triangle_double_area = vertex_edge_function(v0_raster, v1_raster, v2_raster);
+        // let one_over_triangle_area = 1.0 / triangle_double_area;
 
-        let z1_minus_z0 = v1_raster.z - v0_raster.z;
-        let z2_minus_z0 = v2_raster.z - v0_raster.z;
+        let z1_minus_z0 = (v1_raster.z - v0_raster.z) / triangle_double_area;
+        let z2_minus_z0 = (v2_raster.z - v0_raster.z) / triangle_double_area;
+
+        let p: Vec3 = Vec3::new(triangle_bounds_min[0] as f32 + 0.5, triangle_bounds_min[1] as f32 + 0.5, 0.0);
+
+        // Initial edge function values
+        let mut w0_y = vertex_edge_function(v1_raster, v2_raster, p);
+        let mut w1_y = vertex_edge_function(v2_raster, v0_raster, p);
+        let mut w2_y = vertex_edge_function(v0_raster, v1_raster, p);
+
+        let w0_step_y = vertex_edge_function_step_y(v1_raster, v2_raster);
+        let w1_step_y = vertex_edge_function_step_y(v2_raster, v0_raster);
+        let w2_step_y = vertex_edge_function_step_y(v0_raster, v1_raster);
+
+        // Amount of change for edge function values per column
+        let w0_step_x = vertex_edge_function_step_x(v1_raster, v2_raster);
+        let w1_step_x = vertex_edge_function_step_x(v2_raster, v0_raster);
+        let w2_step_x = vertex_edge_function_step_x(v0_raster, v1_raster);
 
         for y in triangle_bounds_min[1]..triangle_bounds_max[1] {
             let y_inverse = self.canvas_height - y - 1;
-            // @TODO do this optimisation for Y as well
-            // Initial edge function values
-            let p: Vec3 = Vec3::new(triangle_bounds_min[0] as f32 + 0.5, y as f32 + 0.5, 0.0);
 
-            let mut w0 = vertex_edge_function(v1_raster, v2_raster, p);
-            let mut w1 = vertex_edge_function(v2_raster, v0_raster, p);
-            let mut w2 = vertex_edge_function(v0_raster, v1_raster, p);
+            // let p: Vec3 = Vec3::new(triangle_bounds_min[0] as f32 + 0.5, y as f32 + 0.5, 0.0);
 
-            // Amount of change for edge function values per column
-            let w0_step = vertex_edge_function_step(v1_raster, v2_raster);
-            let w1_step = vertex_edge_function_step(v2_raster, v0_raster);
-            let w2_step = vertex_edge_function_step(v0_raster, v1_raster);
+            // let mut w0 = vertex_edge_function(v1_raster, v2_raster, p);
+            // let mut w1 = vertex_edge_function(v2_raster, v0_raster, p);
+            // let mut w2 = vertex_edge_function(v0_raster, v1_raster, p);
+
+            let mut w0 = w0_y;
+            let mut w1 = w1_y;
+            let mut w2 = w2_y;
+
             for x in triangle_bounds_min[0]..triangle_bounds_max[0] {
-                let pixel_index = (y_inverse as usize) * (self.canvas_width as usize) + (x as usize);
-                let pixel_color_index = pixel_index * 4;
-
                 // Test pixel is in triangle
                 if w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0 {
                     // Compute barycentric coordinates as proportion of triangle area
-                    let w0 = w0 / triangle_double_area;
-                    let w1 = w1 / triangle_double_area;
-                    let w2 = w2 / triangle_double_area;
+                    // let w0 = w0 * one_over_triangle_area;
+                    // let w1 = w1 * one_over_triangle_area;
+                    // let w2 = w2 * one_over_triangle_area;
 
                     /*
                         Note: w0 + w1 + w2 = 1
@@ -264,21 +599,33 @@ impl Renderer {
                     // let z: f32 = 1.0 / (v0_raster.z * w0 + v1_raster.z * w1 + v2_raster.z * w2);
                     let z: f32 = 1.0 / (v0_raster.z + w1 * z1_minus_z0 + w2 * z2_minus_z0);
 
-                    if z > CAMERA_NEAR && z < self.depth_data[pixel_index] {
-                        // Pixel is nearest so far, draw it
-                        self.depth_data[pixel_index] = z;
 
-                        self.pixel_data[pixel_color_index]     = ((color[0] as f32) * lightness) as u8; /* R */
-                        self.pixel_data[pixel_color_index + 1] = ((color[1] as f32) * lightness) as u8; /* G */
-                        self.pixel_data[pixel_color_index + 2] = ((color[2] as f32) * lightness) as u8; /* B */
+                    if z > CAMERA_NEAR {
+                        let pixel_index = (y_inverse as usize) * (self.canvas_width as usize) + (x as usize);
+
+                        if z < self.depth_data[pixel_index] {
+                            // Pixel is nearest so far, draw it
+                            self.depth_data[pixel_index] = z;
+
+                            let pixel_color_index: usize = pixel_index * 4;
+
+                            self.pixel_data[pixel_color_index]     = ((color[0] as f32) * lightness) as u8; /* R */
+                            self.pixel_data[pixel_color_index + 1] = ((color[1] as f32) * lightness) as u8; /* G */
+                            self.pixel_data[pixel_color_index + 2] = ((color[2] as f32) * lightness) as u8; /* B */
+                        }
                     }
                 }
 
                 // Increase edge function results
-                w0 = w0 + w0_step;
-                w1 = w1 + w1_step;
-                w2 = w2 + w2_step;
+                w0 = w0 + w0_step_x;
+                w1 = w1 + w1_step_x;
+                w2 = w2 + w2_step_x;
             }
+
+            // Increase edge function results
+            w0_y = w0_y + w0_step_y;
+            w1_y = w1_y + w1_step_y;
+            w2_y = w2_y + w2_step_y;
         }
     }
 
@@ -425,53 +772,120 @@ impl Renderer {
         } else {
             Ok(result)
         }
-
     }
 
     /// Debug function to draw a pixel on the screen
-    fn debug_draw_pixel(&mut self, pixel: [i16; 2]) {
+    fn debug_draw_pixel(&mut self, pixel: [i16; 2], color: Color) {
         let x = pixel[0];
         let y = pixel[1];
         if x >= 0 && (x as u16) < self.canvas_width && y >= 0 && (y as u16) < self.canvas_height {
-            let i = ((y as usize) * (self.canvas_width as usize) + (x as usize)) as usize * 4;
-            self.pixel_data[i] = 0xFF;
-            self.pixel_data[i + 1] = 0x00;
-            self.pixel_data[i + 2] = 0xFF;
+            let i = (((self.canvas_height - y as u16) as usize) * (self.canvas_width as usize) + (x as usize)) as usize * 4;
+            self.pixel_data[i] = color[0];
+            self.pixel_data[i + 1] = color[1];
+            self.pixel_data[i + 2] = color[2];
         }
     }
 }
 
-
-fn vertex_position_to_raster(
-    vertex: Vec3,
-    near_plane_width: f32,
-    near_plane_height: f32,
-    canvas_w: f32,
-    canvas_h: f32
-) -> Vec3 {
-    Vec3::new(
-        ((vertex.x * (CAMERA_NEAR / vertex.z)) / near_plane_width + 0.5) * canvas_w,
-        ((vertex.y * (CAMERA_NEAR / vertex.z)) / near_plane_height + 0.5) * canvas_h,
-        // @NOTE pre-calculate reciprocal
-        1.0 / vertex.z
-    )
-}
-
+// Mostly hot garbage
 fn vertex_position_to_ndc(
     vertex: Vec3,
-    near_plane_width: f32,
-    near_plane_height: f32,
+    near_plane_half_width: f32,
+    near_plane_half_height: f32,
 ) -> Vec3 {
+    // @NOTE Perform perspective divide then scale coordinates to [0,1]
     Vec3::new(
-        (vertex.x * (CAMERA_NEAR / vertex.z)) / near_plane_width + 0.5,
-        (vertex.y * (CAMERA_NEAR / vertex.z)) / near_plane_height + 0.5,
+        vertex.x / near_plane_half_width,
+        vertex.y / near_plane_half_height,
         vertex.z
     )
 }
 
 fn vertex_edge_function(a: Vec3, b: Vec3, c: Vec3) -> f32 {
+    // @NOTE just 2D cross product of edges AC x AB
     ((b.x - a.x) * (c.y - a.y)) - ((b.y - a.y) * (c.x - a.x))
 }
-fn vertex_edge_function_step(a: Vec3, b: Vec3) -> f32 {
-    -(b.y - a.y)
+fn vertex_edge_function_step_y(a: Vec3, b: Vec3) -> f32 {
+    /* @NOTE derived from vertex_edge_function(a,b,c) - vertex_edge_function(a,b,(c.x, c.y + 1)) */
+    b.x - a.x
 }
+fn vertex_edge_function_step_x(a: Vec3, b: Vec3) -> f32 {
+    /* @NOTE derived from vertex_edge_function(a,b,c) - vertex_edge_function(a,b,(c.x + 1, c.y)) */
+    a.y - b.y
+}
+
+fn perspective_divide(v: Vec4) -> Vec4 {
+    Vec4::new(
+        v.x / v.w,
+        v.y / v.w,
+        v.z / v.w,
+        v.w
+    )
+}
+
+fn triangle_signed_area_double(a: Vec4, b: Vec4, c: Vec4) -> f32 {
+    ((c.x - a.x) * (b.y - a.y)) - ((c.y - a.y) * (b.x - a.x))
+}
+
+fn clip_polygon_to_axis(vertices: &mut Vec<Vec4>, clip_axis: &ClipAxis, temp_storage: &mut Vec<Vec4>) -> bool {
+    clip_polygon_to_axis_half(vertices, clip_axis, 1.0, temp_storage);
+    vertices.clear();
+
+    if temp_storage.is_empty() {
+        return false;
+    }
+
+    clip_polygon_to_axis_half(&temp_storage, clip_axis, -1.0, vertices);
+    temp_storage.clear();
+
+    !vertices.is_empty()
+}
+
+fn clip_polygon_to_axis_half(vertices: &Vec<Vec4>, clip_axis: &ClipAxis, w_sign: f32, results: &mut Vec<Vec4>) {
+    let mut previous_vertex = vertices.last().unwrap();
+    let mut previous_value = get_vertex_axis(previous_vertex, clip_axis) * w_sign;
+    let mut previous_was_inside = previous_value <= previous_vertex.w;
+
+    for current_vertex in vertices {
+        let current_value = get_vertex_axis(current_vertex, clip_axis) * w_sign;
+        let current_is_inside = current_value <= current_vertex.w;
+
+        if current_is_inside ^ previous_was_inside {
+            // Calculate intersection point with `w`
+            // @NOTE I'm not entirely sure how different w values are being
+            // mixed here
+            let lerp_amount = (previous_vertex.w - previous_value) /
+					((previous_vertex.w - previous_value) -
+					 (current_vertex.w - current_value));
+
+            results.push(previous_vertex.lerp(*current_vertex, lerp_amount));
+        }
+
+        if current_is_inside {
+            results.push(*current_vertex);
+        }
+
+        previous_vertex = current_vertex;
+        previous_value = current_value;
+        previous_was_inside = current_is_inside;
+    }
+}
+
+fn get_vertex_axis(vertex: &Vec4, clip_axis: &ClipAxis) -> f32 {
+    match clip_axis {
+        ClipAxis::X => vertex.x,
+        ClipAxis::Y => vertex.y,
+        ClipAxis::Z => vertex.z,
+        _ => panic!("Invalid clip axis"),
+    }
+}
+
+fn is_inside_frustum(v: &Vec4) -> bool {
+    let w_abs = v.w.abs();
+    v.x.abs() <= w_abs &&
+        v.y.abs() <= w_abs &&
+        v.z.abs() <= w_abs
+}
+
+
+

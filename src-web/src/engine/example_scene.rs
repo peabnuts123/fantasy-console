@@ -1,13 +1,13 @@
-use std::rc::Rc;
+use std::{f32::consts::PI, rc::Rc};
 
 use glam::Vec3;
-use js_sys::Uint8Array;
+use js_sys::{Math, Uint8Array};
 use tobj::LoadError;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
 use crate::types::{
-    Mesh, Object, Scene, Triangle, COLOR_LOVELY_PINK, COLOR_WHITE
+    Mesh, Object, Scene, Triangle, COLOR_BLUE, COLOR_CYAN, COLOR_GREEN, COLOR_LOVELY_PINK, COLOR_MAGENTA, COLOR_RED, COLOR_WHITE, COLOR_YELLOW
 };
 
 #[wasm_bindgen(module = "/src/engine/util.ts")]
@@ -17,8 +17,8 @@ extern "C" {
 }
 
 const MODEL_URI_BASE: &str = "/models";
-const MODEL_RESOURCE: &str = "kitchen.obj";
-// const MODEL_RESOURCE: &str = "burgerCheese.obj";
+// const MODEL_RESOURCE: &str = "kitchen.obj";
+const MODEL_RESOURCE: &str = "burgerCheese.obj";
 
 async fn get_file_data(url: String) -> Result<Vec<u8>, String> {
     let result: Result<JsValue, JsValue> = get_resource(url).await;
@@ -91,8 +91,8 @@ async fn load_obj(path: String, scale: f32) -> Result<Mesh, String> {
                         (chunk[1] as usize) + index_offset,
                         (chunk[0] as usize) + index_offset,
                     ],
-                    color: COLOR_WHITE,
-                    // color,
+                    // color: COLOR_WHITE,
+                    color,
                 })
         );
     }
@@ -108,14 +108,14 @@ async fn load_obj(path: String, scale: f32) -> Result<Mesh, String> {
 pub async fn load_scene() -> Result<Scene, String> {
     /* Loaded OBJ mesh */
     let obj_path = format!("{MODEL_URI_BASE}/{MODEL_RESOURCE}").to_string();
-    let mesh = Rc::new(load_obj(obj_path, 0.5).await?);
+    let mesh = Rc::new(load_obj(obj_path, 2.0).await?);
 
     /* Single triangle */
     // let mesh = Rc::new(Mesh {
     //     vertices : vec![
-    //         Vec3::new(-1.0, -1.0, 0.0),
-    //         Vec3::new(1.0, -1.0, 0.0),
-    //         Vec3::new(0.0, 1.0, 0.0),
+    //         Vec3::new(-1.0, -1.0, 0.0) * 5.0,
+    //         Vec3::new(1.0, -1.0, 0.0) * 5.0,
+    //         Vec3::new(0.0, 1.0, 0.0) * 5.0,
     //     ],
     //     triangles: vec![
     //         Triangle {
@@ -126,7 +126,7 @@ pub async fn load_scene() -> Result<Scene, String> {
     // });
 
     // Big cube
-    // let cube_size: f32 = 2.0;
+    // let cube_size: f32 = 5.0;
     // let mesh = Rc::new(Mesh {
     //     vertices: vec![
     //         Vec3::new(-cube_size, cube_size, cube_size),
@@ -140,24 +140,24 @@ pub async fn load_scene() -> Result<Scene, String> {
     //     ],
     //     triangles: vec![
     //         /* OUTWARDS BOX */
-    //         // // TOP
-    //         // Triangle { indices: [0, 1, 2], color: COLOR_RED, },
-    //         // Triangle { indices: [0, 2, 3], color: COLOR_RED, },
-    //         // // FRONT
-    //         // Triangle { indices: [1, 5, 6], color: COLOR_GREEN, },
-    //         // Triangle { indices: [1, 6, 2], color: COLOR_GREEN, },
-    //         // // RIGHT
-    //         // Triangle { indices: [2, 6, 7], color: COLOR_BLUE, },
-    //         // Triangle { indices: [2, 7, 3], color: COLOR_BLUE, },
-    //         // // BACK
-    //         // Triangle { indices: [3, 7, 4], color: COLOR_MAGENTA, },
-    //         // Triangle { indices: [3, 4, 0], color: COLOR_MAGENTA, },
-    //         // // LEFT
-    //         // Triangle { indices: [0, 4, 5], color: COLOR_YELLOW, },
-    //         // Triangle { indices: [0, 5, 1], color: COLOR_YELLOW, },
-    //         // // BOTTOM
-    //         // Triangle { indices: [4, 7, 6], color: COLOR_CYAN, },
-    //         // Triangle { indices: [4, 6, 5], color: COLOR_CYAN, },
+    //         // TOP
+    //         Triangle { indices: [0, 1, 2], color: COLOR_RED, },
+    //         Triangle { indices: [0, 2, 3], color: COLOR_RED, },
+    //         // FRONT
+    //         Triangle { indices: [1, 5, 6], color: COLOR_GREEN, },
+    //         Triangle { indices: [1, 6, 2], color: COLOR_GREEN, },
+    //         // RIGHT
+    //         Triangle { indices: [2, 6, 7], color: COLOR_BLUE, },
+    //         Triangle { indices: [2, 7, 3], color: COLOR_BLUE, },
+    //         // BACK
+    //         Triangle { indices: [3, 7, 4], color: COLOR_MAGENTA, },
+    //         Triangle { indices: [3, 4, 0], color: COLOR_MAGENTA, },
+    //         // LEFT
+    //         Triangle { indices: [0, 4, 5], color: COLOR_YELLOW, },
+    //         Triangle { indices: [0, 5, 1], color: COLOR_YELLOW, },
+    //         // BOTTOM
+    //         Triangle { indices: [4, 7, 6], color: COLOR_CYAN, },
+    //         Triangle { indices: [4, 6, 5], color: COLOR_CYAN, },
 
     //         /* INWARDS BOX */
     //         // TOP
@@ -188,30 +188,31 @@ pub async fn load_scene() -> Result<Scene, String> {
         objects: Vec::new(),
     };
 
-    let scene_origin: Vec3 = Vec3::new(0.0, 0.0, 5.0);
+    let scene_origin: Vec3 = Vec3::new(0.0, 0.0, 0.0);
 
     // Randomly generated objects
-    // let variance = 10.0;
-    // let variance_offset = variance / 2.0;
-    // let num_objects = 50;
-    // for _ in 0..num_objects {
-    //     scene.objects.push(Object {
-    //         position: Vec3::new(
-    //             (Math::random() * variance - variance_offset) as f32,
-    //             (Math::random() * variance - variance_offset) as f32,
-    //             (Math::random() * variance - variance_offset) as f32
-    //         ) + scene_origin,
-    //         rotation: Math::random() as f32 * PI,
-    //         mesh: mesh.clone(),
-    //     });
-    // }
+    let variance = 30.0;
+    let variance_offset = variance / 2.0;
+    let num_objects = 1000;
+    for _ in 0..num_objects {
+        scene.objects.push(Object {
+            position: Vec3::new(
+                (Math::random() * variance - variance_offset) as f32,
+                (Math::random() * variance - variance_offset) as f32,
+                (Math::random() * variance - variance_offset) as f32
+            ) + scene_origin,
+            rotation: Math::random() as f32 * PI,
+            mesh: mesh.clone(),
+        });
+    }
+    console::log_1(&format!("{} objects, {} total triangles", num_objects, num_objects * mesh.triangles.len()).into());
 
     // @NOTE single object at `scene_origin`
-    scene.objects.push(Object {
-        position: scene_origin,
-        rotation: 0.0,
-        mesh: mesh.clone(),
-    });
+    // scene.objects.push(Object {
+    //     position: scene_origin,
+    //     rotation: 0.0,
+    //     mesh: mesh.clone(),
+    // });
 
     Ok(scene)
 }

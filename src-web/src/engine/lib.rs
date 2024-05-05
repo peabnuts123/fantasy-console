@@ -89,8 +89,6 @@ impl Engine {
         for object in &self.scene.as_ref().unwrap().objects {
             self.renderer.render_object(object, self.angle);
         }
-
-        // self.angle += 0.01;
     }
 
     /// Entrypoint to the library (lol)
@@ -139,6 +137,7 @@ impl Engine {
 
         self.renderer.camera_position += movement_vector + Vec3::new(0.0, camera_speed_y, 0.0);
 
+        self.angle += 0.01;
 
         self.draw();
     }
