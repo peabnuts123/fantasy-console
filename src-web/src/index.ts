@@ -4,6 +4,8 @@ import { Engine } from '@engine/fantasy_console';
 // Increase stack trace size for better view of Rust panics
 (Error as any).stackTraceLimit = 50;
 
+const ENABLE_DEBUG_FRAMERATE_COUNTER = true;
+
 enum KeyCode {
   W = 0,
   A = 1,
@@ -25,6 +27,7 @@ const NativeCodeToKeyCodeMap: Record<string, KeyCode> = {
 async function main() {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   const ctx = canvas.getContext('2d')!;
+  const fpsCounter = document.getElementById('debug_framerate') as HTMLDivElement;
 
   // Construct 3d rendering engine
   const engine = new Engine(canvas.width, canvas.height);
@@ -63,6 +66,7 @@ async function main() {
     ctx.putImageData(imageData, 0, 0);
 
     requestAnimationFrame(draw);
+    // setTimeout(draw);
 
     // Count number of frames drawn
     framesDrawn++;
@@ -76,10 +80,14 @@ async function main() {
 
   // Begin drawing
   requestAnimationFrame(draw);
+  // setTimeout(draw);
 
   // Count number of frames drawn per second
   setInterval(() => {
     console.log(`Frames drawn: ${framesDrawn}`);
+    if (ENABLE_DEBUG_FRAMERATE_COUNTER) {
+      fpsCounter.innerText = `${framesDrawn}fps`;
+    }
     framesDrawn = 0;
   }, 1000);
 
