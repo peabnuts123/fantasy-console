@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "watch:wasm": "nodemon --watch src --ext 'rs' --exec npm run build:wasm--dev",
     "build:wasm": "wasm-pack build",
-    "build:wasm--dev": "npm run build:wasm",
+    "build:wasm--dev": "npm run build:wasm -- --profiling",
     "build:wasm--release": "npm run build:wasm -- --release --no-default-features",
     "preview": "vite preview"
   },
