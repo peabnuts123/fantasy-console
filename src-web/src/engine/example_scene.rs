@@ -1,6 +1,7 @@
-use std::rc::Rc;
+use std::{f32::consts::PI, rc::Rc};
 
 use glam::{Vec2, Vec3, Vec4};
+use js_sys::Math;
 use tobj::LoadError;
 use web_sys::console;
 
@@ -12,9 +13,15 @@ use crate::{
 
 const MODEL_URI_BASE: &str = "/models";
 // const MODEL_RESOURCE: &str = "kitchen.obj";
-const MODEL_RESOURCE: &str = "ball.obj";
+// const MODEL_RESOURCE: &str = "ball.obj";
 // const MODEL_RESOURCE: &str = "burgerCheese.obj";
 // const MODEL_RESOURCE: &str = "detailDumpster_closed.obj";
+
+const obj_files: [&str;3] = [
+    "ball.obj",
+    "burgerCheese.obj",
+    "detailDumpster_closed.obj",
+];
 
 async fn load_obj(path: String, texture_cache: &mut TextureCache, scale: f32) -> Result<Mesh, String> {
     let obj_bytes = web::get_file_data(path).await?;
@@ -126,9 +133,16 @@ async fn load_obj(path: String, texture_cache: &mut TextureCache, scale: f32) ->
 }
 
 pub async fn load_scene(texture_cache: &mut TextureCache) -> Result<Scene, String> {
-    /* Loaded OBJ mesh */
-    let obj_path = format!("{MODEL_URI_BASE}/{MODEL_RESOURCE}").to_string();
-    let mesh = Rc::new(load_obj(obj_path, texture_cache, 1.0).await?);
+    /* Single OBJ */
+    // let obj_path = format!("{MODEL_URI_BASE}/{MODEL_RESOURCE}").to_string();
+    // let mesh = Rc::new(load_obj(obj_path, texture_cache, 1.0).await?);
+
+    /* Multiple OBJ files */
+    let mut meshes: Vec<Rc<Mesh>> = Vec::new();
+    for file in obj_files.iter() {
+        let obj_path = format!("{MODEL_URI_BASE}/{file}").to_string();
+        meshes.push(Rc::new(load_obj(obj_path, texture_cache, 1.0).await?));
+    }
 
     /* Single triangle */
     // let triangle_scale = 5.0;
@@ -215,29 +229,35 @@ pub async fn load_scene(texture_cache: &mut TextureCache) -> Result<Scene, Strin
     let scene_origin: Vec3 = Vec3::new(0.0, 0.0, 0.0);
 
     // Randomly generated objects
-    // let num_objects = 4000;
-    // let variance: f64 = (num_objects as f64) / 150.0;
-    // let variance_offset = variance / 2.0;
-    // let scene_origin: Vec3 = Vec3::new(0.0, 0.0, variance as f32);
-    // for _ in 0..num_objects {
-    //     scene.objects.push(Object {
-    //         position: Vec3::new(
-    //             (Math::random() * variance - variance_offset) as f32,
-    //             (Math::random() * variance - variance_offset) as f32,
-    //             (Math::random() * variance - variance_offset) as f32
-    //         ) + scene_origin,
-    //         rotation: Math::random() as f32 * PI,
-    //         mesh: mesh.clone(),
-    //     });
-    // }
-    // console::log_1(&format!("{} objects, {} total triangles", num_objects, num_objects * mesh.triangles.len()).into());
+    let num_objects = 500;
+    let variance: f64 = 20.0;
+    let variance_offset = variance / 2.0;
+    let scene_origin: Vec3 = Vec3::new(0.0, 0.0, variance as f32);
+    let mut total_triangles: u32 = 0;
+    for _ in 0..num_objects {
+        /* Multiple meshes, randomly */
+        let mesh: Rc<Mesh> = meshes[(Math::random() * meshes.len() as f64).floor() as usize].clone();
+        /* Single mesh */
+        // let mesh = mesh.clone();
+        total_triangles += mesh.triangles.len() as u32;
+        scene.objects.push(Object {
+            position: Vec3::new(
+                (Math::random() * variance - variance_offset) as f32,
+                (Math::random() * variance - variance_offset) as f32,
+                (Math::random() * variance - variance_offset) as f32
+            ) + scene_origin,
+            rotation: Math::random() as f32 * PI,
+            mesh,
+        });
+    }
+    console::log_1(&format!("{} objects, {} total triangles", num_objects, num_objects * total_triangles).into());
 
     // @NOTE single object at `scene_origin`
-    scene.objects.push(Object {
-        position: scene_origin,
-        rotation: 0.0,
-        mesh: mesh.clone(),
-    });
+    // scene.objects.push(Object {
+    //     position: scene_origin,
+    //     rotation: 0.0,
+    //     mesh: mesh.clone(),
+    // });
 
     Ok(scene)
 }

@@ -194,7 +194,7 @@ impl Renderer {
         let mesh = &object.mesh;
 
         // Object (local) to world (global) coordinates
-        let object_matrix: Mat4 = Mat4::from_translation(object.position);// * Mat4::from_rotation_y(angle + object.rotation) * Mat4::from_rotation_x(angle + object.rotation);
+        let object_matrix: Mat4 = Mat4::from_translation(object.position) * Mat4::from_rotation_y(angle + object.rotation) * Mat4::from_rotation_x(angle + object.rotation);
 
         // World to camera-relative coordinates (i.e. apply offset by camera position, rotation)
         let camera_matrix = Mat4::from_euler(glam::EulerRot::ZXY, self.camera_rotation.z, self.camera_rotation.x, self.camera_rotation.y) * Mat4::from_translation(-self.camera_position);
