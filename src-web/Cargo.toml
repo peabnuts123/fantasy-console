@@ -34,6 +34,7 @@ wasm-bindgen = "0.2.84"
 js-sys = "0.3.69"
 glam = "0.27.0"
 wasm-bindgen-futures = "0.4.42"
+image = { version = "0.25.1", default-features = false, features = ["jpeg", "png", "tiff"] }
 
 [dependencies.tobj]
 version = "4.0.2"
@@ -50,9 +51,7 @@ optional = true
 
 [dependencies.web-sys]
 version = "0.3.69"
-features = [
-  'console',
-]
+features = ['console']
 
 
 [dev-dependencies]

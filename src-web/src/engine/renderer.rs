@@ -3,17 +3,19 @@ use std::{
     f32::consts::PI, ops::{Add, Mul, Sub},
 };
 
-use glam::{FloatExt, Mat4, Quat, Vec3, Vec4};
-use crate::{types::{Color, Object, COLOR_BLUE, COLOR_GREEN, COLOR_LOVELY_PINK, COLOR_RED}};
+use glam::{FloatExt, Mat4, Quat, Vec2, Vec3, Vec4};
+use crate::{textures::{Texture, TextureCache}, types::{Color, Object, Triangle, Vertex, VertexAxis, COLOR_BLUE, COLOR_GREEN, COLOR_LOVELY_PINK, COLOR_RED}};
+
+type PixelColor = [u8; 3];
 
 const CAMERA_FOV_V: f32 = 50.0 * PI / 180.0;
 const CAMERA_NEAR: f32 = 0.1;
 const CAMERA_FAR: f32 = 100.0;
 
-const LIGHT_ANGLE: Vec3 = Vec3::new(-1.0, -1.0, 2.0);
+const LIGHT_ANGLE: Vec3 = Vec3::new(1.0, 1.0, -2.0);
 
 /* Clear color for the screen */
-const CLEAR_COLOR: Color = [
+const CLEAR_COLOR: PixelColor = [
     0x87, 0xCE, 0xEB, // Sky Blue
     // 0xFF, 0xFF, 0xFF, // White
 ];
@@ -25,13 +27,10 @@ pub const VEC_RIGHT: Vec3 = Vec3::new(1.0, 0.0, 0.0);
 pub const VEC_FORWARD: Vec3 = Vec3::new(0.0, 0.0, 1.0);
 pub const VEC_BACKWARD: Vec3 = Vec3::new(0.0, 0.0, -1.0);
 
-enum ClipAxis {
-    X,
-    Y,
-    Z,
-}
+
 
 struct Interpolator<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy> {
+    values: [T; 3],
     step_x: T,
     step_y: T,
     left: T,
@@ -44,9 +43,8 @@ impl<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy> Interpolator<
         v0: Vec4, v1: Vec4, v2: Vec4,
         one_over_dx: f32
     ) -> Self {
-        // @NOTE z coordinates have already been inverted
         Self::new(
-            c0 * v0.w, c1 * v1.w, c2 * v2.w,
+            c0 * (1.0 / v0.w), c1 * (1.0 / v1.w), c2 * (1.0 / v2.w),
             v0, v1, v2,
             one_over_dx,
         )
@@ -58,6 +56,7 @@ impl<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy> Interpolator<
         one_over_dx: f32
     ) -> Self {
         Interpolator {
+            values: [c0, c1, c2],
             step_x: (
                 (c1 - c2) * (v0.y - v2.y)
                 - (c0 - c2) * (v1.y - v2.y)
@@ -71,7 +70,8 @@ impl<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy> Interpolator<
         }
     }
 
-    fn reset_left(&mut self, c: T, y_start_offset: f32, left_delta_x: f32) {
+    fn reset_left(&mut self, value_index: usize, y_start_offset: f32, left_delta_x: f32) {
+        let c = self.values[value_index];
         self.left = c + (self.step_y * y_start_offset) + (self.step_x * (y_start_offset * left_delta_x));
         // @NOTE Also reset line value
         self.current_value_for_line = self.left;
@@ -107,6 +107,7 @@ pub struct Renderer {
     pub camera_rotation: Vec3,
     projection_matrix: Mat4,
     screen_space_matrix: Mat4,
+    pub texture_cache: TextureCache,
 }
 
 impl Renderer {
@@ -118,10 +119,11 @@ impl Renderer {
         Self {
             canvas_width,
             canvas_height,
+            texture_cache: TextureCache::new(),
             pixel_data: vec![0; (canvas_width as usize) * (canvas_height as usize) * 4 /* rgba */],
             depth_data: vec![0.0; (canvas_width as usize) * (canvas_height as usize)],
             offset: 0,
-            camera_position: Vec3::new(0.0, 0.0, -25.0),
+            camera_position: Vec3::new(0.0, 0.0, -5.0),
             camera_rotation: Vec3::ZERO,
             projection_matrix: Mat4::from_cols(
                 Vec4::new(1.0 / ((CAMERA_FOV_V * 0.5).tan() * aspect_ratio), 0.0, 0.0, 0.0),
@@ -192,7 +194,7 @@ impl Renderer {
         let mesh = &object.mesh;
 
         // Object (local) to world (global) coordinates
-        let object_matrix = Mat4::from_translation(object.position) * Mat4::from_rotation_y(angle + object.rotation) * Mat4::from_rotation_x(angle + object.rotation);
+        let object_matrix: Mat4 = Mat4::from_translation(object.position);// * Mat4::from_rotation_y(angle + object.rotation) * Mat4::from_rotation_x(angle + object.rotation);
 
         // World to camera-relative coordinates (i.e. apply offset by camera position, rotation)
         let camera_rotation: Mat4 = Mat4::from_euler(glam::EulerRot::ZXY, self.camera_rotation.z, self.camera_rotation.x, self.camera_rotation.y);
@@ -205,102 +207,140 @@ impl Renderer {
         let light_angle = camera_rotation.transform_vector3(LIGHT_ANGLE);
 
         // @NOTE used by clipping
-        let mut temp_vertex_buffer: Vec<Vec4> = Vec::new();
+        let mut temp_vertex_buffer: Vec<Vertex> = Vec::new();
 
         for triangle_index in 0..mesh.triangles.len() {
             let triangle = &mesh.triangles[triangle_index];
 
-            // Transform vertices to clip space coordinates
-            let v0 = model_view_matrix * Vec4::from((mesh.vertices[triangle.indices[0]], 1.0));
-            let v1 = model_view_matrix * Vec4::from((mesh.vertices[triangle.indices[1]], 1.0));
-            let v2 = model_view_matrix * Vec4::from((mesh.vertices[triangle.indices[2]], 1.0));
+            // Look up vertices from triangle indices
+            let mut v0 = mesh.vertices[triangle.indices[0]].clone();
+            let mut v1 = mesh.vertices[triangle.indices[1]].clone();
+            let mut v2 = mesh.vertices[triangle.indices[2]].clone();
+
+            // Transform vertex positions to clip space coordinates
+            v0.pos = model_view_matrix * v0.pos;
+            v1.pos = model_view_matrix * v1.pos;
+            v2.pos = model_view_matrix * v2.pos;
 
             /* Clipping */
 
             // If triangle needs no clipping, just draw it
-            if is_inside_frustum(&v0) && is_inside_frustum(&v1) && is_inside_frustum(&v2) {
-                self.render_triangle(v0, v1, v2, triangle.color, light_angle);
+            if v0.is_inside_frustum() && v1.is_inside_frustum() && v2.is_inside_frustum() {
+                self.render_triangle(
+                    &mut v0, &mut v1, &mut v2,
+                    triangle,
+                    light_angle
+                );
                 continue;
             }
 
-            let mut vertices: Vec<Vec4> = Vec::new();
-            vertices.push(v0);
-            vertices.push(v1);
-            vertices.push(v2);
+            let mut vertices = vec![v0, v1, v2];
 
             // Clip triangle successively against each axis
             // As the triangle is clipped, it turns into a polygon with more than 3 edges
             // If the entire triangle is clipped, skip drawing entirely
             if
-                clip_polygon_to_axis(&mut vertices, &ClipAxis::X, &mut temp_vertex_buffer) &&
-                clip_polygon_to_axis(&mut vertices, &ClipAxis::Y, &mut temp_vertex_buffer) &&
-                clip_polygon_to_axis(&mut vertices, &ClipAxis::Z, &mut temp_vertex_buffer)
+                clip_polygon_to_axis(&mut vertices, &VertexAxis::X, &mut temp_vertex_buffer) &&
+                clip_polygon_to_axis(&mut vertices, &VertexAxis::Y, &mut temp_vertex_buffer) &&
+                clip_polygon_to_axis(&mut vertices, &VertexAxis::Z, &mut temp_vertex_buffer)
             {
                 // Draw clipped triangle as a triangle fan
-                let initial_vertex = vertices[0];
-
                 for i in 1..(vertices.len() - 1)
                 {
-                    self.render_triangle(initial_vertex, vertices[i], vertices[i + 1], triangle.color, light_angle);
+                    self.render_triangle(
+                        &mut vertices[0].clone(), &mut vertices[i].clone(), &mut vertices[i + 1].clone(),
+                        triangle,
+                        light_angle
+                    );
                 }
             }
         }
     }
 
-    fn render_triangle(&mut self, v0: Vec4, v1: Vec4, v2: Vec4, color: Color, light_angle: Vec3) {
-        // Transform vertices to screen space coordinates
-        let mut v0_raster = perspective_divide(self.screen_space_matrix * v0);
-        let mut v1_raster = perspective_divide(self.screen_space_matrix * v1);
-        let mut v2_raster = perspective_divide(self.screen_space_matrix * v2);
+    fn render_triangle(&mut self,
+        // v0_pos: Vec4, v1_pos: Vec4, v2_pos: Vec4,
+        v0: &mut Vertex, v1: &mut Vertex, v2: &mut Vertex,
+        triangle: &Triangle,
+        light_angle: Vec3
+    ) {
+        let debug_backup_normal: Vec3 = (v2.pos - v0.pos).truncate().cross((v1.pos - v0.pos).truncate()).normalize();
 
-        let triangle_normal: Vec3 = (v2 - v0).truncate().cross((v1 - v0).truncate()).normalize();
+        // @TODO do before drawing the triangle to remove need for mutable reference
+        // Transform vertices to screen space coordinates
+        v0.pos = perspective_divide(self.screen_space_matrix * v0.pos);
+        v1.pos = perspective_divide(self.screen_space_matrix * v1.pos);
+        v2.pos = perspective_divide(self.screen_space_matrix * v2.pos);
+
 
         // Arbitrary set minimum lightness to 20%
-        let lightness = 0.2_f32.max(light_angle.angle_between(triangle_normal) / PI);
-        // let lightness = 1.0;
+        let backup_lightness = debug_backup_normal.dot(light_angle).clamp(0.0, 1.0) * 0.8 + 0.2;
+        // let backup_lightness: f32 = 0.2_f32.max(light_angle.angle_between(triangle_normal) / PI);
+        // let backup_lightness = 1.0;
 
         /* Backface culling */
-        if triangle_signed_area_double(v0_raster, v1_raster, v2_raster) < 0.0 {
+        if triangle_signed_area_double(v0.pos, v1.pos, v2.pos) < 0.0 {
             return;
         }
 
+        let mut v0 = v0;
+        let mut v1 = v1;
+        let mut v2 = v2;
+
         // Make sure vertices are sorted by their Y coordinate
-        if v2_raster.y < v1_raster.y {
-            (v2_raster, v1_raster) = (v1_raster, v2_raster);
+        if v2.pos.y < v1.pos.y {
+            (v2, v1) = (v1, v2);
         }
-        if v1_raster.y < v0_raster.y {
-            (v1_raster, v0_raster) = (v0_raster, v1_raster);
+        if v1.pos.y < v0.pos.y {
+            (v1, v0) = (v0, v1);
         }
-        if v2_raster.y < v1_raster.y {
-            (v2_raster, v1_raster) = (v1_raster, v2_raster);
+        if v2.pos.y < v1.pos.y {
+            (v2, v1) = (v1, v2);
         }
 
         // Interpolation constant
-        let one_over_dx: f32 = 1.0 / ((v1_raster.x - v2_raster.x) * (v0_raster.y - v2_raster.y)
-            - (v0_raster.x - v2_raster.x) * (v1_raster.y - v2_raster.y));
+        let one_over_dx: f32 = 1.0 / ((v1.pos.x - v2.pos.x) * (v0.pos.y - v2.pos.y)
+            - (v0.pos.x - v2.pos.x) * (v1.pos.y - v2.pos.y));
 
         /* Draw first half of triangle */
-        let mut left_delta_x = (v2_raster.x - v0_raster.x) / (v2_raster.y - v0_raster.y);
-        let mut right_delta_x = (v1_raster.x - v0_raster.x) / (v1_raster.y - v0_raster.y);
+        let mut left_delta_x = (v2.pos.x - v0.pos.x) / (v2.pos.y - v0.pos.y);
+        let mut right_delta_x = (v1.pos.x - v0.pos.x) / (v1.pos.y - v0.pos.y);
 
-        let triangle_sign = triangle_signed_area_double(v0_raster, v1_raster, v2_raster);
+        let triangle_sign = triangle_signed_area_double(v0.pos, v1.pos, v2.pos);
         if triangle_sign >= 0.0 {
             (left_delta_x, right_delta_x) = (right_delta_x, left_delta_x);
         }
 
-        let y_start_offset = v0_raster.y.ceil() - v0_raster.y;
+        let y_start_offset = v0.pos.y.ceil() - v0.pos.y;
 
-        let mut x_start = v0_raster.x + left_delta_x * y_start_offset;
-        let mut x_end = v0_raster.x + right_delta_x * y_start_offset;
+        let mut x_start = v0.pos.x + left_delta_x * y_start_offset;
+        let mut x_end = v0.pos.x + right_delta_x * y_start_offset;
 
         /* Interpolators */
         // - 1 / z
         let mut one_over_z_interpolator = Interpolator::<f32>::new(
-            1.0 / v0_raster.w, 1.0 / v1_raster.w, 1.0 / v2_raster.w,
-            v0_raster, v1_raster, v2_raster,
+            1.0 / v0.pos.w, 1.0 / v1.pos.w, 1.0 / v2.pos.w,
+            v0.pos, v1.pos, v2.pos,
             one_over_dx,
         );
-        one_over_z_interpolator.reset_left(1.0 / v0_raster.w, y_start_offset, left_delta_x);
+        one_over_z_interpolator.reset_left(0, y_start_offset, left_delta_x);
+
+        // Texture coordinate
+        let triangle_has_texture = triangle.texture_index.is_some();
+        let mut texture_coord_interpolator = Interpolator::<Vec2>::new_perspective_correct(
+            // @TODO use `triangle_has_texture` and panic if they don't agree
+            v0.texture_coord.unwrap_or(Vec2::ZERO),
+            v1.texture_coord.unwrap_or(Vec2::ZERO),
+            v2.texture_coord.unwrap_or(Vec2::ZERO),
+            v0.pos, v1.pos, v2.pos,
+            one_over_dx,
+        );
+        texture_coord_interpolator.reset_left(0, y_start_offset, left_delta_x);
+
+        let texture = if triangle_has_texture {
+            Some(self.texture_cache.get_texture(triangle.texture_index.unwrap()))
+        } else {
+            None
+        };
 
         // - Color
         // @TODO @DEBUG REMOVE
@@ -309,9 +349,10 @@ impl Renderer {
         //     v0_raster, v1_raster, v2_raster,
         //     one_over_dx,
         // );
-        // color_interpolator.reset_left(v0_color, y_start_offset, left_delta_x);
+        // color_interpolator.reset_left(0, y_start_offset, left_delta_x);
 
-        for y in (v0_raster.y.ceil() as u16)..(v1_raster.y.ceil() as u16) {
+
+        for y in (v0.pos.y.ceil() as u16)..(v1.pos.y.ceil() as u16) {
             for x in (x_start.ceil() as u16)..(x_end.ceil() as u16) {
 
                 let depth_z = 1.0 / one_over_z_interpolator.value();
@@ -331,9 +372,18 @@ impl Renderer {
                         // self.pixel_data[pixel_color_index + 1] = c.y as u8;  /* G */
                         // self.pixel_data[pixel_color_index + 2] = c.z as u8;  /* B */
 
-                        self.pixel_data[pixel_color_index]     = ((color[0] as f32) * lightness) as u8; /* R */
-                        self.pixel_data[pixel_color_index + 1] = ((color[1] as f32) * lightness) as u8; /* G */
-                        self.pixel_data[pixel_color_index + 2] = ((color[2] as f32) * lightness) as u8; /* B */
+                        let mut pixel = triangle.color;
+                        if triangle_has_texture {
+                            let texture_coord = texture_coord_interpolator.value_perspective_correct(depth_z);
+                            let sample = sample_texture(&texture_coord, texture.expect("Texture was empty"));
+                            pixel[0] = pixel[0] * sample[0];
+                            pixel[1] = pixel[1] * sample[1];
+                            pixel[2] = pixel[2] * sample[2];
+                        }
+
+                        self.pixel_data[pixel_color_index]     = (pixel[0] * backup_lightness * 255.0) as u8; /* R */
+                        self.pixel_data[pixel_color_index + 1] = (pixel[1] * backup_lightness * 255.0) as u8; /* G */
+                        self.pixel_data[pixel_color_index + 2] = (pixel[2] * backup_lightness * 255.0) as u8; /* B */
 
                         /* Visualise depth buffer */
                         // self.pixel_data[pixel_color_index]     = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* R */
@@ -345,6 +395,7 @@ impl Renderer {
                 // Interpolators
                 one_over_z_interpolator.step();
                 // color_interpolator.step();
+                texture_coord_interpolator.step();
             }
 
             x_start = x_start + left_delta_x;
@@ -353,28 +404,30 @@ impl Renderer {
             // Interpolators
             one_over_z_interpolator.step_line(left_delta_x);
             // color_interpolator.step_line(left_delta_x);
+            texture_coord_interpolator.step_line(left_delta_x);
         }
 
         /* Draw second half of triangle */
         // Reset stateful counters
-        let v1_y_start_offset = v1_raster.y.ceil() - v1_raster.y;
+        let v1_y_start_offset = v1.pos.y.ceil() - v1.pos.y;
         if triangle_sign >= 0.0 {
             // Update left edge of triangle
-            left_delta_x = (v2_raster.x - v1_raster.x) / (v2_raster.y - v1_raster.y);
-            x_start = v1_raster.x + left_delta_x * v1_y_start_offset;
+            left_delta_x = (v2.pos.x - v1.pos.x) / (v2.pos.y - v1.pos.y);
+            x_start = v1.pos.x + left_delta_x * v1_y_start_offset;
 
             // Interpolators
-            one_over_z_interpolator.reset_left(1.0 / v1_raster.w, v1_y_start_offset, left_delta_x);
-            // color_interpolator.reset_left(v1_color, v1_y_start_offset, left_delta_x);
+            one_over_z_interpolator.reset_left(1, v1_y_start_offset, left_delta_x);
+            // color_interpolator.reset_left(1, v1_y_start_offset, left_delta_x);
+            texture_coord_interpolator.reset_left(1, v1_y_start_offset, left_delta_x);
         } else {
             // Update right edge of triangle
-            right_delta_x = (v2_raster.x - v1_raster.x) / (v2_raster.y - v1_raster.y);
-            x_end = v1_raster.x + right_delta_x * v1_y_start_offset;
+            right_delta_x = (v2.pos.x - v1.pos.x) / (v2.pos.y - v1.pos.y);
+            x_end = v1.pos.x + right_delta_x * v1_y_start_offset;
 
             // @NOTE no need to reset interpolators for right edge
         }
 
-        for y in (v1_raster.y.ceil() as u16)..(v2_raster.y.ceil() as u16) {
+        for y in (v1.pos.y.ceil() as u16)..(v2.pos.y.ceil() as u16) {
             for x in (x_start.ceil() as u16)..(x_end.ceil() as u16) {
 
                 let depth_z = 1.0 / one_over_z_interpolator.value();
@@ -394,9 +447,18 @@ impl Renderer {
                         // self.pixel_data[pixel_color_index + 1] = c.y as u8;  /* G */
                         // self.pixel_data[pixel_color_index + 2] = c.z as u8;  /* B */
 
-                        self.pixel_data[pixel_color_index]     = ((color[0] as f32) * lightness) as u8; /* R */
-                        self.pixel_data[pixel_color_index + 1] = ((color[1] as f32) * lightness) as u8; /* G */
-                        self.pixel_data[pixel_color_index + 2] = ((color[2] as f32) * lightness) as u8; /* B */
+                        let mut pixel = triangle.color;
+                        if triangle_has_texture {
+                            let texture_coord = texture_coord_interpolator.value_perspective_correct(depth_z);
+                            let sample = sample_texture(&texture_coord, texture.expect("Texture was empty"));
+                            pixel[0] = pixel[0] * sample[0];
+                            pixel[1] = pixel[1] * sample[1];
+                            pixel[2] = pixel[2] * sample[2];
+                        }
+
+                        self.pixel_data[pixel_color_index]     = (pixel[0] * backup_lightness * 255.0) as u8; /* R */
+                        self.pixel_data[pixel_color_index + 1] = (pixel[1] * backup_lightness * 255.0) as u8; /* G */
+                        self.pixel_data[pixel_color_index + 2] = (pixel[2] * backup_lightness * 255.0) as u8; /* B */
 
                         /* Visualise depth buffer */
                         // self.pixel_data[pixel_color_index]     = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* R */
@@ -408,6 +470,7 @@ impl Renderer {
                 // Interpolators
                 one_over_z_interpolator.step();
                 // color_interpolator.step();
+                texture_coord_interpolator.step();
             }
 
             x_start = x_start + left_delta_x;
@@ -416,6 +479,7 @@ impl Renderer {
             // Interpolators
             one_over_z_interpolator.step_line(left_delta_x);
             // color_interpolator.step_line(left_delta_x);
+            texture_coord_interpolator.step_line(left_delta_x);
         }
     }
 
@@ -438,9 +502,9 @@ impl Renderer {
 
         for triangle_index in 0..mesh.triangles.len() {
             let triangle = &mesh.triangles[triangle_index];
-            let mut v0 = mesh.vertices[triangle.indices[0]];
-            let mut v1 = mesh.vertices[triangle.indices[1]];
-            let mut v2 = mesh.vertices[triangle.indices[2]];
+            let mut v0 = mesh.vertices[triangle.indices[0]].pos.truncate();
+            let mut v1 = mesh.vertices[triangle.indices[1]].pos.truncate();
+            let mut v2 = mesh.vertices[triangle.indices[2]].pos.truncate();
 
             // Apply rotation to vertices, offset camera position
             v0 = camera_rotation * (spin * v0 + position_offset);
@@ -643,9 +707,9 @@ impl Renderer {
 
         for triangle_index in 0..mesh.triangles.len() {
             let triangle = &mesh.triangles[triangle_index];
-            let mut v0 = mesh.vertices[triangle.indices[0]] + object.position;
-            let mut v1 = mesh.vertices[triangle.indices[1]] + object.position;
-            let mut v2 = mesh.vertices[triangle.indices[2]] + object.position;
+            let mut v0 = mesh.vertices[triangle.indices[0]].pos.truncate() + object.position;
+            let mut v1 = mesh.vertices[triangle.indices[1]].pos.truncate() + object.position;
+            let mut v2 = mesh.vertices[triangle.indices[2]].pos.truncate() + object.position;
 
             // Apply rotation to vertices, offset camera position
             v0 = spin * (v0 - rotation_point) + rotation_point - self.camera_position;
@@ -775,7 +839,7 @@ impl Renderer {
     }
 
     /// Debug function to draw a pixel on the screen
-    fn debug_draw_pixel(&mut self, pixel: [i16; 2], color: Color) {
+    fn debug_draw_pixel(&mut self, pixel: [i16; 2], color: PixelColor) {
         let x = pixel[0];
         let y = pixel[1];
         if x >= 0 && (x as u16) < self.canvas_width && y >= 0 && (y as u16) < self.canvas_height {
@@ -827,7 +891,7 @@ fn triangle_signed_area_double(a: Vec4, b: Vec4, c: Vec4) -> f32 {
     ((c.x - a.x) * (b.y - a.y)) - ((c.y - a.y) * (b.x - a.x))
 }
 
-fn clip_polygon_to_axis(vertices: &mut Vec<Vec4>, clip_axis: &ClipAxis, temp_storage: &mut Vec<Vec4>) -> bool {
+fn clip_polygon_to_axis(vertices: &mut Vec<Vertex>, clip_axis: &VertexAxis, temp_storage: &mut Vec<Vertex>) -> bool {
     clip_polygon_to_axis_half(vertices, clip_axis, 1.0, temp_storage);
     vertices.clear();
 
@@ -841,28 +905,29 @@ fn clip_polygon_to_axis(vertices: &mut Vec<Vec4>, clip_axis: &ClipAxis, temp_sto
     !vertices.is_empty()
 }
 
-fn clip_polygon_to_axis_half(vertices: &Vec<Vec4>, clip_axis: &ClipAxis, w_sign: f32, results: &mut Vec<Vec4>) {
+fn clip_polygon_to_axis_half(vertices: &Vec<Vertex>, clip_axis: &VertexAxis, w_sign: f32, results: &mut Vec<Vertex>) {
     let mut previous_vertex = vertices.last().unwrap();
-    let mut previous_value = get_vertex_axis(previous_vertex, clip_axis) * w_sign;
-    let mut previous_was_inside = previous_value <= previous_vertex.w;
+    let mut previous_value = previous_vertex.get_axis(clip_axis) * w_sign;
+    let mut previous_was_inside = previous_value <= previous_vertex.pos.w;
 
     for current_vertex in vertices {
-        let current_value = get_vertex_axis(current_vertex, clip_axis) * w_sign;
-        let current_is_inside = current_value <= current_vertex.w;
+        let current_value = current_vertex.get_axis(clip_axis) * w_sign;
+        let current_is_inside = current_value <= current_vertex.pos.w;
 
         if current_is_inside ^ previous_was_inside {
             // Calculate intersection point with `w`
             // @NOTE I'm not entirely sure how different w values are being
             // mixed here
-            let lerp_amount = (previous_vertex.w - previous_value) /
-					((previous_vertex.w - previous_value) -
-					 (current_vertex.w - current_value));
+            let lerp_amount = (previous_vertex.pos.w - previous_value) /
+					((previous_vertex.pos.w - previous_value) -
+					 (current_vertex.pos.w - current_value));
 
-            results.push(previous_vertex.lerp(*current_vertex, lerp_amount));
+            let clipped_vertex = previous_vertex.lerp(current_vertex, lerp_amount);
+            results.push(clipped_vertex);
         }
 
         if current_is_inside {
-            results.push(*current_vertex);
+            results.push(current_vertex.clone());
         }
 
         previous_vertex = current_vertex;
@@ -871,21 +936,12 @@ fn clip_polygon_to_axis_half(vertices: &Vec<Vec4>, clip_axis: &ClipAxis, w_sign:
     }
 }
 
-fn get_vertex_axis(vertex: &Vec4, clip_axis: &ClipAxis) -> f32 {
-    match clip_axis {
-        ClipAxis::X => vertex.x,
-        ClipAxis::Y => vertex.y,
-        ClipAxis::Z => vertex.z,
-        _ => panic!("Invalid clip axis"),
-    }
+fn sample_texture(texture_coord: &Vec2, texture: &Texture) -> Color {
+    let u = ((texture_coord.x.fract()) + 1.0).fract();
+    let v = ((texture_coord.y.fract()) + 1.0).fract();
+
+    texture.get_pixel(
+        (u * (texture.width() as f32)) as u32,
+        (v * (texture.height() as f32)) as u32,
+    ).0
 }
-
-fn is_inside_frustum(v: &Vec4) -> bool {
-    let w_abs = v.w.abs();
-    v.x.abs() <= w_abs &&
-        v.y.abs() <= w_abs &&
-        v.z.abs() <= w_abs
-}
-
-
-

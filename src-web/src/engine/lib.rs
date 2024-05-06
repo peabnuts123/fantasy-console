@@ -2,6 +2,8 @@ mod example_scene;
 mod types;
 mod renderer;
 mod input;
+mod web;
+mod textures;
 
 use glam::{Quat, Vec3};
 use renderer::Renderer;
@@ -10,7 +12,7 @@ use web_sys::console;
 use types::Scene;
 use input::{keycodes, InputState, RawInputState, Input2D};
 
-const CAMERA_SPEED_PER_SECOND: f32 = 10.0;
+const CAMERA_SPEED_PER_SECOND: f32 = 3.0;
 const CAMERA_LOOK_SENSITIVITY: f32 = 0.005;
 
 #[wasm_bindgen(start)]
@@ -70,7 +72,7 @@ impl Engine {
 
     #[wasm_bindgen]
     pub async fn load_scene(&mut self) -> Result<(), String>{
-        let scene = example_scene::load_scene().await?;
+        let scene = example_scene::load_scene(&mut self.renderer.texture_cache).await?;
         self.scene = Some(scene);
         Ok(())
     }
