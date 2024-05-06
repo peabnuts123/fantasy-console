@@ -5,7 +5,7 @@ authors = ["peabnuts123"]
 edition = "2018"
 
 [package.metadata.wasm-pack.profile.profiling]
-wasm-opt = ['-O4', '-g']
+wasm-opt = false
 
 [package.metadata.wasm-pack.profile.profiling.wasm-bindgen]
 # Should we enable wasm-bindgen's debug assertions in its generated JS glue?
