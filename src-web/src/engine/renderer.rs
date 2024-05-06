@@ -12,8 +12,6 @@ const CAMERA_FOV_V: f32 = 50.0 * PI / 180.0;
 const CAMERA_NEAR: f32 = 0.1;
 const CAMERA_FAR: f32 = 100.0;
 
-const LIGHT_ANGLE: Vec3 = Vec3::new(1.0, 1.0, -2.0);
-
 /* Clear color for the screen */
 const CLEAR_COLOR: PixelColor = [
     0x87, 0xCE, 0xEB, // Sky Blue
@@ -108,6 +106,7 @@ pub struct Renderer {
     projection_matrix: Mat4,
     screen_space_matrix: Mat4,
     pub texture_cache: TextureCache,
+    light_angle: Vec3,
 }
 
 impl Renderer {
@@ -137,6 +136,7 @@ impl Renderer {
                 Vec4::new(0.0, 0.0, 1.0, 0.0),
                 Vec4::new(0.0, 0.0, 0.0, 1.0),
             ).transpose(),
+            light_angle: Vec3::new(1.0, 1.0, -2.0).normalize(),
         }
     }
 
@@ -197,14 +197,10 @@ impl Renderer {
         let object_matrix: Mat4 = Mat4::from_translation(object.position);// * Mat4::from_rotation_y(angle + object.rotation) * Mat4::from_rotation_x(angle + object.rotation);
 
         // World to camera-relative coordinates (i.e. apply offset by camera position, rotation)
-        let camera_rotation: Mat4 = Mat4::from_euler(glam::EulerRot::ZXY, self.camera_rotation.z, self.camera_rotation.x, self.camera_rotation.y);
-        let camera_matrix = camera_rotation * Mat4::from_translation(-self.camera_position);
+        let camera_matrix = Mat4::from_euler(glam::EulerRot::ZXY, self.camera_rotation.z, self.camera_rotation.x, self.camera_rotation.y) * Mat4::from_translation(-self.camera_position);
 
         // Full projection matrix for object + camera + perspective projection
         let model_view_matrix = self.projection_matrix * camera_matrix * object_matrix;
-
-        // @TODO gotta be a better way of doing this. Can we just use `camera_matrix`?
-        let light_angle = camera_rotation.transform_vector3(LIGHT_ANGLE);
 
         // @NOTE used by clipping
         let mut temp_vertex_buffer: Vec<Vertex> = Vec::new();
@@ -222,14 +218,29 @@ impl Renderer {
             v1.pos = model_view_matrix * v1.pos;
             v2.pos = model_view_matrix * v2.pos;
 
+            // Transform normals to world space
+            v0.normal = v0.normal.map_or(v0.normal, |normal|
+                Some(object_matrix.transform_vector3(normal))
+            );
+            v1.normal = v1.normal.map_or(v1.normal, |normal|
+                Some(object_matrix.transform_vector3(normal))
+            );
+            v2.normal = v2.normal.map_or(v2.normal, |normal|
+                Some(object_matrix.transform_vector3(normal))
+            );
+
             /* Clipping */
 
             // If triangle needs no clipping, just draw it
             if v0.is_inside_frustum() && v1.is_inside_frustum() && v2.is_inside_frustum() {
+                // Transform vertices to screen space coordinates
+                v0.pos = perspective_divide(self.screen_space_matrix * v0.pos);
+                v1.pos = perspective_divide(self.screen_space_matrix * v1.pos);
+                v2.pos = perspective_divide(self.screen_space_matrix * v2.pos);
+
                 self.render_triangle(
-                    &mut v0, &mut v1, &mut v2,
-                    triangle,
-                    light_angle
+                    &v0, &v1, &v2,
+                    triangle
                 );
                 continue;
             }
@@ -244,13 +255,17 @@ impl Renderer {
                 clip_polygon_to_axis(&mut vertices, &VertexAxis::Y, &mut temp_vertex_buffer) &&
                 clip_polygon_to_axis(&mut vertices, &VertexAxis::Z, &mut temp_vertex_buffer)
             {
+                // Transform vertices to screen space coordinates
+                for vertex in vertices.iter_mut() {
+                    vertex.pos = perspective_divide(self.screen_space_matrix * vertex.pos);
+                }
+
                 // Draw clipped triangle as a triangle fan
                 for i in 1..(vertices.len() - 1)
                 {
                     self.render_triangle(
                         &mut vertices[0].clone(), &mut vertices[i].clone(), &mut vertices[i + 1].clone(),
-                        triangle,
-                        light_angle
+                        triangle
                     );
                 }
             }
@@ -258,22 +273,14 @@ impl Renderer {
     }
 
     fn render_triangle(&mut self,
-        // v0_pos: Vec4, v1_pos: Vec4, v2_pos: Vec4,
-        v0: &mut Vertex, v1: &mut Vertex, v2: &mut Vertex,
-        triangle: &Triangle,
-        light_angle: Vec3
+        v0: &Vertex, v1: &Vertex, v2: &Vertex,
+        triangle: &Triangle
     ) {
-        let debug_backup_normal: Vec3 = (v2.pos - v0.pos).truncate().cross((v1.pos - v0.pos).truncate()).normalize();
-
-        // @TODO do before drawing the triangle to remove need for mutable reference
-        // Transform vertices to screen space coordinates
-        v0.pos = perspective_divide(self.screen_space_matrix * v0.pos);
-        v1.pos = perspective_divide(self.screen_space_matrix * v1.pos);
-        v2.pos = perspective_divide(self.screen_space_matrix * v2.pos);
-
+        // let debug_backup_normal: Vec3 = (v2.pos - v0.pos).truncate().cross((v1.pos - v0.pos).truncate()).normalize();
 
         // Arbitrary set minimum lightness to 20%
-        let backup_lightness = debug_backup_normal.dot(light_angle).clamp(0.0, 1.0) * 0.8 + 0.2;
+        // let backup_lightness = debug_backup_normal.dot(light_angle).clamp(0.0, 1.0) * 0.8 + 0.2;
+        // let default_lightness
         // let backup_lightness: f32 = 0.2_f32.max(light_angle.angle_between(triangle_normal) / PI);
         // let backup_lightness = 1.0;
 
@@ -342,6 +349,17 @@ impl Renderer {
             None
         };
 
+        // Normal
+        let triangle_has_normals: bool = v0.normal.is_some() && v1.normal.is_some() && v2.normal.is_some();
+        let mut normal_interpolator = Interpolator::<Vec3>::new_perspective_correct(
+            v0.normal.unwrap_or(Vec3::ZERO),
+            v1.normal.unwrap_or(Vec3::ZERO),
+            v2.normal.unwrap_or(Vec3::ZERO),
+            v0.pos, v1.pos, v2.pos,
+            one_over_dx,
+        );
+        normal_interpolator.reset_left(0, y_start_offset, left_delta_x);
+
         // - Color
         // @TODO @DEBUG REMOVE
         // let mut color_interpolator = Interpolator::<Vec3>::new(
@@ -381,9 +399,19 @@ impl Renderer {
                             pixel[2] = pixel[2] * sample[2];
                         }
 
-                        self.pixel_data[pixel_color_index]     = (pixel[0] * backup_lightness * 255.0) as u8; /* R */
-                        self.pixel_data[pixel_color_index + 1] = (pixel[1] * backup_lightness * 255.0) as u8; /* G */
-                        self.pixel_data[pixel_color_index + 2] = (pixel[2] * backup_lightness * 255.0) as u8; /* B */
+                        if triangle_has_normals {
+                            let normal = normal_interpolator.value_perspective_correct(depth_z);
+                            let lightness = normal.dot(self.light_angle).clamp(0.0, 1.0) * 0.8 + 0.2;
+
+                            pixel[0] = pixel[0] * lightness;
+                            pixel[1] = pixel[1] * lightness;
+                            pixel[2] = pixel[2] * lightness;
+                        }
+
+
+                        self.pixel_data[pixel_color_index]     = (pixel[0] * 255.0) as u8; /* R */
+                        self.pixel_data[pixel_color_index + 1] = (pixel[1] * 255.0) as u8; /* G */
+                        self.pixel_data[pixel_color_index + 2] = (pixel[2] * 255.0) as u8; /* B */
 
                         /* Visualise depth buffer */
                         // self.pixel_data[pixel_color_index]     = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* R */
@@ -396,6 +424,7 @@ impl Renderer {
                 one_over_z_interpolator.step();
                 // color_interpolator.step();
                 texture_coord_interpolator.step();
+                normal_interpolator.step();
             }
 
             x_start = x_start + left_delta_x;
@@ -405,6 +434,7 @@ impl Renderer {
             one_over_z_interpolator.step_line(left_delta_x);
             // color_interpolator.step_line(left_delta_x);
             texture_coord_interpolator.step_line(left_delta_x);
+            normal_interpolator.step_line(left_delta_x);
         }
 
         /* Draw second half of triangle */
@@ -419,6 +449,7 @@ impl Renderer {
             one_over_z_interpolator.reset_left(1, v1_y_start_offset, left_delta_x);
             // color_interpolator.reset_left(1, v1_y_start_offset, left_delta_x);
             texture_coord_interpolator.reset_left(1, v1_y_start_offset, left_delta_x);
+            normal_interpolator.reset_left(1, v1_y_start_offset, left_delta_x);
         } else {
             // Update right edge of triangle
             right_delta_x = (v2.pos.x - v1.pos.x) / (v2.pos.y - v1.pos.y);
@@ -456,9 +487,19 @@ impl Renderer {
                             pixel[2] = pixel[2] * sample[2];
                         }
 
-                        self.pixel_data[pixel_color_index]     = (pixel[0] * backup_lightness * 255.0) as u8; /* R */
-                        self.pixel_data[pixel_color_index + 1] = (pixel[1] * backup_lightness * 255.0) as u8; /* G */
-                        self.pixel_data[pixel_color_index + 2] = (pixel[2] * backup_lightness * 255.0) as u8; /* B */
+                        if triangle_has_normals {
+                            let normal = normal_interpolator.value_perspective_correct(depth_z);
+                            let lightness = normal.dot(self.light_angle).clamp(0.0, 1.0) * 0.8 + 0.2;
+
+                            pixel[0] = pixel[0] * lightness;
+                            pixel[1] = pixel[1] * lightness;
+                            pixel[2] = pixel[2] * lightness;
+                        }
+
+
+                        self.pixel_data[pixel_color_index]     = (pixel[0] * 255.0) as u8; /* R */
+                        self.pixel_data[pixel_color_index + 1] = (pixel[1] * 255.0) as u8; /* G */
+                        self.pixel_data[pixel_color_index + 2] = (pixel[2] * 255.0) as u8; /* B */
 
                         /* Visualise depth buffer */
                         // self.pixel_data[pixel_color_index]     = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* R */
@@ -471,6 +512,7 @@ impl Renderer {
                 one_over_z_interpolator.step();
                 // color_interpolator.step();
                 texture_coord_interpolator.step();
+                normal_interpolator.step();
             }
 
             x_start = x_start + left_delta_x;
@@ -480,6 +522,7 @@ impl Renderer {
             one_over_z_interpolator.step_line(left_delta_x);
             // color_interpolator.step_line(left_delta_x);
             texture_coord_interpolator.step_line(left_delta_x);
+            normal_interpolator.step_line(left_delta_x);
         }
     }
 
@@ -496,7 +539,7 @@ impl Renderer {
 
         let camera_rotation = Quat::from_euler(glam::EulerRot::ZXY, self.camera_rotation.z, self.camera_rotation.x, self.camera_rotation.y);
 
-        let light_angle = camera_rotation * LIGHT_ANGLE;
+        let light_angle = camera_rotation * self.light_angle;
 
         let position_offset = object.position - self.camera_position;
 
@@ -752,7 +795,7 @@ impl Renderer {
             let triangle_normal = edge0.cross(v2 - v0).normalize();
             let triangle_plane_distance: f32 = -triangle_normal.dot(v0);
             // Arbitrary set minimum to 20%
-            let lightness = 0.2_f32.max(LIGHT_ANGLE.angle_between(triangle_normal) / PI);
+            let lightness = 0.2_f32.max(self.light_angle.angle_between(triangle_normal) / PI);
 
             for y in triangle_bounds_min[1]..triangle_bounds_max[1] {
                 for x in triangle_bounds_min[0]..triangle_bounds_max[0] {

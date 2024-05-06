@@ -11,7 +11,8 @@ use crate::{
 };
 
 const MODEL_URI_BASE: &str = "/models";
-const MODEL_RESOURCE: &str = "kitchen.obj";
+// const MODEL_RESOURCE: &str = "kitchen.obj";
+const MODEL_RESOURCE: &str = "ball.obj";
 // const MODEL_RESOURCE: &str = "burgerCheese.obj";
 // const MODEL_RESOURCE: &str = "detailDumpster_closed.obj";
 
