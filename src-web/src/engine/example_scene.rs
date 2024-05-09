@@ -12,7 +12,7 @@ use crate::{
 };
 
 const MODEL_URI_BASE: &str = "/models";
-// const MODEL_RESOURCE: &str = "kitchen.obj";
+const MODEL_RESOURCE: &str = "scene.obj";
 // const MODEL_RESOURCE: &str = "ball.obj";
 // const MODEL_RESOURCE: &str = "burgerCheese.obj";
 // const MODEL_RESOURCE: &str = "detailDumpster_closed.obj";
@@ -65,13 +65,11 @@ async fn load_obj(path: String, texture_cache: &mut TextureCache, scale: f32) ->
         /* Material diffuse texture */
         let mut texture_index_diffuse: Option<usize> = None;
         if let Some(texture) = &material.diffuse_texture {
-            web_sys::console::log_1(&format!("Loading texture: {}", texture).into());
             texture_index_diffuse = Some(texture_cache.load_texture(format!("{MODEL_URI_BASE}/{texture}")).await?);
         }
 
         /* Vertex data */
         let has_normals = !model.mesh.normals.is_empty();
-        web_sys::console::log_1(&format!("Mesh {model_index} has normals: {}", model.mesh.normals.len()).into());
         let has_texture_coords = !model.mesh.texcoords.is_empty();
         for i in (0..model.mesh.positions.len()).step_by(3) {
             let triangle_index: usize = i / 3;
@@ -107,21 +105,36 @@ async fn load_obj(path: String, texture_cache: &mut TextureCache, scale: f32) ->
         for i in (0..model.mesh.indices.len()).step_by(3) {
             let triangle_index = triangles.len();
 
+            let indices = [
+                // 👀 flip normals
+                (model.mesh.indices[i + 2] as usize) + index_offset,
+                (model.mesh.indices[i + 1] as usize) + index_offset,
+                (model.mesh.indices[i] as usize) + index_offset,
+            ];
+
+            let vertices = [
+                &vertices[indices[0]],
+                &vertices[indices[1]],
+                &vertices[indices[2]],
+            ];
+
             triangles.push(
                 Triangle {
                     id: triangle_index,
-                    indices: [
-                        // 👀
-                        (model.mesh.indices[i + 2] as usize) + index_offset,
-                        (model.mesh.indices[i + 1] as usize) + index_offset,
-                        (model.mesh.indices[i] as usize) + index_offset,
-                    ],
+                    indices,
+                    // @NOTE for flat shading
+                    normal: (vertices[2].pos - vertices[0].pos).truncate()
+                        .cross(
+                            (vertices[1].pos - vertices[0].pos).truncate()
+                        ).normalize(),
                     // color: COLOR_WHITE,
                     color: color_diffuse,
                     texture_index: texture_index_diffuse,
                 }
             );
         }
+
+        web_sys::console::log_1(&format!("Model {model_index} has {} vertices, {} triangles", model.mesh.positions.len(), model.mesh.indices.len() / 3).into());
     }
 
     console::log_1(&format!("Loaded {} vertices and {} triangles", vertices.len(), triangles.len()).into());
@@ -134,15 +147,15 @@ async fn load_obj(path: String, texture_cache: &mut TextureCache, scale: f32) ->
 
 pub async fn load_scene(texture_cache: &mut TextureCache) -> Result<Scene, String> {
     /* Single OBJ */
-    // let obj_path = format!("{MODEL_URI_BASE}/{MODEL_RESOURCE}").to_string();
-    // let mesh = Rc::new(load_obj(obj_path, texture_cache, 1.0).await?);
+    let obj_path = format!("{MODEL_URI_BASE}/{MODEL_RESOURCE}").to_string();
+    let mesh = Rc::new(load_obj(obj_path, texture_cache, 1.0).await?);
 
     /* Multiple OBJ files */
-    let mut meshes: Vec<Rc<Mesh>> = Vec::new();
-    for file in obj_files.iter() {
-        let obj_path = format!("{MODEL_URI_BASE}/{file}").to_string();
-        meshes.push(Rc::new(load_obj(obj_path, texture_cache, 1.0).await?));
-    }
+    // let mut meshes: Vec<Rc<Mesh>> = Vec::new();
+    // for file in obj_files.iter() {
+    //     let obj_path = format!("{MODEL_URI_BASE}/{file}").to_string();
+    //     meshes.push(Rc::new(load_obj(obj_path, texture_cache, 1.0).await?));
+    // }
 
     /* Single triangle */
     // let triangle_scale = 5.0;
@@ -229,35 +242,37 @@ pub async fn load_scene(texture_cache: &mut TextureCache) -> Result<Scene, Strin
     let scene_origin: Vec3 = Vec3::new(0.0, 0.0, 0.0);
 
     // Randomly generated objects
-    let num_objects = 500;
-    let variance: f64 = 20.0;
-    let variance_offset = variance / 2.0;
-    let scene_origin: Vec3 = Vec3::new(0.0, 0.0, variance as f32);
-    let mut total_triangles: u32 = 0;
-    for _ in 0..num_objects {
-        /* Multiple meshes, randomly */
-        let mesh: Rc<Mesh> = meshes[(Math::random() * meshes.len() as f64).floor() as usize].clone();
-        /* Single mesh */
-        // let mesh = mesh.clone();
-        total_triangles += mesh.triangles.len() as u32;
-        scene.objects.push(Object {
-            position: Vec3::new(
-                (Math::random() * variance - variance_offset) as f32,
-                (Math::random() * variance - variance_offset) as f32,
-                (Math::random() * variance - variance_offset) as f32
-            ) + scene_origin,
-            rotation: Math::random() as f32 * PI,
-            mesh,
-        });
-    }
-    console::log_1(&format!("{} objects, {} total triangles", num_objects, num_objects * total_triangles).into());
+    // let num_objects = 500;
+    // let variance: f64 = 20.0;
+    // let variance_offset = variance / 2.0;
+    // let scene_origin: Vec3 = Vec3::new(0.0, 0.0, variance as f32);
+    // let mut total_triangles: u32 = 0;
+    // for _ in 0..num_objects {
+    //     /* Multiple meshes, randomly */
+    //     // let mesh: Rc<Mesh> = meshes[(Math::random() * meshes.len() as f64).floor() as usize].clone();
+    //     /* Single mesh */
+    //     let mesh = mesh.clone();
+    //     total_triangles += mesh.triangles.len() as u32;
+    //     scene.objects.push(Object {
+    //         position: Vec3::new(
+    //             (Math::random() * variance - variance_offset) as f32,
+    //             (Math::random() * variance - variance_offset) as f32,
+    //             (Math::random() * variance - variance_offset) as f32
+    //         ) + scene_origin,
+    //         rotation: Math::random() as f32 * PI,
+    //         mesh,
+    //     });
+    // }
+    // console::log_1(&format!("{} objects, {} total triangles", num_objects, total_triangles).into());
 
     // @NOTE single object at `scene_origin`
-    // scene.objects.push(Object {
-    //     position: scene_origin,
-    //     rotation: 0.0,
-    //     mesh: mesh.clone(),
-    // });
+    scene.objects.push(Object {
+        position: scene_origin,
+        rotation: 0.0,
+        mesh: mesh.clone(),
+    });
+    console::log_1(&format!("{} total triangles", mesh.triangles.len()).into());
+
 
     Ok(scene)
 }

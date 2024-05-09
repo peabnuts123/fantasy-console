@@ -4,6 +4,7 @@ use glam::{Vec2, Vec3, Vec4};
 
 // @TODO could probably be a struct with to_pixel and to_color or whatever
 pub type Color = [f32; 3];
+pub type ColorRgba = [f32; 4];
 
 pub const COLOR_WHITE: Color = [1.0, 1.0, 1.0];
 pub const COLOR_RED: Color = [1.0, 0.0, 0.0];
@@ -15,12 +16,13 @@ pub const COLOR_YELLOW: Color = [1.0, 1.0, 0.0];
 
 pub const COLOR_LOVELY_PINK: Color = [1.0, 0.6, 0.87];
 
-#[derive(Debug)]
+#[derive(Clone,Debug)]
 pub struct Triangle {
     pub id: usize,
     pub indices: [usize; 3],
     pub color: Color,
     pub texture_index: Option<usize>,
+    pub normal: Vec3,
 }
 
 pub enum VertexAxis {

@@ -4,7 +4,7 @@ use std::{
 };
 
 use glam::{FloatExt, Mat4, Quat, Vec2, Vec3, Vec4};
-use crate::{textures::{Texture, TextureCache}, types::{Color, Object, Triangle, Vertex, VertexAxis, COLOR_BLUE, COLOR_GREEN, COLOR_LOVELY_PINK, COLOR_RED}};
+use crate::{textures::{Texture, TextureCache}, types::{Color, ColorRgba, Object, Triangle, Vertex, VertexAxis, COLOR_BLUE, COLOR_GREEN, COLOR_LOVELY_PINK, COLOR_RED}};
 
 type PixelColor = [u8; 3];
 
@@ -33,12 +33,13 @@ struct Interpolator<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy
     step_y: T,
     left: T,
     current_value_for_line: T,
+    step_x_times_left_delta_x_plus_step_y: T, // Cached computation
 }
 
 impl<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy> Interpolator<T> {
     fn new_perspective_correct(
         c0: T, c1: T, c2: T,
-        v0: Vec4, v1: Vec4, v2: Vec4,
+        v0: &Vec4, v1: &Vec4, v2: &Vec4,
         one_over_dx: f32
     ) -> Self {
         Self::new(
@@ -50,7 +51,7 @@ impl<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy> Interpolator<
 
     fn new(
         c0: T, c1: T, c2: T,
-        v0: Vec4, v1: Vec4, v2: Vec4,
+        v0: &Vec4, v1: &Vec4, v2: &Vec4,
         one_over_dx: f32
     ) -> Self {
         Interpolator {
@@ -65,13 +66,19 @@ impl<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy> Interpolator<
             ) * (-one_over_dx),
             left: c0,
             current_value_for_line: c0,
+            step_x_times_left_delta_x_plus_step_y: c0 * 0.0, // @NOTE some kind of nonsense value as default, expected to call reset_left before use
         }
     }
 
     fn reset_left(&mut self, value_index: usize, y_start_offset: f32, left_delta_x: f32) {
+        let step_x_times_left_delta_x = self.step_x * left_delta_x;
+        // @NOTE Pre-compute this calculation as it is re-used per-line and is constant
+        self.step_x_times_left_delta_x_plus_step_y = step_x_times_left_delta_x + self.step_y;
+
         let c = self.values[value_index];
-        self.left = c + (self.step_y * y_start_offset) + (self.step_x * (y_start_offset * left_delta_x));
-        // @NOTE Also reset line value
+        self.left = c + (self.step_y * y_start_offset) + (step_x_times_left_delta_x * y_start_offset);
+
+        // Reset line value
         self.current_value_for_line = self.left;
     }
 
@@ -79,9 +86,10 @@ impl<T: Mul<f32, Output=T> + Sub<Output=T> + Add<Output=T> + Copy> Interpolator<
         self.current_value_for_line = self.current_value_for_line + self.step_x;
     }
 
-    fn step_line(&mut self, left_delta_x: f32) {
-        self.left = self.left + self.step_y + (self.step_x * left_delta_x);
-        // self.right = self.right + self.step_y + (self.step_x * right_delta_x);
+    fn step_line(&mut self) {
+        // @NOTE same calculation as `reset_left` except we know `y_start_offset` = 1
+        // Precomputed because it is constant since `reset_left`
+        self.left = self.left + self.step_x_times_left_delta_x_plus_step_y;
         self.current_value_for_line = self.left;
     }
 
@@ -122,8 +130,10 @@ impl Renderer {
             pixel_data: vec![0; (canvas_width as usize) * (canvas_height as usize) * 4 /* rgba */],
             depth_data: vec![0.0; (canvas_width as usize) * (canvas_height as usize)],
             offset: 0,
-            camera_position: Vec3::new(0.0, 0.0, -5.0),
-            camera_rotation: Vec3::ZERO,
+            // camera_position: Vec3::new(0.0, 0.0, -5.0),
+            // camera_rotation: Vec3::ZERO,
+            camera_position: Vec3::new(2.0399384, 2.0847206, -3.8119411),
+            camera_rotation: Vec3::new(-0.275, 0.31499982, 0.0),
             projection_matrix: Mat4::from_cols(
                 Vec4::new(1.0 / ((CAMERA_FOV_V * 0.5).tan() * aspect_ratio), 0.0, 0.0, 0.0),
                 Vec4::new(0.0, 1.0 / (CAMERA_FOV_V * 0.5).tan().tan(), 0.0, 0.0),
@@ -136,7 +146,7 @@ impl Renderer {
                 Vec4::new(0.0, 0.0, 1.0, 0.0),
                 Vec4::new(0.0, 0.0, 0.0, 1.0),
             ).transpose(),
-            light_angle: Vec3::new(1.0, 1.0, -2.0).normalize(),
+            light_angle: Vec3::new(2.0, 10.0, 1.0).normalize(),
         }
     }
 
@@ -194,7 +204,7 @@ impl Renderer {
         let mesh = &object.mesh;
 
         // Object (local) to world (global) coordinates
-        let object_matrix: Mat4 = Mat4::from_translation(object.position) * Mat4::from_rotation_y(angle + object.rotation) * Mat4::from_rotation_x(angle + object.rotation);
+        let object_matrix: Mat4 = Mat4::from_translation(object.position); // * Mat4::from_rotation_y(angle + object.rotation) * Mat4::from_rotation_x(angle + object.rotation);
 
         // World to camera-relative coordinates (i.e. apply offset by camera position, rotation)
         let camera_matrix = Mat4::from_euler(glam::EulerRot::ZXY, self.camera_rotation.z, self.camera_rotation.x, self.camera_rotation.y) * Mat4::from_translation(-self.camera_position);
@@ -206,7 +216,7 @@ impl Renderer {
         let mut temp_vertex_buffer: Vec<Vertex> = Vec::new();
 
         for triangle_index in 0..mesh.triangles.len() {
-            let triangle = &mesh.triangles[triangle_index];
+            let mut triangle = mesh.triangles[triangle_index].clone();
 
             // Look up vertices from triangle indices
             let mut v0 = mesh.vertices[triangle.indices[0]].clone();
@@ -228,6 +238,7 @@ impl Renderer {
             v2.normal = v2.normal.map_or(v2.normal, |normal|
                 Some(object_matrix.transform_vector3(normal))
             );
+            triangle.normal = object_matrix.transform_vector3(triangle.normal);
 
             /* Clipping */
 
@@ -240,7 +251,7 @@ impl Renderer {
 
                 self.render_triangle(
                     &v0, &v1, &v2,
-                    triangle
+                    &triangle
                 );
                 continue;
             }
@@ -265,7 +276,7 @@ impl Renderer {
                 {
                     self.render_triangle(
                         &mut vertices[0].clone(), &mut vertices[i].clone(), &mut vertices[i + 1].clone(),
-                        triangle
+                        &triangle
                     );
                 }
             }
@@ -308,7 +319,6 @@ impl Renderer {
         let one_over_dx: f32 = 1.0 / ((v1.pos.x - v2.pos.x) * (v0.pos.y - v2.pos.y)
             - (v0.pos.x - v2.pos.x) * (v1.pos.y - v2.pos.y));
 
-        /* Draw first half of triangle */
         let mut left_delta_x = (v2.pos.x - v0.pos.x) / (v2.pos.y - v0.pos.y);
         let mut right_delta_x = (v1.pos.x - v0.pos.x) / (v1.pos.y - v0.pos.y);
 
@@ -326,7 +336,7 @@ impl Renderer {
         // - 1 / z
         let mut one_over_z_interpolator = Interpolator::<f32>::new(
             1.0 / v0.pos.w, 1.0 / v1.pos.w, 1.0 / v2.pos.w,
-            v0.pos, v1.pos, v2.pos,
+            &v0.pos, &v1.pos, &v2.pos,
             one_over_dx,
         );
         one_over_z_interpolator.reset_left(0, y_start_offset, left_delta_x);
@@ -338,7 +348,7 @@ impl Renderer {
             v0.texture_coord.unwrap_or(Vec2::ZERO),
             v1.texture_coord.unwrap_or(Vec2::ZERO),
             v2.texture_coord.unwrap_or(Vec2::ZERO),
-            v0.pos, v1.pos, v2.pos,
+            &v0.pos, &v1.pos, &v2.pos,
             one_over_dx,
         );
         texture_coord_interpolator.reset_left(0, y_start_offset, left_delta_x);
@@ -355,10 +365,11 @@ impl Renderer {
             v0.normal.unwrap_or(Vec3::ZERO),
             v1.normal.unwrap_or(Vec3::ZERO),
             v2.normal.unwrap_or(Vec3::ZERO),
-            v0.pos, v1.pos, v2.pos,
+            &v0.pos, &v1.pos, &v2.pos,
             one_over_dx,
         );
         normal_interpolator.reset_left(0, y_start_offset, left_delta_x);
+        let flat_lightness: f32 = triangle.normal.dot(self.light_angle).clamp(0.0, 1.0) * 0.8 + 0.2;
 
         // - Color
         // @TODO @DEBUG REMOVE
@@ -369,19 +380,19 @@ impl Renderer {
         // );
         // color_interpolator.reset_left(0, y_start_offset, left_delta_x);
 
-
+        /* ==========
+         * UPPER HALF
+         * ========= */
         for y in (v0.pos.y.ceil() as u16)..(v1.pos.y.ceil() as u16) {
+            let pixel_index_y_component = (y as usize) * (self.canvas_width as usize);
             for x in (x_start.ceil() as u16)..(x_end.ceil() as u16) {
 
                 let depth_z = 1.0 / one_over_z_interpolator.value();
 
-                if depth_z > CAMERA_NEAR {
-                    let pixel_index = (y as usize) * (self.canvas_width as usize) + (x as usize);
+                if depth_z > CAMERA_NEAR && depth_z < CAMERA_FAR {
+                    let pixel_index = pixel_index_y_component + (x as usize);
 
                     if depth_z < self.depth_data[pixel_index] {
-                        // Pixel is nearest so far, draw it
-                        self.depth_data[pixel_index] = depth_z;
-
                         let pixel_color_index: usize = pixel_index * 4;
 
                         /* Draw debug interpolated color @TODO @REMOVE */
@@ -390,33 +401,45 @@ impl Renderer {
                         // self.pixel_data[pixel_color_index + 1] = c.y as u8;  /* G */
                         // self.pixel_data[pixel_color_index + 2] = c.z as u8;  /* B */
 
+                        let mut is_pixel_invisible = false;
                         let mut pixel = triangle.color;
                         if triangle_has_texture {
                             let texture_coord = texture_coord_interpolator.value_perspective_correct(depth_z);
                             let sample = sample_texture(&texture_coord, texture.expect("Texture was empty"));
+                            if sample[3] < 0.5 {
+                                is_pixel_invisible = true;
+                            }
                             pixel[0] = pixel[0] * sample[0];
                             pixel[1] = pixel[1] * sample[1];
                             pixel[2] = pixel[2] * sample[2];
                         }
 
-                        if triangle_has_normals {
-                            let normal = normal_interpolator.value_perspective_correct(depth_z);
-                            let lightness = normal.dot(self.light_angle).clamp(0.0, 1.0) * 0.8 + 0.2;
+                        if !is_pixel_invisible {
+                            if triangle_has_normals {
+                                let normal = normal_interpolator.value_perspective_correct(depth_z);
+                                let lightness = normal.dot(self.light_angle).clamp(0.0, 1.0) * 0.8 + 0.2;
 
-                            pixel[0] = pixel[0] * lightness;
-                            pixel[1] = pixel[1] * lightness;
-                            pixel[2] = pixel[2] * lightness;
+                                pixel[0] = pixel[0] * lightness;
+                                pixel[1] = pixel[1] * lightness;
+                                pixel[2] = pixel[2] * lightness;
+                            } else {
+                                pixel[0] = pixel[0] * flat_lightness;
+                                pixel[1] = pixel[1] * flat_lightness;
+                                pixel[2] = pixel[2] * flat_lightness;
+                            }
+
+                            self.pixel_data[pixel_color_index]     = (pixel[0] * 255.0) as u8; /* R */
+                            self.pixel_data[pixel_color_index + 1] = (pixel[1] * 255.0) as u8; /* G */
+                            self.pixel_data[pixel_color_index + 2] = (pixel[2] * 255.0) as u8; /* B */
+
+                            /* Visualise depth buffer */
+                            // self.pixel_data[pixel_color_index]     = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* R */
+                            // self.pixel_data[pixel_color_index + 1] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* G */
+                            // self.pixel_data[pixel_color_index + 2] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* B */
+
+                            // Pixel is nearest so far
+                            self.depth_data[pixel_index] = depth_z;
                         }
-
-
-                        self.pixel_data[pixel_color_index]     = (pixel[0] * 255.0) as u8; /* R */
-                        self.pixel_data[pixel_color_index + 1] = (pixel[1] * 255.0) as u8; /* G */
-                        self.pixel_data[pixel_color_index + 2] = (pixel[2] * 255.0) as u8; /* B */
-
-                        /* Visualise depth buffer */
-                        // self.pixel_data[pixel_color_index]     = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* R */
-                        // self.pixel_data[pixel_color_index + 1] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* G */
-                        // self.pixel_data[pixel_color_index + 2] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* B */
                     }
                 }
 
@@ -431,13 +454,12 @@ impl Renderer {
             x_end = x_end + right_delta_x;
 
             // Interpolators
-            one_over_z_interpolator.step_line(left_delta_x);
-            // color_interpolator.step_line(left_delta_x);
-            texture_coord_interpolator.step_line(left_delta_x);
-            normal_interpolator.step_line(left_delta_x);
+            one_over_z_interpolator.step_line();
+            // color_interpolator.step_line();
+            texture_coord_interpolator.step_line();
+            normal_interpolator.step_line();
         }
 
-        /* Draw second half of triangle */
         // Reset stateful counters
         let v1_y_start_offset = v1.pos.y.ceil() - v1.pos.y;
         if triangle_sign >= 0.0 {
@@ -458,18 +480,19 @@ impl Renderer {
             // @NOTE no need to reset interpolators for right edge
         }
 
+        /* ==========
+         * LOWER HALF
+         * ========= */
         for y in (v1.pos.y.ceil() as u16)..(v2.pos.y.ceil() as u16) {
+            let pixel_index_y_component = (y as usize) * (self.canvas_width as usize);
             for x in (x_start.ceil() as u16)..(x_end.ceil() as u16) {
 
                 let depth_z = 1.0 / one_over_z_interpolator.value();
 
-                if depth_z > CAMERA_NEAR {
-                    let pixel_index = (y as usize) * (self.canvas_width as usize) + (x as usize);
+                if depth_z > CAMERA_NEAR && depth_z < CAMERA_FAR {
+                    let pixel_index = pixel_index_y_component + (x as usize);
 
                     if depth_z < self.depth_data[pixel_index] {
-                        // Pixel is nearest so far, draw it
-                        self.depth_data[pixel_index] = depth_z;
-
                         let pixel_color_index: usize = pixel_index * 4;
 
                         /* Draw debug interpolated color @TODO @REMOVE */
@@ -478,33 +501,45 @@ impl Renderer {
                         // self.pixel_data[pixel_color_index + 1] = c.y as u8;  /* G */
                         // self.pixel_data[pixel_color_index + 2] = c.z as u8;  /* B */
 
+                        let mut is_pixel_invisible = false;
                         let mut pixel = triangle.color;
                         if triangle_has_texture {
                             let texture_coord = texture_coord_interpolator.value_perspective_correct(depth_z);
                             let sample = sample_texture(&texture_coord, texture.expect("Texture was empty"));
+                            if sample[3] < 0.5 {
+                                is_pixel_invisible = true;
+                            }
                             pixel[0] = pixel[0] * sample[0];
                             pixel[1] = pixel[1] * sample[1];
                             pixel[2] = pixel[2] * sample[2];
                         }
 
-                        if triangle_has_normals {
-                            let normal = normal_interpolator.value_perspective_correct(depth_z);
-                            let lightness = normal.dot(self.light_angle).clamp(0.0, 1.0) * 0.8 + 0.2;
+                        if !is_pixel_invisible {
+                            if triangle_has_normals {
+                                let normal = normal_interpolator.value_perspective_correct(depth_z);
+                                let lightness = normal.dot(self.light_angle).clamp(0.0, 1.0) * 0.8 + 0.2;
 
-                            pixel[0] = pixel[0] * lightness;
-                            pixel[1] = pixel[1] * lightness;
-                            pixel[2] = pixel[2] * lightness;
+                                pixel[0] = pixel[0] * lightness;
+                                pixel[1] = pixel[1] * lightness;
+                                pixel[2] = pixel[2] * lightness;
+                            } else {
+                                pixel[0] = pixel[0] * flat_lightness;
+                                pixel[1] = pixel[1] * flat_lightness;
+                                pixel[2] = pixel[2] * flat_lightness;
+                            }
+
+                            self.pixel_data[pixel_color_index]     = (pixel[0] * 255.0) as u8; /* R */
+                            self.pixel_data[pixel_color_index + 1] = (pixel[1] * 255.0) as u8; /* G */
+                            self.pixel_data[pixel_color_index + 2] = (pixel[2] * 255.0) as u8; /* B */
+
+                            /* Visualise depth buffer */
+                            // self.pixel_data[pixel_color_index]     = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* R */
+                            // self.pixel_data[pixel_color_index + 1] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* G */
+                            // self.pixel_data[pixel_color_index + 2] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* B */
+
+                            // Pixel is nearest so far
+                            self.depth_data[pixel_index] = depth_z;
                         }
-
-
-                        self.pixel_data[pixel_color_index]     = (pixel[0] * 255.0) as u8; /* R */
-                        self.pixel_data[pixel_color_index + 1] = (pixel[1] * 255.0) as u8; /* G */
-                        self.pixel_data[pixel_color_index + 2] = (pixel[2] * 255.0) as u8; /* B */
-
-                        /* Visualise depth buffer */
-                        // self.pixel_data[pixel_color_index]     = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* R */
-                        // self.pixel_data[pixel_color_index + 1] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* G */
-                        // self.pixel_data[pixel_color_index + 2] = ((1.0 - (depth_z / CAMERA_FAR)) * 255.0) as u8;  /* B */
                     }
                 }
 
@@ -519,10 +554,10 @@ impl Renderer {
             x_end = x_end + right_delta_x;
 
             // Interpolators
-            one_over_z_interpolator.step_line(left_delta_x);
-            // color_interpolator.step_line(left_delta_x);
-            texture_coord_interpolator.step_line(left_delta_x);
-            normal_interpolator.step_line(left_delta_x);
+            one_over_z_interpolator.step_line();
+            // color_interpolator.step_line();
+            texture_coord_interpolator.step_line();
+            normal_interpolator.step_line();
         }
     }
 
@@ -979,12 +1014,18 @@ fn clip_polygon_to_axis_half(vertices: &Vec<Vertex>, clip_axis: &VertexAxis, w_s
     }
 }
 
-fn sample_texture(texture_coord: &Vec2, texture: &Texture) -> Color {
+fn sample_texture(texture_coord: &Vec2, texture: &Texture) -> ColorRgba {
     let u = ((texture_coord.x.fract()) + 1.0).fract();
     let v = ((texture_coord.y.fract()) + 1.0).fract();
+    let texture_x = (u * ((texture.width - 1) as f32)) as usize;
+    let texture_y = (v * ((texture.height - 1) as f32)) as usize;
 
-    texture.get_pixel(
-        (u * (texture.width() as f32)) as u32,
-        (v * (texture.height() as f32)) as u32,
-    ).0
+    let texture_index = ((texture_y * texture.width) + texture_x) * 4;
+
+    [
+        texture.data[texture_index],
+        texture.data[texture_index + 1],
+        texture.data[texture_index + 2],
+        texture.data[texture_index + 3],
+    ]
 }
