@@ -1,16 +1,23 @@
 mod example_scene;
-mod types;
 mod renderer;
 mod input;
 mod web;
 mod textures;
+mod cartridge;
+mod meshes;
+
+use std::rc::Rc;
 
 use glam::{Quat, Vec3};
+use meshes::MeshCache;
 use renderer::Renderer;
+use textures::TextureCache;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
-use types::Scene;
+use cartridge::{Cartridge, ComponentDefinition, Object, Scene};
 use input::{keycodes, InputState, RawInputState, Input2D};
+
+use crate::cartridge::{Component, MeshRendererComponent};
 
 const CAMERA_SPEED_PER_SECOND: f32 = 3.0;
 const CAMERA_LOOK_SENSITIVITY: f32 = 0.005;
@@ -28,11 +35,13 @@ fn init() {
 
 #[wasm_bindgen]
 pub struct Engine {
-    scene: Option<Scene>,
+    cartridge: Option<Cartridge>,
+    current_scene: Option<Rc::<Scene>>,
     renderer: Renderer,
-    angle: f32,
     raw_input_state: RawInputState,
     input_state: InputState,
+    texture_cache: TextureCache,
+    mesh_cache: MeshCache,
 }
 
 #[wasm_bindgen]
@@ -40,9 +49,11 @@ impl Engine {
     #[wasm_bindgen(constructor)]
     pub fn new(canvas_width: u16, canvas_height: u16) -> Self {
         Self {
-            scene: None,
+            cartridge: None,
+            current_scene: None,
             renderer: Renderer::new(canvas_width, canvas_height),
-            angle: 0.0,
+            texture_cache: TextureCache::new(),
+            mesh_cache: MeshCache::new(),
             raw_input_state: RawInputState {
                 keyboard: input::RawKeyboardInputState {
                     up: false,
@@ -72,10 +83,60 @@ impl Engine {
 
     #[wasm_bindgen]
     pub async fn load_scene(&mut self) -> Result<(), String>{
-        let scene = example_scene::load_scene(&mut self.renderer.texture_cache).await?;
-        self.scene = Some(scene);
+        let cartridge_def = example_scene::load_cartridge_definition().await?;
+
+        let mut scenes = Vec::<Rc::<Scene>>::new();
+        for scene_def in cartridge_def.scenes.iter() {
+            let mut objects = Vec::<Object>::new();
+
+            for object_def in scene_def.objects.iter() {
+                let mut components = Vec::<Component>::new();
+
+                for component_def in object_def.components.iter() {
+                    match component_def {
+                        ComponentDefinition::MeshRenderer(mesh_renderer_def) => {
+                            components.push(
+                                Component::MeshRenderer(
+                                    MeshRendererComponent {
+                                        mesh_id: self.mesh_cache.load_mesh(&mesh_renderer_def.mesh.path, &mut self.texture_cache).await?
+                                    }
+                                )
+                            )
+                        },
+                    }
+                }
+
+                objects.push(
+                    Object {
+                        position: object_def.position,
+                        rotation: object_def.rotation,
+                        components,
+                    }
+                )
+            }
+
+            scenes.push(
+                Rc::new(Scene {
+                    objects,
+                })
+            )
+        }
+
+        let cartridge = Cartridge {
+            scenes,
+        };
+
+        self.current_scene = Some(cartridge.scenes[0].clone());
+        self.cartridge = Some(cartridge);
+
+        // self.scene = Some(scene);
         Ok(())
     }
+
+    fn get_current_scene(&self) -> Rc<Scene> {
+        self.current_scene.as_ref().expect("No scene is currently loaded").clone()
+    }
+
 
     /// Fetch underlying frame buffer
     #[wasm_bindgen(getter, js_name = buffer)]
@@ -83,18 +144,19 @@ impl Engine {
         self.renderer.buffer()
     }
 
-    /// A demo that renders a scene using a custom 3d software renderer
     fn draw(&mut self) {
         self.renderer.clear_buffers();
 
-        // Render each mesh
-        for object in &self.scene.as_ref().unwrap().objects {
-            self.renderer.render_object(object, self.angle);
+        for object in self.get_current_scene().objects.iter() {
+            for component in object.components.iter() {
+                if let Component::MeshRenderer(mesh_renderer) = component {
+                    let mesh: &cartridge::MeshAsset = self.mesh_cache.get_mesh_asset(&mesh_renderer.mesh_id);
+                    self.renderer.render_mesh(object.position, mesh, &self.texture_cache);
+                }
+            }
         }
     }
 
-    /// Entrypoint to the library (lol)
-    /// Fill the framebuffer with the next frame's data
     #[wasm_bindgen]
     pub fn update(&mut self, dt: f32) {
         // Camera rotation
@@ -138,8 +200,6 @@ impl Engine {
             );
 
         self.renderer.camera_position += movement_vector + Vec3::new(0.0, camera_speed_y, 0.0);
-
-        self.angle += 0.01;
 
         self.draw();
     }

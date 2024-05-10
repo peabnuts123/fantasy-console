@@ -3,6 +3,9 @@ use image::io::Reader as ImageReader;
 
 use crate::web;
 
+#[derive(Copy,Clone,Debug)]
+pub struct TextureAssetId(usize);
+
 pub struct Texture {
     pub width: usize,
     pub height: usize,
@@ -22,9 +25,13 @@ impl TextureCache {
         }
     }
 
-    pub async fn load_texture(&mut self, texture_path: String) -> Result<usize, String> {
+    pub fn get_texture_asset(&self, TextureAssetId(id): &TextureAssetId) -> &Texture {
+        &self.textures[*id]
+    }
+
+    pub async fn load_texture(&mut self, texture_path: String) -> Result<TextureAssetId, String> {
         if self.path_to_index.contains_key(&texture_path) {
-            return Ok(*self.path_to_index.get(&texture_path).unwrap());
+            return Ok(TextureAssetId(*self.path_to_index.get(&texture_path).unwrap()))
         }
 
         let image_file_data = web::get_file_data(texture_path.clone()).await?;
@@ -45,10 +52,6 @@ impl TextureCache {
             data: texture_data,
         });
 
-        Ok(next_index)
-    }
-
-    pub fn get_texture(&self, texture_index: usize) -> &Texture {
-        &self.textures[texture_index]
+        Ok(TextureAssetId(next_index))
     }
 }
