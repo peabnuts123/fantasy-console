@@ -8,6 +8,7 @@ import topLevelAwait from 'vite-plugin-top-level-await';
 export default defineConfig(async (env) => {
   const config: UserConfigExport = {
     clearScreen: false,
+    publicDir: "../sample-cartridge/content",
     server: {
       // @NOTE tauri expects a fixed port, fail if that port is not available
       port: 1420,

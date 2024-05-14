@@ -1,7 +1,7 @@
 use std::{collections::HashMap, io::Cursor};
 use image::io::Reader as ImageReader;
 
-use crate::web;
+use crate::cartridge::CartridgeDefinition;
 
 #[derive(Copy,Clone,Debug)]
 pub struct TextureAssetId(usize);
@@ -29,12 +29,12 @@ impl TextureCache {
         &self.textures[*id]
     }
 
-    pub async fn load_texture(&mut self, texture_path: String) -> Result<TextureAssetId, String> {
+    pub fn load_texture(&mut self, cartridge: &CartridgeDefinition, texture_path: String) -> Result<TextureAssetId, String> {
         if self.path_to_index.contains_key(&texture_path) {
             return Ok(TextureAssetId(*self.path_to_index.get(&texture_path).unwrap()))
         }
 
-        let image_file_data = web::get_file_data(texture_path.clone()).await?;
+        let image_file_data = &cartridge.get_file_by_path(texture_path.clone()).bytes;
 
         let image = ImageReader::new(Cursor::new(image_file_data.as_slice()))
             .with_guessed_format().map_err(|e| format!("Failed to determine image format: {texture_path} ({e})"))?

@@ -55,7 +55,7 @@ async function main() {
 
   let framesDrawn = 0;
   let lastFrameTime = performance.now();
-  const draw: FrameRequestCallback = () => {
+  const update: FrameRequestCallback = () => {
     // Draw the next frame into the frame buffer
     let currentFrameTime = performance.now();
     let deltaT = currentFrameTime - lastFrameTime;
@@ -65,7 +65,7 @@ async function main() {
     // Write frame buffer to canvas
     ctx.putImageData(imageData, 0, 0);
 
-    requestAnimationFrame(draw);
+    requestAnimationFrame(update);
     // setTimeout(draw);
 
     // Count number of frames drawn
@@ -79,7 +79,7 @@ async function main() {
   }
 
   // Begin drawing
-  requestAnimationFrame(draw);
+  requestAnimationFrame(update);
   // setTimeout(draw);
 
   // Count number of frames drawn per second

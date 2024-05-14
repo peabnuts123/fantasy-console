@@ -6,7 +6,7 @@ mod textures;
 mod cartridge;
 mod meshes;
 
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use glam::{Quat, Vec3};
 use meshes::MeshCache;
@@ -14,13 +14,23 @@ use renderer::Renderer;
 use textures::TextureCache;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
-use cartridge::{Cartridge, ComponentDefinition, Object, Scene};
+use cartridge::{Cartridge, ComponentDefinition, Object, Scene, VirtualFileType};
 use input::{keycodes, InputState, RawInputState, Input2D};
 
-use crate::cartridge::{Component, MeshRendererComponent};
+use crate::cartridge::{Component, GameObject, JsEngineObject, MeshRendererComponent, ObjectData, ScriptComponent};
 
 const CAMERA_SPEED_PER_SECOND: f32 = 3.0;
 const CAMERA_LOOK_SENSITIVITY: f32 = 0.005;
+
+#[wasm_bindgen(module = "/src/engine/script-loader.ts")]
+extern "C" {
+    // @TODO Reference this like a class https://rustwasm.github.io/wasm-bindgen/contributing/design/importing-js-struct.html
+    #[wasm_bindgen(catch)]
+    fn load_module(path: String, source: String) -> Result<(), JsValue>;
+    #[wasm_bindgen(catch)]
+    fn bind_script_to_game_object(engineObject: JsEngineObject, scriptPath: String) -> Result<GameObject, JsValue>;
+}
+
 
 #[wasm_bindgen(start)]
 fn init() {
@@ -85,20 +95,56 @@ impl Engine {
     pub async fn load_scene(&mut self) -> Result<(), String>{
         let cartridge_def = example_scene::load_cartridge_definition().await?;
 
+        // Load all script files into javascript runtime
+        for file in cartridge_def.files.iter() {
+            if file.file_type == VirtualFileType::Script {
+                load_module(
+                    file.path.clone(),
+                    // @NOTE pretty large clone here
+                    String::from_utf8(file.bytes.clone()).expect("Could not parse script bytes"),
+                ).expect("Failed to load script module");
+            }
+        }
+
         let mut scenes = Vec::<Rc::<Scene>>::new();
         for scene_def in cartridge_def.scenes.iter() {
-            let mut objects = Vec::<Object>::new();
+            let mut objects = Vec::new();
 
             for object_def in scene_def.objects.iter() {
-                let mut components = Vec::<Component>::new();
+                let mut components = vec![];
+                let object_data = Rc::new(RefCell::new(
+                    ObjectData {
+                        position: object_def.position,
+                        rotation: object_def.rotation,
+                    }
+                ));
 
                 for component_def in object_def.components.iter() {
                     match component_def {
                         ComponentDefinition::MeshRenderer(mesh_renderer_def) => {
+                            let mesh_file = cartridge_def.get_file_by_id(mesh_renderer_def.mesh.file);
                             components.push(
                                 Component::MeshRenderer(
                                     MeshRendererComponent {
-                                        mesh_id: self.mesh_cache.load_mesh(&mesh_renderer_def.mesh.path, &mut self.texture_cache).await?
+                                        mesh_id: self.mesh_cache.load_mesh(mesh_file, &cartridge_def, &mut self.texture_cache)?
+                                    }
+                                )
+                            )
+                        },
+                        ComponentDefinition::Script(script_def) => {
+                            let script_file = cartridge_def.get_file_by_id(script_def.script.file);
+
+                            let game_object_instance = bind_script_to_game_object(
+                                JsEngineObject {
+                                    data: object_data.clone(),
+                                },
+                                script_file.path.clone()
+                            ).map_err(|e| format!("Failed to bind script to new game object {:?}", e))?;
+
+                            components.push(
+                                Component::Script(
+                                    ScriptComponent {
+                                        game_object_instance,
                                     }
                                 )
                             )
@@ -108,8 +154,7 @@ impl Engine {
 
                 objects.push(
                     Object {
-                        position: object_def.position,
-                        rotation: object_def.rotation,
+                        data: object_data,
                         components,
                     }
                 )
@@ -148,10 +193,11 @@ impl Engine {
         self.renderer.clear_buffers();
 
         for object in self.get_current_scene().objects.iter() {
+            let object_data = object.data.borrow();
             for component in object.components.iter() {
                 if let Component::MeshRenderer(mesh_renderer) = component {
                     let mesh: &cartridge::MeshAsset = self.mesh_cache.get_mesh_asset(&mesh_renderer.mesh_id);
-                    self.renderer.render_mesh(object.position, mesh, &self.texture_cache);
+                    self.renderer.render_mesh(object_data.position, mesh, &self.texture_cache);
                 }
             }
         }
@@ -159,9 +205,15 @@ impl Engine {
 
     #[wasm_bindgen]
     pub fn update(&mut self, dt: f32) {
+        // Update every object in the scene
+        for object in self.get_current_scene().objects.iter() {
+            object.on_update(dt);
+        }
+
+        // @TODO move all this into a component script
         // Camera rotation
-        let mut camera_rotation_speed_yaw: f32 = 0.0;
-        let mut camera_rotation_speed_pitch: f32 = 0.0;
+        let camera_rotation_speed_yaw: f32;
+        let camera_rotation_speed_pitch: f32;
 
         // @TODO @DEBUG Hard-coded mouse integration
         camera_rotation_speed_yaw = -self.raw_input_state.mouse.delta_x * CAMERA_LOOK_SENSITIVITY;
