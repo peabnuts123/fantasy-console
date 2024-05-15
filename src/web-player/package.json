@@ -1,0 +1,20 @@
+{
+  "name": "@fantasy-console/web-player",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build"
+  },
+  "devDependencies": {
+    "sass": "^1.74.1",
+    "typescript": "^5.0.2",
+    "vite": "^5.0.0",
+    "vite-plugin-top-level-await": "^1.4.1",
+    "vite-plugin-wasm": "^3.3.0",
+    "vite-tsconfig-paths": "^4.3.2"
+  },
+  "author": "peabnuts123",
+  "license": "UNLICENSED"
+}

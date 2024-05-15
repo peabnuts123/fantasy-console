@@ -1,0 +1,27 @@
+{
+  "name": "@fantasy-console/editor",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "tauri dev",
+    "start:web": "cd src/web && vite",
+    "build": "tauri build",
+    "build:web": "cd src/web && tsc && vite build",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.5.14",
+    "sass": "^1.74.1",
+    "typescript": "^5.0.2",
+    "vite": "^5.0.0",
+    "vite-plugin-top-level-await": "^1.4.1",
+    "vite-plugin-wasm": "^3.3.0",
+    "vite-tsconfig-paths": "^4.3.2"
+  },
+  "author": "peabnuts123",
+  "license": "UNLICENSED"
+}

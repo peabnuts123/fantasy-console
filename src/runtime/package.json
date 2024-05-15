@@ -1,0 +1,19 @@
+{
+  "name": "@fantasy-console/runtime",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "module": "src/index.ts",
+  "scripts": {
+    "start": "nodemon --watch src --ext 'rs,ts' --exec npm run build:dev",
+    "build": "wasm-pack build --out-dir dist --scope 'fantasy-console'",
+    "build:dev": "npm run build -- --profiling",
+    "build:release": "npm run build -- --release --no-default-features"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "wasm-pack": "^0.12.1"
+  },
+  "author": "peabnuts123",
+  "license": "UNLICENSED"
+}
