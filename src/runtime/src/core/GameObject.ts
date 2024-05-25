@@ -7,7 +7,6 @@ export abstract class GameObject {
 
   protected constructor() {
     if (GameObject.__newEngineObject !== undefined) {
-      console.log(`[RAMBOTAN] Assign engineObject`);
       this.engineObject = GameObject.__newEngineObject;
     } else {
       throw new Error(`Attempted to create new GameObject manually`)
@@ -27,7 +26,6 @@ export abstract class GameObject {
 
   /* Private @TODO could use type laundering to set this property if need-be */
   public static createBound(ctor: new () => GameObject, engineObject: JsEngineObject): GameObject {
-    console.log(`[RAMBOTAN] createBound()`);
     // @NOTE @HACKS initialise private field engineObject through a stateful static property
     // This is so that the `engineObject` property is set by the time the constructor is finished
     // (which is especially relevant to decorators like `@inject`)
@@ -38,8 +36,6 @@ export abstract class GameObject {
     if (!(gameObject instanceof GameObject)) {
       throw new Error(`Object does extend from type 'GameObject'`);
     }
-    // gameObject.engineObject = engineObject;
-    console.log(`[RAMBOTAN] FINISHED`);
     return gameObject;
   }
 }

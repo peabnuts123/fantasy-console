@@ -1,5 +1,3 @@
-// import * as GameEngine from './engine';
-// import { GameObject } from './engine';
 import * as Core from '@fantasy-console/core';
 import { JsEngineObject, GameObject } from '@fantasy-console/core';
 
