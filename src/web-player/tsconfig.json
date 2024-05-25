@@ -16,12 +16,12 @@
     "baseUrl": ".",
     "paths": {
       "@fantasy-console/runtime": ["../runtime/src"],
-      "@fantasy-console/runtime/*": ["../runtime/src/*"],
-      "@fantasy-console/engine": ["../runtime/dist"],
+      "@fantasy-console/engine": ["../runtime/dist/fantasy_engine"],
+      "@fantasy-console/core": ["../runtime/src/core"],
     },
 
     "strict": true,
     "noUnusedLocals": true,
   },
-  "include": ["src"]
+  "include": ["src/**/*.ts"],
 }

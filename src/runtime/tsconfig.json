@@ -15,7 +15,8 @@
 
     "baseUrl": ".",
     "paths": {
-      "@fantasy-console/engine": ["dist"],
+      "@fantasy-console/engine": ["dist/fantasy_engine"],
+      "@fantasy-console/core": ["src/core"],
     },
 
     /* Linting */
@@ -24,5 +25,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src/**/*.ts"]
 }

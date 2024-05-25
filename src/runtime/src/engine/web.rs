@@ -1,7 +1,7 @@
 use js_sys::Uint8Array;
 use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen(module = "/src/util.ts")]
+#[wasm_bindgen(module = "/util.ts")]
 extern "C" {
     #[wasm_bindgen(catch)]
     async fn get_resource(url: String) -> Result<JsValue, JsValue>;

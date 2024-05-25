@@ -1,4 +1,4 @@
-import { GameObject } from '@fantasy-console/runtime/engine';
+import { GameObject } from '@fantasy-console/core';
 
 class MyObject extends GameObject {
   private time: number;

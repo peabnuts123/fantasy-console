@@ -1,5 +1,5 @@
+import path from 'path';
 import { UserConfigExport, defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
 
@@ -14,11 +14,14 @@ export default defineConfig(async (env) => {
       port: 1420,
       strictPort: true,
     },
+    resolve: {
+      alias: {
+        '@fantasy-console/runtime': path.resolve(__dirname, "../../../runtime/src"),
+        '@fantasy-console/engine': path.resolve(__dirname, "../../../runtime/dist/fantasy_engine"),
+        '@fantasy-console/core': path.resolve(__dirname, "../../../runtime/src/core"),
+      }
+    },
     plugins: [
-      tsconfigPaths({
-        root: "../../..",
-        projects: ["editor/src/web", "runtime"],
-      }),
       wasm(),
       topLevelAwait(),
     ],

@@ -1,6 +1,7 @@
-import * as GameEngine from './engine';
-import { GameObject } from './engine';
-import { JsEngineObject } from '@fantasy-console/engine';
+// import * as GameEngine from './engine';
+// import { GameObject } from './engine';
+import * as Core from '@fantasy-console/core';
+import { JsEngineObject, GameObject } from '@fantasy-console/core';
 
 const MAGIC_PREFIX = `cartridge/scripts/`;
 
@@ -17,7 +18,7 @@ const modulesBeingLoaded: Record<string, ModuleDefinition> = {};
 const moduleCache: Record<string, Module> = {};
 
 // Magic module definitions
-moduleCache['@fantasy-console/runtime/engine'] = GameEngine;
+moduleCache['@fantasy-console/core'] = Core;
 moduleCache['require'] = () => { throw new Error(`Nested require is not supported, it should not be necessary`) };
 
 export function load_module(path: string, source: string) {

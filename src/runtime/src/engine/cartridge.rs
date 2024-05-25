@@ -1,20 +1,9 @@
 use std::{cell::RefCell, path::{Path, PathBuf}, rc::Rc};
 
 use glam::{Vec2, Vec3, Vec4};
-use wasm_bindgen::prelude::*;
+use fantasy_core::objects::{GameObject, ObjectData};
 
 use crate::{meshes::MeshAssetId, renderer::Color, textures::TextureAssetId, web};
-
-#[wasm_bindgen(module = "/src/engine.ts")]
-extern "C" {
-    // @TODO can we alias this?
-    pub type GameObject;
-
-    #[wasm_bindgen(method)]
-    fn on_update(this: &GameObject, deltaTime: f32);
-}
-
-
 
 pub struct CartridgeDefinition {
     pub scenes: Vec<SceneDefinition>,
@@ -113,10 +102,7 @@ pub struct Scene {
     pub objects: Vec<Object>,
 }
 
-pub struct ObjectData {
-    pub position: Vec3,
-    pub rotation: f32, // @TODO expressed as a 1D angle for now
-}
+
 
 pub struct Object {
     pub data: Rc<RefCell<ObjectData>>,
@@ -136,37 +122,6 @@ impl Object {
     }
 }
 
-#[wasm_bindgen]
-pub struct JsEngineObject {
-    #[wasm_bindgen(skip)]
-    pub data: Rc<RefCell<ObjectData>>,
-}
-
-#[wasm_bindgen]
-impl JsEngineObject {
-    pub fn get_position(&self) -> JsVec3 {
-        let object = self.data.borrow();
-        JsVec3 {
-            x: object.position.x,
-            y: object.position.y,
-            z: object.position.z,
-        }
-    }
-
-    pub fn set_position(&self, position: JsVec3) {
-        let mut object = self.data.borrow_mut();
-        object.position.x = position.x;
-        object.position.y = position.y;
-        object.position.z = position.z;
-    }
-}
-
-#[wasm_bindgen]
-pub struct JsVec3 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
 
 pub enum Component {
     MeshRenderer(MeshRendererComponent),

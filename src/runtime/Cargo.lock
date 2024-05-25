@@ -64,10 +64,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "engine"
+name = "fantasy_core"
+version = "0.1.0"
+dependencies = [
+ "glam",
+ "js-sys",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-bindgen-test",
+ "web-sys",
+]
+
+[[package]]
+name = "fantasy_engine"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
+ "fantasy_core",
  "glam",
  "image",
  "js-sys",
