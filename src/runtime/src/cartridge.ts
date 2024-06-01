@@ -1,5 +1,5 @@
-import { Vector3 } from '@babylonjs/core';
-import { IVector3Like } from '@babylonjs/core/Maths/math.like';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
+import type { IVector3Like } from '@babylonjs/core/Maths/math.like';
 import { Unzipped, unzip } from 'fflate';
 
 import type { MeshComponent } from './world/components/MeshComponent';

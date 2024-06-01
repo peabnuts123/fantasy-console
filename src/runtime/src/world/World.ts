@@ -1,4 +1,5 @@
-import { Scene, TransformNode } from "@babylonjs/core";
+import type { Scene } from "@babylonjs/core/scene";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import { GameObject, GameObjectData } from "./GameObject";
 
 

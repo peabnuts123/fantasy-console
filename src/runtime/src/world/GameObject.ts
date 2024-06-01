@@ -1,5 +1,5 @@
-import { TransformNode, Vector3 } from '@babylonjs/core';
-
+import type { Vector3 } from '@babylonjs/core/Maths/math.vector';
+import type { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { GameObjectComponent } from './GameObjectComponent';
 import { World } from './World';
 

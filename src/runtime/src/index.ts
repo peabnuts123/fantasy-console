@@ -1,4 +1,5 @@
-import { Color4, Texture, Color3 } from "@babylonjs/core";
+import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
+import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { FreeCamera } from "@babylonjs/core/Cameras/freeCamera";
 import { Engine } from "@babylonjs/core/Engines/engine";
 import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
@@ -9,6 +10,7 @@ import "@babylonjs/loaders/OBJ/objFileLoader";
 import { loadCartridge, fetchCartridge } from './cartridge';
 import Resolver from './Resolver';
 import { Game } from "./Game";
+
 
 export type OnUpdateCallback = () => void;
 

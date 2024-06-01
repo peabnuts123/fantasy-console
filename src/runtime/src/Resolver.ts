@@ -1,4 +1,4 @@
-import { Tools } from '@babylonjs/core';
+import { Tools } from '@babylonjs/core/Misc/tools';
 import { VirtualFileSystem } from './cartridge';
 
 /**

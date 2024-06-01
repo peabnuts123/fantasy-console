@@ -1,5 +1,4 @@
-import { AssetContainer, InstantiatedEntries } from "@babylonjs/core";
-
+import type { AssetContainer, InstantiatedEntries } from "@babylonjs/core/assetContainer";
 import { GameObjectComponent, GameObjectComponentData } from "../GameObjectComponent";
 
 /**

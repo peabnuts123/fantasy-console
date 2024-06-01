@@ -1,4 +1,6 @@
-import { AssetContainer, Scene as BabylonScene, SceneLoader } from '@babylonjs/core';
+import type { AssetContainer } from "@babylonjs/core/assetContainer";
+import type { Scene as BabylonScene } from "@babylonjs/core/scene";
+import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 
 import { World } from './world/World';
 import { WorldState } from './world/WorldState';
@@ -7,6 +9,7 @@ import { GameObject } from './world/GameObject';
 import { MeshComponent } from './world/components/MeshComponent';
 import { ScriptLoader } from './ScriptLoader';
 import { GameObjectComponent, GameObjectComponentData } from './core';
+
 
 
 /**
