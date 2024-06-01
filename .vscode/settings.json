@@ -4,8 +4,7 @@
         "editor.insertSpaces": true,
     },
     "rust-analyzer.linkedProjects": [
-      "src/runtime/Cargo.toml",
       "src/editor/src/app/Cargo.toml",
-      "src/scratch/Cargo.toml",
+      "src/editor/src/cli/Cargo.toml",
     ],
 }

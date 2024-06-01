@@ -4,7 +4,7 @@ import { Unzipped, unzip } from 'fflate';
 
 import type { MeshComponent } from './world/components/MeshComponent';
 
-export const CARTRIDGE_MANIFEST_FILENAME = '__cartridge.json';
+export const CARTRIDGE_MANIFEST_FILENAME = 'manifest.json';
 
 // @TODO split into separate files under `cartridge/` and re-export through index.ts
 
@@ -38,7 +38,8 @@ export class VirtualFileSystem {
    */
   public tryGetByPath(path: string): VirtualFile | undefined {
     // @NOTE lo-fi canonicalisation hack using `decodeURIComponent`
-    let canonical = decodeURIComponent(new URL(path, "https://foo.bar").pathname);
+    // Trim leading slashes from path
+    let canonical = decodeURIComponent(new URL(path, "https://foo.bar").pathname).replace(/^\//, '');
     return this.files.find((file) => file.path === canonical);
   }
 

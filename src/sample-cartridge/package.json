@@ -2,14 +2,7 @@
   "name": "@fantasy-console/sample-cartridge",
   "private": true,
   "version": "0.1.0",
-  "scripts": {
-    "start": "nodemon --watch src --exec 'npm run build' --ext '.ts'",
-    "build": "rm -rf content/cartridge/scripts/* && spack"
-  },
+  "scripts": {},
   "author": "peabnuts123",
-  "license": "UNLICENSED",
-  "devDependencies": {
-    "@swc/cli": "^0.3.12",
-    "nodemon": "^3.1.0"
-  }
+  "license": "UNLICENSED"
 }

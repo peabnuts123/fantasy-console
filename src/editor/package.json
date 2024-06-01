@@ -8,6 +8,7 @@
     "start:web": "cd src/web && vite",
     "build": "tauri build",
     "build:web": "cd src/web && tsc && vite build",
+    "debug:buildcart": "cd src/cli && cargo run --bin build-cartridge",
     "tauri": "tauri"
   },
   "dependencies": {

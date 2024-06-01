@@ -1,7 +1,7 @@
 import { VirtualFile, VirtualFileType } from './cartridge';
 import * as Core from './core';
 
-const MAGIC_PREFIX = `/cartridge/scripts/`;
+const SCRIPT_PATH_PREFIX = `scripts/`;
 
 /**
  * Metadata of a script module
@@ -126,9 +126,9 @@ export class ScriptLoader {
    */
   private pathToModuleId(path: string): string {
     // Strip prefix (if present)
-    if (path.indexOf(MAGIC_PREFIX) === 0) {
+    if (path.indexOf(SCRIPT_PATH_PREFIX) === 0) {
       // Replace with relative import (./)
-      path = path.replace(MAGIC_PREFIX, './');
+      path = path.replace(SCRIPT_PATH_PREFIX, './');
     } else throw new Error(`Unrecognised; path does not contain magic prefix: ${path}`);
 
     // Strip file extension (if any)

@@ -1,0 +1,220 @@
+{
+  "scenes": [
+    {
+      "id": 0,
+      "objects": [
+        {
+          "id": 0,
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": 0,
+          "components": [
+            {
+              "type": 0,
+              "meshFileId": 1009
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "position": {
+            "x": 2,
+            "y": 0,
+            "z": 1
+          },
+          "rotation": 0,
+          "components": [
+            {
+              "type": 0,
+              "meshFileId": 1003
+            },
+            {
+              "type": 1,
+              "scriptFileId": 2003
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "id": 1000,
+      "type": 0,
+      "path": "models/ball.mtl"
+    },
+    {
+      "id": 1001,
+      "type": 0,
+      "path": "models/ball.obj"
+    },
+    {
+      "id": 1002,
+      "type": 0,
+      "path": "models/burgerCheese.mtl"
+    },
+    {
+      "id": 1003,
+      "type": 0,
+      "path": "models/burgerCheese.obj"
+    },
+    {
+      "id": 1004,
+      "type": 0,
+      "path": "models/detailDumpster_closed.mtl"
+    },
+    {
+      "id": 1005,
+      "type": 0,
+      "path": "models/detailDumpster_closed.obj"
+    },
+    {
+      "id": 1008,
+      "type": 0,
+      "path": "models/scene.mtl"
+    },
+    {
+      "id": 1009,
+      "type": 0,
+      "path": "models/scene.obj"
+    },
+    {
+      "id": 3000,
+      "type": 1,
+      "path": "textures/asphalt.png"
+    },
+    {
+      "id": 3001,
+      "type": 1,
+      "path": "textures/bars.png"
+    },
+    {
+      "id": 3002,
+      "type": 1,
+      "path": "textures/clock texture.png"
+    },
+    {
+      "id": 3003,
+      "type": 1,
+      "path": "textures/concrete.png"
+    },
+    {
+      "id": 3004,
+      "type": 1,
+      "path": "textures/concreteSmooth.png"
+    },
+    {
+      "id": 3005,
+      "type": 1,
+      "path": "textures/dirt.png"
+    },
+    {
+      "id": 3006,
+      "type": 1,
+      "path": "textures/doors.png"
+    },
+    {
+      "id": 3007,
+      "type": 1,
+      "path": "textures/grass.png"
+    },
+    {
+      "id": 3008,
+      "type": 1,
+      "path": "textures/metal.png"
+    },
+    {
+      "id": 3009,
+      "type": 1,
+      "path": "textures/picture on shelf texture.png"
+    },
+    {
+      "id": 3010,
+      "type": 1,
+      "path": "textures/roof.png"
+    },
+    {
+      "id": 3011,
+      "type": 1,
+      "path": "textures/roof_plates.png"
+    },
+    {
+      "id": 3012,
+      "type": 1,
+      "path": "textures/signs.png"
+    },
+    {
+      "id": 3013,
+      "type": 1,
+      "path": "textures/stones.png"
+    },
+    {
+      "id": 3014,
+      "type": 1,
+      "path": "textures/treeA.png"
+    },
+    {
+      "id": 3015,
+      "type": 1,
+      "path": "textures/treeB.png"
+    },
+    {
+      "id": 3016,
+      "type": 1,
+      "path": "textures/truck.png"
+    },
+    {
+      "id": 3017,
+      "type": 1,
+      "path": "textures/truck_alien.png"
+    },
+    {
+      "id": 3019,
+      "type": 1,
+      "path": "textures/wall.png"
+    },
+    {
+      "id": 3020,
+      "type": 1,
+      "path": "textures/wall_garage.png"
+    },
+    {
+      "id": 3021,
+      "type": 1,
+      "path": "textures/wall_lines.png"
+    },
+    {
+      "id": 3022,
+      "type": 1,
+      "path": "textures/wall_metal.png"
+    },
+    {
+      "id": 3023,
+      "type": 1,
+      "path": "textures/windows.png"
+    },
+    {
+      "id": 2000,
+      "type": 2,
+      "path": "scripts/another-object.js"
+    },
+    {
+      "id": 2001,
+      "type": 2,
+      "path": "scripts/lib/math.js"
+    },
+    {
+      "id": 2002,
+      "type": 2,
+      "path": "scripts/lib/util.js"
+    },
+    {
+      "id": 2003,
+      "type": 2,
+      "path": "scripts/my-object.js"
+    }
+  ]
+}
