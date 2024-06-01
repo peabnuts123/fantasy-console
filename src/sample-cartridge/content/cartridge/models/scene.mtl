@@ -17,9 +17,9 @@ Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
+d 1.000000
 illum 1
 map_Kd ../textures/asphalt.png
-map_d ../textures/asphalt.png
 
 newmtl concreteSmooth
 Ns 0.000000
@@ -27,9 +27,9 @@ Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
+d 1.000000
 illum 1
 map_Kd ../textures/concreteSmooth.png
-map_d ../textures/concreteSmooth.png
 
 newmtl grass
 Ns 0.000000
@@ -37,9 +37,9 @@ Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
+d 1.000000
 illum 1
 map_Kd ../textures/grass.png
-map_d ../textures/grass.png
 
 newmtl treeA
 Ns 0.000000
@@ -67,6 +67,6 @@ Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
+d 1.000000
 illum 1
 map_Kd ../textures/truck_alien.png
-map_d ../textures/truck_alien.png

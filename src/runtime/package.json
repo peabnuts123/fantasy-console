@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "main": "src/index.ts",
   "module": "src/index.ts",
   "scripts": {
     "start": "nodemon --watch src --ext 'rs,ts' --exec npm run build:dev",
@@ -11,9 +12,15 @@
     "build:release": "npm run build -- --release --no-default-features"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0",
-    "wasm-pack": "^0.12.1"
+    "nodemon": "^3.1.0"
   },
   "author": "peabnuts123",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@babylonjs/core": "^7.8.0",
+    "@babylonjs/loaders": "^7.8.0",
+    "@babylonjs/materials": "^7.8.0",
+    "fflate": "^0.8.2",
+    "typescript": "^5.4.5"
+  }
 }

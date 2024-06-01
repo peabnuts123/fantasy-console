@@ -1,7 +1,7 @@
 {
   "build": {
     "beforeDevCommand": "npm run start:web",
-    "beforeBuildCommand": "pushd '../../runtime' && npm run build:release && popd && npm run build:web",
+    "beforeBuildCommand": "npm run build:web",
     "devPath": "http://localhost:1420",
     "distDir": "../web/dist",
     "withGlobalTauri": true

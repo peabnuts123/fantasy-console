@@ -21,5 +21,8 @@ dist-ssr
 *.sln
 *.sw?
 
+# Fantasy Console cartridges
+*.pzcart
+
 # local changes
 src/scratch/

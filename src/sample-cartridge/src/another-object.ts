@@ -1,11 +1,11 @@
-import { GameObject } from '@fantasy-console/runtime/engine';
+import { GameObjectComponent, GameObjectComponentData } from '@fantasy-console/core';
 import { magicString } from './lib/util';
 
-class AnotherObject extends GameObject {
+class AnotherObject extends GameObjectComponent {
   public name: string;
 
-  constructor() {
-    super();
+  constructor(data: GameObjectComponentData) {
+    super(data);
     this.name = "Another object: " + magicString();
   }
 

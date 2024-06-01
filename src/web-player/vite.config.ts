@@ -8,15 +8,12 @@ import topLevelAwait from 'vite-plugin-top-level-await';
 export default defineConfig(async (env) => {
   const config: UserConfigExport = {
     clearScreen: false,
-    publicDir: "../sample-cartridge/content",
     server: {
       port: 1420,
     },
     resolve: {
       alias: {
         '@fantasy-console/runtime': path.resolve(__dirname, "../runtime/src"),
-        '@fantasy-console/engine': path.resolve(__dirname, "../runtime/dist/fantasy_engine"),
-        '@fantasy-console/core': path.resolve(__dirname, "../runtime/src/core"),
       }
     },
     plugins: [

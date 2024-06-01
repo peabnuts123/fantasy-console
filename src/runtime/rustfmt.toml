@@ -1,2 +1,0 @@
-# For options see: https://github.com/rust-lang/rustfmt/blob/master/Configurations.md
-disable_all_formatting = true

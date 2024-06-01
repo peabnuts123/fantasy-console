@@ -2,9 +2,13 @@
   "$schema": "https://swc.rs/schema.json",
   "jsc": {
     "parser": {
-      "syntax": "typescript"
+      "syntax": "typescript",
+      "decorators": true
     },
-    "target": "es2016"
+    "target": "es2016",
+    "transform": {
+      "decoratorVersion": "2022-03"
+    }
     /* @TODO What does this "do" ? */
     // Requires v1.2.50 or upper and requires target to be es2016 or upper.
     // "keepClassNames": false,

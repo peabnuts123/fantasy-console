@@ -13,12 +13,6 @@
     "isolatedModules": true,
     "noEmit": true,
 
-    "baseUrl": ".",
-    "paths": {
-      "@fantasy-console/engine": ["dist/fantasy_engine"],
-      "@fantasy-console/core": ["src/core"],
-    },
-
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

@@ -1,54 +1,29 @@
-import { Engine } from '@fantasy-console/engine';
+import { Color4, Texture, Color3 } from "@babylonjs/core";
+import { FreeCamera } from "@babylonjs/core/Cameras/freeCamera";
+import { Engine } from "@babylonjs/core/Engines/engine";
+import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { Scene } from "@babylonjs/core/scene";
+import "@babylonjs/loaders/OBJ/objFileLoader";
 
-// @NOTE v8 custom property
-// Increase stack trace size for better view of Rust panics
-(Error as any).stackTraceLimit = 50;
-
-enum KeyCode {
-  W = 0,
-  A = 1,
-  S = 2,
-  D = 3,
-  Shift = 4,
-  Space = 5,
-}
-const NativeCodeToKeyCodeMap: Record<string, KeyCode> = {
-  'KeyW': KeyCode.W,
-  'KeyA': KeyCode.A,
-  'KeyS': KeyCode.S,
-  'KeyD': KeyCode.D,
-  'ShiftLeft': KeyCode.Shift,
-  'ShiftRight': KeyCode.Shift,
-  'Space': KeyCode.Space,
-}
+import { loadCartridge, fetchCartridge } from './cartridge';
+import Resolver from './Resolver';
+import { Game } from "./Game";
 
 export type OnUpdateCallback = () => void;
-export type MouseInputDelta = { x: number, y: number };
 
+const SAMPLE_CARTRIDGE_URL = "/sample-cartridge.pzcart";
+
+/**
+ * Runtime for Fantasy Console.
+ * Use this to run game cartridges.
+ */
 export class Runtime {
   private canvas: HTMLCanvasElement;
-  private engine: Engine;
-  private ctx: CanvasRenderingContext2D;
-  private mouseInputDelta: MouseInputDelta;
-  private lastFrameTime: number;
   private onUpdateCallbacks: OnUpdateCallback[];
-
-  private imageData!: ImageData;
-
 
   public constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-
-    // Ye-olde this-binding hacks
-    this.update = this.update.bind(this);
-
-    // Construct game engine instance
-    this.engine = new Engine(canvas.width, canvas.height);
-
-    // Initialise state
-    this.ctx = canvas.getContext('2d')!;
-    this.mouseInputDelta = { x: 0, y: 0 };
-    this.lastFrameTime = performance.now();
     this.onUpdateCallbacks = [];
   }
 
@@ -57,86 +32,85 @@ export class Runtime {
   }
 
   public async run() {
-    // Load sample cartridge
-    // @TODO rename
-    await this.engine.loadScene();
+    let initialCanvasWidth = this.canvas.width;
+    let initialCanvasHeight = this.canvas.height;
 
-    // Initialise frame buffer
-    const frameBuffer = this.engine.buffer; // @NOTE must be called last (after loading cartridge). Subsequent memory allocations can throw off this pointer.
-    for (let y = 0; y < this.canvas.height; y++) {
-      for (let x = 0; x < this.canvas.width; x++) {
-        const pixelIndex = ((y * this.canvas.width) + x) * 4;
-        frameBuffer[pixelIndex + 3] = 0xFF;
-      }
+    const engine = new Engine(this.canvas, false);
+    // Override application resolution to fixed resolution
+    engine.setSize(initialCanvasWidth, initialCanvasHeight);
+
+    // Babylon scene (NOT game scene)
+    var scene = new Scene(engine);
+
+    // Game system singleton
+    const game = new Game(scene);
+
+    // Load cartridge
+    // @NOTE Load hard-coded cartridge from URL
+    let timerStart = performance.now();
+    const cartridgeRaw = await fetchCartridge(SAMPLE_CARTRIDGE_URL);
+    let cartridge = await loadCartridge(cartridgeRaw);
+    Resolver.bindTo(cartridge.files);
+    console.log(`Loaded cartridge in ${(performance.now() - timerStart).toFixed(1)}ms`);
+
+    // Boot game
+    // *blows on cartridge*
+    timerStart = performance.now();
+    game.loadCartridge(cartridge);
+    console.log(`Loaded game in ${(performance.now() - timerStart).toFixed(1)}ms`);
+
+
+    /* === @TODO Remove Hard-coded babylon / debug stuff === */
+    {
+      scene.clearColor = new Color4(0xF7 / 0xFF, 0xCE / 0xFF, 0x9B / 0xFF);
+
+      // This creates and positions a free camera (non-mesh)
+      var camera = new FreeCamera("camera1", new Vector3(0, 5, -10), scene);
+
+      // @DEBUG Pointer lock
+      this.canvas.addEventListener("click", async () => {
+        if (!document.pointerLockElement) {
+          await this.canvas.requestPointerLock();
+        }
+      });
+
+      camera.speed = 0.7;
+      camera.keysUp = [87];
+      camera.keysDown = [83];
+      camera.keysLeft = [65];
+      camera.keysRight = [68];
+      camera.keysRotateLeft = [];
+      camera.keysRotateRight = [];
+      camera.keysUpward = [32];
+      camera.keysDownward = [16];
+
+      camera.setTarget(Vector3.Zero());
+      camera.attachControl(this.canvas, true);
+
+      const light = new HemisphericLight("light1", new Vector3(0.2, 1, 0), scene);
+      // const light = new PointLight("light1", new Vector3(0.2, 1, 0), scene);
+      light.diffuse = new Color3(1, 0.9, 0.8);
     }
-    this.imageData = new ImageData(frameBuffer, this.canvas.width, this.canvas.height);
-
-    // Begin drawing
-    requestAnimationFrame(this.update);
-
-    /* Input handling */
-    document.addEventListener('keydown', (event) => this.onKeyDown(event));
-    document.addEventListener('keyup', (event) => this.onKeyUp(event));
+    /* === @TODO Remove Hard-coded babylon stuff === */
 
 
-    /* Pointer lock stuff */
-    this.canvas.addEventListener("click", async () => {
-      if (!document.pointerLockElement) {
-        await this.canvas.requestPointerLock();
-      }
+    // Wait for scene
+    await scene.whenReadyAsync();
+
+    // Graphics overrides
+    // @TODO remove specular, add gouraud shading, flat shading, etc.
+    // @TODO I guess write a big shader that I can use to do all the things I want
+    scene.textures.forEach((texture) => {
+      texture.updateSamplingMode(Texture.NEAREST_SAMPLINGMODE)
+      texture.anisotropicFilteringLevel = 0;
     });
-    const onMouseMove = (e: MouseEvent) => {
-      this.mouseInputDelta.x += e.movementX;
-      this.mouseInputDelta.y += e.movementY;
-    };
-    document.addEventListener("pointerlockchange", () => {
-      if (document.pointerLockElement === this.canvas) {
-        document.addEventListener("mousemove", onMouseMove);
-      } else {
-        document.removeEventListener("mousemove", onMouseMove);
-      }
+
+    engine.runRenderLoop(() => {
+      scene.render();
+      game.update(engine.getDeltaTime() / 1000);
+      // Invoke all `onUpdate` callbacks
+      this.onUpdateCallbacks.forEach((callback) => callback());
     });
-
-  }
-
-  private update(): void {
-    // Draw the next frame into the frame buffer
-    let currentFrameTime = performance.now();
-    let deltaT = currentFrameTime - this.lastFrameTime;
-    this.engine.update(deltaT / 1000);
-    this.lastFrameTime = currentFrameTime;
-
-    // Write frame buffer to canvas
-    this.ctx.putImageData(this.imageData, 0, 0);
-
-    // Update mouse input state
-    this.engine.set_mouse_value(this.mouseInputDelta.x, this.mouseInputDelta.y);
-
-    // Reset mouse input
-    this.mouseInputDelta.x = 0;
-    this.mouseInputDelta.y = 0;
-
-    // Invoke all `onUpdate` callbacks
-    this.onUpdateCallbacks.forEach((callback) => callback());
-
-    // Draw loop
-    // setTimeout(draw);
-    requestAnimationFrame(this.update);
-  }
-
-  private onKeyDown(event: KeyboardEvent) {
-    if (event.repeat) return;
-
-    const keyCode = NativeCodeToKeyCodeMap[event.code];
-    if (keyCode !== undefined) {
-      this.engine.on_key_press(keyCode);
-    }
-  }
-
-  private onKeyUp(event: KeyboardEvent) {
-    const keyCode = NativeCodeToKeyCodeMap[event.code];
-    if (keyCode !== undefined) {
-      this.engine.on_key_release(keyCode);
-    }
   }
 }
+
