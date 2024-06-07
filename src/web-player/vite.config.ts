@@ -1,13 +1,13 @@
 import path from 'path';
 import { UserConfigExport, defineConfig } from 'vite';
-import wasm from 'vite-plugin-wasm';
-import topLevelAwait from 'vite-plugin-top-level-await';
-
 
 // https://vitejs.dev/config/
 export default defineConfig(async (env) => {
   const config: UserConfigExport = {
     clearScreen: false,
+    esbuild: {
+      target: "es2020"
+    },
     server: {
       port: 1420,
     },
@@ -16,10 +16,6 @@ export default defineConfig(async (env) => {
         '@fantasy-console/runtime': path.resolve(__dirname, "../runtime/src"),
       }
     },
-    plugins: [
-      wasm(),
-      topLevelAwait(),
-    ],
   };
 
   if (env.command !== 'build') {
