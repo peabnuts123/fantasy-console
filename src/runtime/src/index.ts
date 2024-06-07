@@ -1,15 +1,13 @@
-import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
-import { FreeCamera } from "@babylonjs/core/Cameras/freeCamera";
 import { Engine } from "@babylonjs/core/Engines/engine";
-import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
-import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { Scene } from "@babylonjs/core/scene";
 import "@babylonjs/loaders/OBJ/objFileLoader";
 
 import { loadCartridge, fetchCartridge } from './cartridge';
 import Resolver from './Resolver';
 import { Game } from "./Game";
+import { Input } from './modules/Input';
+import Modules from './modules';
 
 
 export type OnUpdateCallback = () => void;
@@ -41,6 +39,9 @@ export class Runtime {
     // Override application resolution to fixed resolution
     engine.setSize(initialCanvasWidth, initialCanvasHeight);
 
+    // Initialize singleton modules
+    Input.init(engine);
+
     // Babylon scene (NOT game scene)
     var scene = new Scene(engine);
 
@@ -61,41 +62,6 @@ export class Runtime {
     game.loadCartridge(cartridge);
     console.log(`Loaded game in ${(performance.now() - timerStart).toFixed(1)}ms`);
 
-
-    /* === @TODO Remove Hard-coded babylon / debug stuff === */
-    {
-      scene.clearColor = new Color4(0xF7 / 0xFF, 0xCE / 0xFF, 0x9B / 0xFF);
-
-      // This creates and positions a free camera (non-mesh)
-      var camera = new FreeCamera("camera1", new Vector3(0, 5, -10), scene);
-
-      // @DEBUG Pointer lock
-      this.canvas.addEventListener("click", async () => {
-        if (!document.pointerLockElement) {
-          await this.canvas.requestPointerLock();
-        }
-      });
-
-      camera.speed = 0.7;
-      camera.keysUp = [87];
-      camera.keysDown = [83];
-      camera.keysLeft = [65];
-      camera.keysRight = [68];
-      camera.keysRotateLeft = [];
-      camera.keysRotateRight = [];
-      camera.keysUpward = [32];
-      camera.keysDownward = [16];
-
-      camera.setTarget(Vector3.Zero());
-      camera.attachControl(this.canvas, true);
-
-      const light = new HemisphericLight("light1", new Vector3(0.2, 1, 0), scene);
-      // const light = new PointLight("light1", new Vector3(0.2, 1, 0), scene);
-      light.diffuse = new Color3(1, 0.9, 0.8);
-    }
-    /* === @TODO Remove Hard-coded babylon stuff === */
-
-
     // Wait for scene
     await scene.whenReadyAsync();
 
@@ -109,7 +75,9 @@ export class Runtime {
 
     engine.runRenderLoop(() => {
       scene.render();
-      game.update(engine.getDeltaTime() / 1000);
+      const deltaTime = engine.getDeltaTime() / 1000;
+      Modules.onUpdate(deltaTime);
+      game.update(deltaTime);
       // Invoke all `onUpdate` callbacks
       this.onUpdateCallbacks.forEach((callback) => callback());
     });

@@ -1,74 +1,39 @@
-import { GameObjectComponent, GameObjectComponentData } from '@fantasy-console/core';
+import { GameObjectComponent, GameObjectComponentData, Input, InputButton } from '@fantasy-console/core';
 
-import { magicString } from './lib/util';
-import add from './lib/math';
+const SPEED_PER_SECOND = 3.0;
 
-interface SomethingModule {
-  name: string;
-  value: number;
-}
-
-interface FakeInputState {
-  name: string;
-}
-
-const debug_Modules = [
-  {
-    id: 'Something', value: {
-      name: "I am the something module",
-      value: 5,
-    } satisfies SomethingModule
-  },
-  {
-    id: 'Input', value: {
-      name: "I am the input module",
-    } satisfies FakeInputState
-  }
-]
-
-function inject(identifier: string) {
-  console.log(`[RAMBOTAN] @inject outer`);
-
-  return function injectDecorator<TThis, TValue>(_target: undefined, context: ClassFieldDecoratorContext<TThis, TValue>) {
-    console.log(`[RAMBOTAN] @inject middle`);
-    // console.log(`Decorator context: `, context);
-
-    return function (this: unknown, ...args: any[]): TValue {
-      console.log(`[RAMBOTAN] @inject initializer`);
-      console.log(`initializer this: `, this);
-      console.log(`initializer args:`, ...args);
-
-      let module = debug_Modules.find((module) => module.id === identifier);
-      if (module === undefined) {
-        throw new Error(`Cannot inject module with unknown ID: '${identifier}'`);
-      } else {
-        return module.value as TValue;
-      }
-    }
-  }
-}
-
+/*
+  How can we get a reference to a thing?
+ */
 class MyObject extends GameObjectComponent {
-  @inject("Input")
-  private InputProperty!: FakeInputState;
-
   private time: number;
 
   constructor(data: GameObjectComponentData) {
     super(data);
     this.time = 0;
-
-    console.log(`[MyObject] (ctor) magic string: ${magicString}`);
-    console.log(`[MyObject] (ctor) add(1, 2): ${add(1, 2)}`);
-
-    console.log(`InputProperty`, this.InputProperty);
   }
 
   public onUpdate(deltaTime: number): void {
     this.time += deltaTime;
 
-    this.gameObject.position.x = Math.sin(this.time / 1.28) * 3;
-    this.gameObject.position.z = Math.cos(this.time) * 3;
+    // @TODO vector2 class
+    const delta = { x: 0, y: 0 };
+
+    if (Input.isButtonPressed(InputButton.Right)) delta.x += 1;
+    if (Input.isButtonPressed(InputButton.Left)) delta.x -= 1;
+
+    if (Input.isButtonPressed(InputButton.Up)) delta.y += 1;
+    if (Input.isButtonPressed(InputButton.Down)) delta.y -= 1;
+
+
+    // Normalize delta
+    if (delta.x !== 0 || delta.y !== 0) {
+      delta.x = (delta.x / Math.sqrt(delta.x ** 2 + delta.y ** 2)) * SPEED_PER_SECOND * deltaTime;
+      delta.y = (delta.y / Math.sqrt(delta.x ** 2 + delta.y ** 2)) * SPEED_PER_SECOND * deltaTime;
+    }
+
+    this.gameObject.position.x += delta.x;
+    this.gameObject.position.z += delta.y;
   }
 }
 

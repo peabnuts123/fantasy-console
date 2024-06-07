@@ -1,15 +1,25 @@
 import type { AssetContainer } from "@babylonjs/core/assetContainer";
 import type { Scene as BabylonScene } from "@babylonjs/core/scene";
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
+import { FreeCamera } from "@babylonjs/core/Cameras/freeCamera";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
+import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
+import { PointLight } from "@babylonjs/core/Lights/pointLight";
 
 import { World } from './world/World';
 import { WorldState } from './world/WorldState';
-import { Cartridge, MeshComponentConfig, SceneConfig as CartridgeScene, VirtualFile, GameObjectConfig, ScriptComponentConfig, VirtualFileType } from './cartridge';
+import { Cartridge, MeshComponentConfig, SceneConfig as CartridgeScene, VirtualFile, GameObjectConfig, ScriptComponentConfig, VirtualFileType, CameraComponentConfig } from './cartridge';
 import { GameObject } from './world/GameObject';
 import { MeshComponent } from './world/components/MeshComponent';
 import { ScriptLoader } from './ScriptLoader';
 import { GameObjectComponent, GameObjectComponentData } from './core';
-
+import { CameraComponent } from "./world/components/CameraComponent";
+import { DirectionalLightComponentConfig } from "./cartridge/config/components/DirectionalLightComponentConfig";
+import { DirectionalLightComponent } from "./world/components/DirectionalLightComponent";
+import { PointLightComponentConfig } from "./cartridge/config/components/PointLightComponentConfig";
+import { PointLightComponent } from "./world/components/PointLightComponent";
 
 
 /**
@@ -23,6 +33,7 @@ export class Game {
   private worldState: WorldState;
   private assetCache: Map<VirtualFile, AssetContainer>;
   private scriptLoader: ScriptLoader;
+  private ambientLight: HemisphericLight | undefined;
 
   constructor(babylonScene: BabylonScene) {
     this.babylonScene = babylonScene;
@@ -69,6 +80,20 @@ export class Game {
    */
   public async loadCartridgeScene(scene: CartridgeScene): Promise<void> {
     // @TODO unload previous scene
+    this.ambientLight?.dispose();
+
+    // @TODO I guess we need a runtime object for a Scene (rather than storing it on Game)
+    /* Scene clear color */
+    this.babylonScene.clearColor = scene.clearColor;
+
+    /* Set up global ambient lighting */
+    this.ambientLight = new HemisphericLight("__ambient", new Vector3(0, 0, 0), this.babylonScene);
+    this.ambientLight.intensity = scene.ambientLight.intensity;
+    this.ambientLight.diffuse = scene.ambientLight.color;
+    this.ambientLight.groundColor = scene.ambientLight.color;
+    this.ambientLight.specular = Color3.Black();
+
+    /* Load game objects */
     for (let sceneObject of scene.objects) {
       await this.createGameObjectFromConfig(sceneObject);
     }
@@ -82,11 +107,11 @@ export class Game {
     const gameObject = this.world.createGameObject({
       position: gameObjectConfig.position,
     });
+    let lightCount = 0;
     for (let componentConfig of gameObjectConfig.components) {
       // Load well-known inbuilt component types
-      // @TODO other builtin components or whatever
       if (componentConfig instanceof MeshComponentConfig) {
-        /* Mesh Component */
+        /* Mesh component */
         const meshAsset = await this.loadAssetCached(componentConfig.meshFile);
         gameObject.addComponent(new MeshComponent({ gameObject }, meshAsset));
       } else if (componentConfig instanceof ScriptComponentConfig) {
@@ -100,6 +125,25 @@ export class Game {
           throw new Error(`Cannot add component to GameObject. Default export from script '${componentConfig.scriptFile.path}' is not of type 'GameObjectComponent': ${ScriptComponent}`);
         }
         gameObject.addComponent(new ScriptComponent({ gameObject } satisfies GameObjectComponentData));
+      } else if (componentConfig instanceof CameraComponentConfig) {
+        /* Camera component */
+        const camera = new FreeCamera("Main Camera", Vector3.Zero(), this.babylonScene, true);
+        camera.inputs.clear();
+        gameObject.addComponent(new CameraComponent({ gameObject }, camera));
+      } else if (componentConfig instanceof DirectionalLightComponentConfig) {
+        /* Directional Light component */
+        const light = new DirectionalLight(`light_directional_${lightCount++}`, Vector3.Down(), this.babylonScene);
+        light.specular = Color3.Black();
+        light.intensity = componentConfig.intensity;
+        light.diffuse = componentConfig.color;
+        gameObject.addComponent(new DirectionalLightComponent({ gameObject }, light));
+      } else if (componentConfig instanceof PointLightComponentConfig) {
+        /* Point Light component */
+        const light = new PointLight(`light_point_${lightCount++}`, Vector3.Zero(), this.babylonScene);
+        light.specular = Color3.Black();
+        light.intensity = componentConfig.intensity;
+        light.diffuse = componentConfig.color;
+        gameObject.addComponent(new PointLightComponent({ gameObject }, light));
       } else {
         console.error(`[Game] (createGameObjectFromConfig) Unrecognised component config: `, componentConfig);
       }
