@@ -1,9 +1,11 @@
 import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
+
+import { Vector3 } from "@fantasy-console/core/util/Vector3";
+
 import { GameObjectConfig } from "./GameObjectConfig";
 import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, SceneDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition } from "../archive";
 import { CameraComponentConfig, ComponentConfig, DirectionalLightComponentConfig, MeshComponentConfig, PointLightComponentConfig, ScriptComponentConfig } from "./components";
 import { VirtualFileType } from "./VirtualFile";
-import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { VirtualFileSystem } from "./VirtualFileSystem";
 
 export interface SceneAmbientLightConfig {
@@ -21,10 +23,6 @@ export class SceneConfig {
   public ambientLight: SceneAmbientLightConfig;
   public clearColor: Color4;
 
-  // public constructor(id: number, objects: GameObjectConfig[]) {
-  //   this.id = id;
-  //   this.objects = objects;
-  // }
   public constructor(sceneDefinition: SceneDefinition, fileSystem: VirtualFileSystem) {
     /* ID */
     this.id = sceneDefinition.id;

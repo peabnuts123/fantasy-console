@@ -1,11 +1,10 @@
-import { Input } from './Input';
-import { Module } from './Module';
+import { IModule } from '@fantasy-console/core/modules/IModule';
+import { Input } from '@fantasy-console/core/modules/Input';
 
-export * from './Input';
-export * from './Module';
+export * from './BabylonInputManager';
 
 class Modules {
-  private modules: Module[] = [
+  private modules: IModule[] = [
     Input,
   ]
 

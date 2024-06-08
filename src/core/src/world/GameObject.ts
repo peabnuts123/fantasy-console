@@ -1,33 +1,27 @@
-import type { Vector3 } from '@babylonjs/core/Maths/math.vector';
-import type { TransformNode } from '@babylonjs/core/Meshes/transformNode';
-import { GameObjectComponent } from './GameObjectComponent';
-import { World } from './World';
+import { Vector3 } from "../util/Vector3";
+import { GameObjectComponent } from "./GameObjectComponent";
+import { Transform } from "./Transform";
 
 export interface GameObjectData {
-  position: Vector3;
+  transform: Transform;
 }
 
 /**
  * An object that lives within the game world.
  * Components are used to build up behaviours whereas a GameObject by itself does nothing.
  */
-export class GameObject {
+export abstract class GameObject {
   /** Unique identifier for this GameObject */
-  private readonly id: number;
+  protected readonly id: number;
   /** Components attached to this GameObject */
-  private readonly components: GameObjectComponent[];
-  /** Reference to the {@link World} this GameObject lives in */
-  private readonly world: World;
-  /** {@link TransformNode} this GameObject is tied to */
-  public readonly transform: TransformNode;
+  protected readonly components: GameObjectComponent[];
+  /** Position, rotation, scale, hierarchy data */
+  public readonly transform: Transform;
 
-  public constructor(transform: TransformNode, world: World, id: number, data: GameObjectData) {
+  public constructor(id: number, data: GameObjectData) {
     this.components = [];
-    this.transform = transform;
-    this.world = world;
-
     this.id = id;
-    this.position = data.position;
+    this.transform = data.transform;
   }
 
   public addComponent(component: GameObjectComponent) {
@@ -46,10 +40,7 @@ export class GameObject {
    * Destroy this GameObject, removing it (and all of its components)
    * from the World.
    */
-  public destroy() {
-    // @NOTE `world.destroyObject()` calls `onDestroy()`
-    this.world.destroyObject(this);
-  }
+  public abstract destroy(): void;
 
   /**
    * Called when this GameObject is destroyed.
@@ -62,7 +53,9 @@ export class GameObject {
     return this.transform.position;
   }
   public set position(value: Vector3) {
-    this.transform.position = value;
+    this.transform.position.x = value.x;
+    this.transform.position.y = value.y;
+    this.transform.position.z = value.z;
   }
 
   public toString(): string {

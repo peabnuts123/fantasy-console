@@ -3,23 +3,38 @@ import type { Scene as BabylonScene } from "@babylonjs/core/scene";
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { FreeCamera } from "@babylonjs/core/Cameras/freeCamera";
-import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { Vector3 as Vector3Babylon } from "@babylonjs/core/Maths/math.vector";
 import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { PointLight } from "@babylonjs/core/Lights/pointLight";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 
+import { GameObjectComponent, GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
+import { GameObject } from "@fantasy-console/core/world/GameObject";
+
+import { ScriptLoader } from './ScriptLoader';
 import { World } from './world/World';
 import { WorldState } from './world/WorldState';
-import { Cartridge, MeshComponentConfig, SceneConfig as CartridgeScene, VirtualFile, GameObjectConfig, ScriptComponentConfig, VirtualFileType, CameraComponentConfig } from './cartridge';
-import { GameObject } from './world/GameObject';
-import { MeshComponent } from './world/components/MeshComponent';
-import { ScriptLoader } from './ScriptLoader';
-import { GameObjectComponent, GameObjectComponentData } from './core';
-import { CameraComponent } from "./world/components/CameraComponent";
-import { DirectionalLightComponentConfig } from "./cartridge/config/components/DirectionalLightComponentConfig";
-import { DirectionalLightComponent } from "./world/components/DirectionalLightComponent";
-import { PointLightComponentConfig } from "./cartridge/config/components/PointLightComponentConfig";
-import { PointLightComponent } from "./world/components/PointLightComponent";
+import { TransformBabylon } from "./world/Transform";
+import {
+  Cartridge,
+  MeshComponentConfig,
+  SceneConfig as CartridgeScene,
+  VirtualFile,
+  GameObjectConfig,
+  ScriptComponentConfig,
+  VirtualFileType,
+  CameraComponentConfig,
+  PointLightComponentConfig,
+  DirectionalLightComponentConfig,
+} from './cartridge/config';
+import {
+  MeshComponentBabylon,
+  CameraComponentBabylon,
+  DirectionalLightComponentBabylon,
+  PointLightComponentBabylon,
+} from './world/components';
+
 
 
 /**
@@ -87,7 +102,7 @@ export class Game {
     this.babylonScene.clearColor = scene.clearColor;
 
     /* Set up global ambient lighting */
-    this.ambientLight = new HemisphericLight("__ambient", new Vector3(0, 0, 0), this.babylonScene);
+    this.ambientLight = new HemisphericLight("__ambient", new Vector3Babylon(0, 0, 0), this.babylonScene);
     this.ambientLight.intensity = scene.ambientLight.intensity;
     this.ambientLight.diffuse = scene.ambientLight.color;
     this.ambientLight.groundColor = scene.ambientLight.color;
@@ -105,7 +120,10 @@ export class Game {
    */
   private async createGameObjectFromConfig(gameObjectConfig: GameObjectConfig): Promise<GameObject> {
     const gameObject = this.world.createGameObject({
-      position: gameObjectConfig.position,
+      transform: new TransformBabylon(
+        new TransformNode(`GameObject(${gameObjectConfig.id})`, this.babylonScene),
+        gameObjectConfig.position
+      )
     });
     let lightCount = 0;
     for (let componentConfig of gameObjectConfig.components) {
@@ -113,7 +131,7 @@ export class Game {
       if (componentConfig instanceof MeshComponentConfig) {
         /* Mesh component */
         const meshAsset = await this.loadAssetCached(componentConfig.meshFile);
-        gameObject.addComponent(new MeshComponent({ gameObject }, meshAsset));
+        gameObject.addComponent(new MeshComponentBabylon({ gameObject }, meshAsset));
       } else if (componentConfig instanceof ScriptComponentConfig) {
         /* Custom component script */
         let scriptModule = this.scriptLoader.getModule(componentConfig.scriptFile);
@@ -127,23 +145,23 @@ export class Game {
         gameObject.addComponent(new ScriptComponent({ gameObject } satisfies GameObjectComponentData));
       } else if (componentConfig instanceof CameraComponentConfig) {
         /* Camera component */
-        const camera = new FreeCamera("Main Camera", Vector3.Zero(), this.babylonScene, true);
+        const camera = new FreeCamera("Main Camera", Vector3Babylon.Zero(), this.babylonScene, true);
         camera.inputs.clear();
-        gameObject.addComponent(new CameraComponent({ gameObject }, camera));
+        gameObject.addComponent(new CameraComponentBabylon({ gameObject }, camera));
       } else if (componentConfig instanceof DirectionalLightComponentConfig) {
         /* Directional Light component */
-        const light = new DirectionalLight(`light_directional_${lightCount++}`, Vector3.Down(), this.babylonScene);
+        const light = new DirectionalLight(`light_directional_${lightCount++}`, Vector3Babylon.Down(), this.babylonScene);
         light.specular = Color3.Black();
         light.intensity = componentConfig.intensity;
         light.diffuse = componentConfig.color;
-        gameObject.addComponent(new DirectionalLightComponent({ gameObject }, light));
+        gameObject.addComponent(new DirectionalLightComponentBabylon({ gameObject }, light));
       } else if (componentConfig instanceof PointLightComponentConfig) {
         /* Point Light component */
-        const light = new PointLight(`light_point_${lightCount++}`, Vector3.Zero(), this.babylonScene);
+        const light = new PointLight(`light_point_${lightCount++}`, Vector3Babylon.Zero(), this.babylonScene);
         light.specular = Color3.Black();
         light.intensity = componentConfig.intensity;
         light.diffuse = componentConfig.color;
-        gameObject.addComponent(new PointLightComponent({ gameObject }, light));
+        gameObject.addComponent(new PointLightComponentBabylon({ gameObject }, light));
       } else {
         console.error(`[Game] (createGameObjectFromConfig) Unrecognised component config: `, componentConfig);
       }

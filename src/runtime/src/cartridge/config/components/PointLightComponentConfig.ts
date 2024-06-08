@@ -1,7 +1,8 @@
-import { ComponentConfig } from "./ComponentConfig";
-
-import type { PointLightComponent } from '../../../world/components/PointLightComponent';
 import { Color3 } from "@babylonjs/core/Maths/math.color";
+
+import type { PointLightComponent } from '@fantasy-console/core/world/components/PointLightComponent';
+
+import { ComponentConfig } from "./ComponentConfig";
 
 /**
  * Configuration data for a {@link PointLightComponent}.

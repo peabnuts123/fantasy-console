@@ -1,7 +1,8 @@
-import { ComponentConfig } from "./ComponentConfig";
-
-import type { DirectionalLightComponent } from '../../../world/components/DirectionalLightComponent';
 import { Color3 } from "@babylonjs/core/Maths/math.color";
+
+import type { DirectionalLightComponent } from '@fantasy-console/core/world/components/DirectionalLightComponent';
+
+import { ComponentConfig } from "./ComponentConfig";
 
 /**
  * Configuration data for a {@link DirectionalLightComponent}.

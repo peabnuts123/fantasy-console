@@ -1,4 +1,4 @@
-import type { Vector3 } from '@babylonjs/core/Maths/math.vector';
+import type { Vector3 } from '@fantasy-console/core/util/Vector3';
 
 import { ComponentConfig } from './components/ComponentConfig';
 

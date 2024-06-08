@@ -3,10 +3,12 @@ import { Engine } from "@babylonjs/core/Engines/engine";
 import { Scene } from "@babylonjs/core/scene";
 import "@babylonjs/loaders/OBJ/objFileLoader";
 
+import { Input } from '@fantasy-console/core/modules/Input';
+
 import { loadCartridge, fetchCartridge } from './cartridge';
 import Resolver from './Resolver';
 import { Game } from "./Game";
-import { Input } from './modules/Input';
+import { BabylonInputManager } from './modules/BabylonInputManager';
 import Modules from './modules';
 
 
@@ -40,7 +42,7 @@ export class Runtime {
     engine.setSize(initialCanvasWidth, initialCanvasHeight);
 
     // Initialize singleton modules
-    Input.init(engine);
+    Input.init(new BabylonInputManager(engine));
 
     // Babylon scene (NOT game scene)
     var scene = new Scene(engine);

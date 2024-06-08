@@ -1,6 +1,6 @@
-import { ComponentConfig } from "./ComponentConfig";
+import type { CameraComponent } from '@fantasy-console/core/world/components/CameraComponent';
 
-import type { CameraComponent } from '../../../world/components/CameraComponent';
+import { ComponentConfig } from "./ComponentConfig";
 
 /**
  * Configuration data for a {@link CameraComponent}.

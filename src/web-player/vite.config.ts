@@ -14,6 +14,7 @@ export default defineConfig(async (env) => {
     resolve: {
       alias: {
         '@fantasy-console/runtime': path.resolve(__dirname, "../runtime/src"),
+        '@fantasy-console/core': path.resolve(__dirname, "../core/src"),
       }
     },
   };

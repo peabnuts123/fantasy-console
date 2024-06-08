@@ -1,4 +1,3 @@
-import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { Unzipped, unzip } from 'fflate';
 
 export * from './archive';

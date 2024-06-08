@@ -1,9 +1,11 @@
-import { GameObjectComponent, GameObjectComponentData, Input, InputButton } from '@fantasy-console/core';
+import { GameObjectComponent, GameObjectComponentData } from '@fantasy-console/core';
+import { Vector2 } from '@fantasy-console/core/util';
+import { Input, InputButton } from '@fantasy-console/core/modules/Input';
 
 const SPEED_PER_SECOND = 3.0;
 
 /*
-  How can we get a reference to a thing?
+  @TODO How can we get a reference to a thing?
  */
 class MyObject extends GameObjectComponent {
   private time: number;
@@ -17,7 +19,7 @@ class MyObject extends GameObjectComponent {
     this.time += deltaTime;
 
     // @TODO vector2 class
-    const delta = { x: 0, y: 0 };
+    let delta = new Vector2(0, 0);
 
     if (Input.isButtonPressed(InputButton.Right)) delta.x += 1;
     if (Input.isButtonPressed(InputButton.Left)) delta.x -= 1;
@@ -25,12 +27,8 @@ class MyObject extends GameObjectComponent {
     if (Input.isButtonPressed(InputButton.Up)) delta.y += 1;
     if (Input.isButtonPressed(InputButton.Down)) delta.y -= 1;
 
-
-    // Normalize delta
-    if (delta.x !== 0 || delta.y !== 0) {
-      delta.x = (delta.x / Math.sqrt(delta.x ** 2 + delta.y ** 2)) * SPEED_PER_SECOND * deltaTime;
-      delta.y = (delta.y / Math.sqrt(delta.x ** 2 + delta.y ** 2)) * SPEED_PER_SECOND * deltaTime;
-    }
+    // Normalize to speed per second
+    delta.normalizeSelf().multiplySelf(SPEED_PER_SECOND * deltaTime)
 
     this.gameObject.position.x += delta.x;
     this.gameObject.position.z += delta.y;

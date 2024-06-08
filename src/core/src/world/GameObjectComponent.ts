@@ -16,10 +16,10 @@ export interface GameObjectComponentData {
  */
 export abstract class GameObjectComponent {
   /** The GameObject this component is attached to */
-  protected readonly gameObject: GameObject;
+  private readonly _gameObject: GameObject;
 
   protected constructor(data: GameObjectComponentData) {
-    this.gameObject = data.gameObject;
+    this._gameObject = data.gameObject;
   }
 
   /**
@@ -32,4 +32,8 @@ export abstract class GameObjectComponent {
    * is destroyed.
    */
   public onDestroy(): void { }
+
+  protected get gameObject(): GameObject {
+    return this._gameObject;
+  }
 }

@@ -1,5 +1,5 @@
 import { VirtualFile, VirtualFileType } from './cartridge';
-import * as Core from './core';
+import { CoreModules } from './core.g';
 
 const SCRIPT_PATH_PREFIX = `scripts/`;
 
@@ -31,8 +31,12 @@ export class ScriptLoader {
 
   public constructor() {
     // Magic module definitions
-    this.moduleCache['@fantasy-console/core'] = Core;
+    /* require */
     this.moduleCache['require'] = () => { throw new Error(`Nested require is not supported, it should not be necessary`) };
+    /* core modules */
+    CoreModules.forEach((coreModule) => {
+      this.moduleCache[coreModule.name] = coreModule.module;
+    })
   }
 
   /**
@@ -52,7 +56,8 @@ export class ScriptLoader {
 
     let moduleDefinition: ModuleDefinition = undefined!;
     let scriptSource = new TextDecoder().decode(scriptFile.bytes);
-    new Function('define', `"use strict";${scriptSource}`)(this.defineModule.bind(this, (result) => {
+    // @NOTE use magic "source map" keyword `sourceURL` to make script show up in devtools sources under `cartridge/`
+    new Function('define', `"use strict";\n${scriptSource}\n//# sourceURL=cartridge/${scriptFile.path}`)(this.defineModule.bind(this, (result) => {
       moduleDefinition = result;
     }));
 

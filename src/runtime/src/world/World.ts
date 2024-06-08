@@ -1,7 +1,10 @@
 import type { Scene } from "@babylonjs/core/scene";
-import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import { GameObject, GameObjectData } from "./GameObject";
+import { GameObject, GameObjectData } from "@fantasy-console/core/world/GameObject";
 
+import { GameObjectBabylon } from './GameObjectBabylon';
+
+
+/* @TODO should / could this live in core? */
 
 /**
  * The game world, containing all the current {@link GameObject}s
@@ -42,8 +45,7 @@ export class World {
    */
   public createGameObject(data: GameObjectData) {
     const id = this.getNextGameObjectId();
-    const transform = new TransformNode(`GameObject(${id})`, this.scene);
-    const gameObject = new GameObject(transform, this, id, data);
+    const gameObject: GameObject = new GameObjectBabylon(this, id, data);
     this.gameObjects.push(gameObject);
     return gameObject;
   }

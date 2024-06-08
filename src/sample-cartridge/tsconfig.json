@@ -15,7 +15,8 @@
 
     "baseUrl": ".",
     "paths": {
-      "@fantasy-console/core": ["../runtime/dist/core"],
+      "@fantasy-console/core": ["../core/dist"],
+      "@fantasy-console/core/*": ["../core/dist/*"],
     },
 
     /* Linting */
