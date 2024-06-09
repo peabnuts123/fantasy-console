@@ -7,7 +7,6 @@ import { Vector3 as Vector3Babylon } from "@babylonjs/core/Maths/math.vector";
 import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { PointLight } from "@babylonjs/core/Lights/pointLight";
-import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 
 import { GameObjectComponent, GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
 import { GameObject } from "@fantasy-console/core/world/GameObject";
@@ -86,7 +85,7 @@ export class Game {
 
     // Load the first scene on the cartridge
     // @TODO add concept of "initial" scene to cartridge manifest
-    this.loadCartridgeScene(cartridge.scenes[0]);
+    await this.loadCartridgeScene(cartridge.scenes[0]);
   }
 
   /**
@@ -118,14 +117,28 @@ export class Game {
    * Create a new instance of a GameObject from a {@link GameObjectConfig} i.e. a cartridge-defined object.
    * @param gameObjectConfig The config to instantiate.
    */
-  private async createGameObjectFromConfig(gameObjectConfig: GameObjectConfig): Promise<GameObject> {
+  private async createGameObjectFromConfig(gameObjectConfig: GameObjectConfig, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObject> {
+    // Construct game object transform for constructing scene's hierarchy
+    const gameObjectTransform = new TransformBabylon(
+      gameObjectConfig.name,
+      this.babylonScene,
+      parentTransform,
+      gameObjectConfig.position
+    );
+
+    // Create all child objects first
+    let childrenObjects = await Promise.all(gameObjectConfig.children.map((childObjectConfig) => this.createGameObjectFromConfig(childObjectConfig, gameObjectTransform)));
+
+    // Create blank object
     const gameObject = this.world.createGameObject({
-      transform: new TransformBabylon(
-        new TransformNode(`GameObject(${gameObjectConfig.id})`, this.babylonScene),
-        gameObjectConfig.position
-      )
+      name: gameObjectConfig.name,
+      transform: gameObjectTransform,
+      children: childrenObjects,
     });
-    let lightCount = 0;
+
+    // Load game object components
+    // @TODO this light thingy is nonsense, remove it
+    let debug_lightCount = 0;
     for (let componentConfig of gameObjectConfig.components) {
       // Load well-known inbuilt component types
       if (componentConfig instanceof MeshComponentConfig) {
@@ -150,14 +163,14 @@ export class Game {
         gameObject.addComponent(new CameraComponentBabylon({ gameObject }, camera));
       } else if (componentConfig instanceof DirectionalLightComponentConfig) {
         /* Directional Light component */
-        const light = new DirectionalLight(`light_directional_${lightCount++}`, Vector3Babylon.Down(), this.babylonScene);
+        const light = new DirectionalLight(`light_directional_${debug_lightCount++}`, Vector3Babylon.Down(), this.babylonScene);
         light.specular = Color3.Black();
         light.intensity = componentConfig.intensity;
         light.diffuse = componentConfig.color;
         gameObject.addComponent(new DirectionalLightComponentBabylon({ gameObject }, light));
       } else if (componentConfig instanceof PointLightComponentConfig) {
         /* Point Light component */
-        const light = new PointLight(`light_point_${lightCount++}`, Vector3Babylon.Zero(), this.babylonScene);
+        const light = new PointLight(`light_point_${debug_lightCount++}`, Vector3Babylon.Zero(), this.babylonScene);
         light.specular = Color3.Black();
         light.intensity = componentConfig.intensity;
         light.diffuse = componentConfig.color;

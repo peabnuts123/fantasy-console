@@ -5,8 +5,9 @@ import { ComponentDefinition } from "./components/ComponentDefinition";
  * i.e. The raw data in the archive before being loaded by the engine into a {@link GameObjectConfig}.
  */
 export interface SceneObjectDefinition {
-  id: number;
+  name: string;
   position: { x: number, y: number, z: number };
   rotation: number;
   components: ComponentDefinition[];
+  children: SceneObjectDefinition[] | undefined;
 }

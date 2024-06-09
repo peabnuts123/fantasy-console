@@ -3,7 +3,7 @@ import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
 import { Vector3 } from "@fantasy-console/core/util/Vector3";
 
 import { GameObjectConfig } from "./GameObjectConfig";
-import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, SceneDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition } from "../archive";
+import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, SceneDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition, SceneObjectDefinition } from "../archive";
 import { CameraComponentConfig, ComponentConfig, DirectionalLightComponentConfig, MeshComponentConfig, PointLightComponentConfig, ScriptComponentConfig } from "./components";
 import { VirtualFileType } from "./VirtualFile";
 import { VirtualFileSystem } from "./VirtualFileSystem";
@@ -48,54 +48,64 @@ export class SceneConfig {
     /* Game Objects */
     this.objects = [];
     for (let objectDefinition of sceneDefinition.objects) {
-      let components: ComponentConfig[] = [];
-      for (let componentDefinition of objectDefinition.components) {
-        switch (componentDefinition.type) {
-          case ComponentDefinitionType.Mesh: {
-            const meshComponentDefinition = componentDefinition as MeshComponentDefinition;
-            const meshFile = fileSystem.getById(meshComponentDefinition.meshFileId, VirtualFileType.Model);
-            components.push(new MeshComponentConfig(meshFile));
-            break;
-          }
-          case ComponentDefinitionType.Script: {
-            const scriptComponentDefinition = componentDefinition as ScriptComponentDefinition;
-            const scriptFile = fileSystem.getById(scriptComponentDefinition.scriptFileId, VirtualFileType.Script);
-            components.push(new ScriptComponentConfig(scriptFile));
-            break;
-          }
-          case ComponentDefinitionType.Camera: {
-            const cameraComponentDefinition = componentDefinition as CameraComponentDefinition;
-            components.push(new CameraComponentConfig());
-            break;
-          }
-          case ComponentDefinitionType.DirectionalLight: {
-            const directionalLightComponentDefinition = componentDefinition as DirectionalLightComponentDefinition;
-            const color = new Color3(
-              directionalLightComponentDefinition.color.r,
-              directionalLightComponentDefinition.color.g,
-              directionalLightComponentDefinition.color.b,
-            );
-            components.push(new DirectionalLightComponentConfig(directionalLightComponentDefinition.intensity, color));
-            break;
-          }
-          case ComponentDefinitionType.PointLight: {
-            const pointLightComponentDefinition = componentDefinition as PointLightComponentDefinition;
-            const color = new Color3(
-              pointLightComponentDefinition.color.r,
-              pointLightComponentDefinition.color.g,
-              pointLightComponentDefinition.color.b,
-            );
-            components.push(new PointLightComponentConfig(pointLightComponentDefinition.intensity, color));
-            break;
-          }
-          default: {
-            throw new Error(`Unknown component type: ${componentDefinition.type}`);
-          }
+      this.objects.push(this.loadObjectDefinition(objectDefinition, fileSystem));
+    }
+  }
+
+  private loadObjectDefinition(objectDefinition: SceneObjectDefinition, fileSystem: VirtualFileSystem): GameObjectConfig {
+    let components: ComponentConfig[] = [];
+    for (let componentDefinition of objectDefinition.components) {
+      switch (componentDefinition.type) {
+        case ComponentDefinitionType.Mesh: {
+          const meshComponentDefinition = componentDefinition as MeshComponentDefinition;
+          const meshFile = fileSystem.getById(meshComponentDefinition.meshFileId, VirtualFileType.Model);
+          components.push(new MeshComponentConfig(meshFile));
+          break;
+        }
+        case ComponentDefinitionType.Script: {
+          const scriptComponentDefinition = componentDefinition as ScriptComponentDefinition;
+          const scriptFile = fileSystem.getById(scriptComponentDefinition.scriptFileId, VirtualFileType.Script);
+          components.push(new ScriptComponentConfig(scriptFile));
+          break;
+        }
+        case ComponentDefinitionType.Camera: {
+          const cameraComponentDefinition = componentDefinition as CameraComponentDefinition;
+          components.push(new CameraComponentConfig());
+          break;
+        }
+        case ComponentDefinitionType.DirectionalLight: {
+          const directionalLightComponentDefinition = componentDefinition as DirectionalLightComponentDefinition;
+          const color = new Color3(
+            directionalLightComponentDefinition.color.r,
+            directionalLightComponentDefinition.color.g,
+            directionalLightComponentDefinition.color.b,
+          );
+          components.push(new DirectionalLightComponentConfig(directionalLightComponentDefinition.intensity, color));
+          break;
+        }
+        case ComponentDefinitionType.PointLight: {
+          const pointLightComponentDefinition = componentDefinition as PointLightComponentDefinition;
+          const color = new Color3(
+            pointLightComponentDefinition.color.r,
+            pointLightComponentDefinition.color.g,
+            pointLightComponentDefinition.color.b,
+          );
+          components.push(new PointLightComponentConfig(pointLightComponentDefinition.intensity, color));
+          break;
+        }
+        default: {
+          throw new Error(`Unknown component type: ${componentDefinition.type}`);
         }
       }
-
-      let position = new Vector3(objectDefinition.position.x, objectDefinition.position.y, objectDefinition.position.z);
-      this.objects.push(new GameObjectConfig(objectDefinition.id, position, objectDefinition.rotation, components));
     }
+
+    // Load children (recursively)
+    let children: GameObjectConfig[] = [];
+    if (objectDefinition.children !== undefined) {
+      children = objectDefinition.children.map((childObjectDefinition) => this.loadObjectDefinition(childObjectDefinition, fileSystem));
+    }
+
+    let position = new Vector3(objectDefinition.position.x, objectDefinition.position.y, objectDefinition.position.z);
+    return new GameObjectConfig(objectDefinition.name, position, objectDefinition.rotation, components, children);
   }
 }

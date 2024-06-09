@@ -61,7 +61,7 @@ export class Runtime {
     // Boot game
     // *blows on cartridge*
     timerStart = performance.now();
-    game.loadCartridge(cartridge);
+    await game.loadCartridge(cartridge);
     console.log(`Loaded game in ${(performance.now() - timerStart).toFixed(1)}ms`);
 
     // Wait for scene

@@ -4,7 +4,7 @@
       "id": 0,
       "objects": [
         {
-          "id": 0,
+          "name": "Map",
           "position": {
             "x": 0,
             "y": 0,
@@ -19,7 +19,7 @@
           ]
         },
         {
-          "id": 1,
+          "name": "Burger",
           "position": {
             "x": 2,
             "y": 0,
@@ -44,10 +44,27 @@
                 "b": 0
               }
             }
+          ],
+          "children": [
+            {
+              "name": "Dumpster",
+              "position": {
+                "x": 0,
+                "y": 0.5,
+                "z": 0
+              },
+              "rotation": 0,
+              "components": [
+                {
+                  "type": 0,
+                  "meshFileId": 1005
+                }
+              ]
+            }
           ]
         },
         {
-          "id": 2,
+          "name": "Main Camera",
           "position": {
             "x": 0,
             "y": 0.5,
@@ -61,19 +78,7 @@
           ]
         },
         {
-          "id": 3,
-          "position": {
-            "x": 0,
-            "y": 0.5,
-            "z": 0
-          },
-          "rotation": 0,
-          "components": [
-
-          ]
-        },
-        {
-          "id": 4,
+          "name": "Sun",
           "position": {
             "x": 0,
             "y": 0.5,

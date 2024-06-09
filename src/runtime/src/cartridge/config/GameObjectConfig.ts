@@ -7,15 +7,17 @@ import { ComponentConfig } from './components/ComponentConfig';
  * but not yet loaded into the game. Think of it like a template (Unity's "Prefabs", Unreal's "Blueprints", Godot's "Scenes", etc.)
  */
 export class GameObjectConfig {
-  public id: number;
+  public name: string;
   public position: Vector3;
   public rotation: number; // @TODO expressed as a 1D angle for now
   public components: ComponentConfig[];
+  public children: GameObjectConfig[];
 
-  public constructor(id: number, position: Vector3, rotation: number, components: ComponentConfig[]) {
-    this.id = id;
+  public constructor(name: string, position: Vector3, rotation: number, components: ComponentConfig[], children: GameObjectConfig[]) {
+    this.name = name;
     this.position = position;
     this.rotation = rotation;
     this.components = components;
+    this.children = children;
   }
 }

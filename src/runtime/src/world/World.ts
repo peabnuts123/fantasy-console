@@ -43,7 +43,7 @@ export class World {
    * @param data Constructor data for new {@link GameObject}
    * @returns The new {@link GameObject} instance.
    */
-  public createGameObject(data: GameObjectData) {
+  public createGameObject(data: GameObjectData): GameObject {
     const id = this.getNextGameObjectId();
     const gameObject: GameObject = new GameObjectBabylon(this, id, data);
     this.gameObjects.push(gameObject);
