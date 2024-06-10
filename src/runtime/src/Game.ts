@@ -10,11 +10,11 @@ import { PointLight } from "@babylonjs/core/Lights/pointLight";
 
 import { GameObjectComponent, GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
 import { GameObject } from "@fantasy-console/core/world/GameObject";
+import { World } from '@fantasy-console/core/modules/World';
 
 import { ScriptLoader } from './ScriptLoader';
-import { World } from './world/World';
 import { WorldState } from './world/WorldState';
-import { TransformBabylon } from "./world/Transform";
+import { TransformBabylon } from "./world/TransformBabylon";
 import {
   Cartridge,
   MeshComponentConfig,
@@ -33,6 +33,7 @@ import {
   DirectionalLightComponentBabylon,
   PointLightComponentBabylon,
 } from './world/components';
+import { GameObjectBabylon } from "./world/GameObjectBabylon";
 
 
 
@@ -43,7 +44,6 @@ import {
 export class Game {
   private cartridge: Cartridge | undefined;
   private babylonScene: BabylonScene;
-  private world: World;
   private worldState: WorldState;
   private assetCache: Map<VirtualFile, AssetContainer>;
   private scriptLoader: ScriptLoader;
@@ -51,18 +51,9 @@ export class Game {
 
   constructor(babylonScene: BabylonScene) {
     this.babylonScene = babylonScene;
-    this.world = new World(babylonScene);
     this.worldState = {};
     this.assetCache = new Map();
     this.scriptLoader = new ScriptLoader();
-  }
-
-  /**
-   * Called once per frame.
-   * @param deltaTime Time (in seconds) since the last frame.
-   */
-  public update(deltaTime: number): void {
-    this.world.update(deltaTime);
   }
 
   /**
@@ -109,7 +100,16 @@ export class Game {
 
     /* Load game objects */
     for (let sceneObject of scene.objects) {
-      await this.createGameObjectFromConfig(sceneObject);
+      const gameObject = await this.createGameObjectFromConfig(sceneObject);
+      World.addObject(gameObject);
+    }
+
+    // Call init() on all game objects
+    // @NOTE Special case. init() is only called after ALL
+    // GameObjects have been loaded, as opposed to immediately after adding
+    // each object to the scene
+    for (let gameObject of World.gameObjects) {
+      gameObject.init();
     }
   }
 
@@ -127,14 +127,18 @@ export class Game {
     );
 
     // Create all child objects first
-    let childrenObjects = await Promise.all(gameObjectConfig.children.map((childObjectConfig) => this.createGameObjectFromConfig(childObjectConfig, gameObjectTransform)));
+    await Promise.all(gameObjectConfig.children.map((childObjectConfig) => this.createGameObjectFromConfig(childObjectConfig, gameObjectTransform)));
 
     // Create blank object
-    const gameObject = this.world.createGameObject({
-      name: gameObjectConfig.name,
-      transform: gameObjectTransform,
-      children: childrenObjects,
-    });
+    const gameObject: GameObject = new GameObjectBabylon(
+      World.getNextGameObjectId(),
+      {
+        name: gameObjectConfig.name,
+        transform: gameObjectTransform,
+      }
+    );
+
+    gameObjectTransform.setGameObject(gameObject);
 
     // Load game object components
     // @TODO this light thingy is nonsense, remove it

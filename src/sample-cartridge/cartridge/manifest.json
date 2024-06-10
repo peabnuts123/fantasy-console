@@ -67,8 +67,8 @@
           "name": "Main Camera",
           "position": {
             "x": 0,
-            "y": 0.5,
-            "z": -5
+            "y": 2.5,
+            "z": -4
           },
           "rotation": 0,
           "components": [

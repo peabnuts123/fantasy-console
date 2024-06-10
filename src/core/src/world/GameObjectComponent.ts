@@ -23,6 +23,12 @@ export abstract class GameObjectComponent {
   }
 
   /**
+   * Called once, after the game is added to the world.
+   * When a scene is loaded, all objects are loaded before this is called.
+   */
+  public init() { }
+
+  /**
    * Called once per frame
    * @param _deltaTime Time (in seconds) since the previous frame
    */

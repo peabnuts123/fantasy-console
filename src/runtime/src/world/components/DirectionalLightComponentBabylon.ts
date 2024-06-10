@@ -3,9 +3,9 @@ import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
 import { DirectionalLightComponent } from "@fantasy-console/core/world/components/DirectionalLightComponent";
 
-import { InternalGameObjectComponent } from "../InternalGameObjectComponent";
+import { GameObjectBabylon } from "../GameObjectBabylon";
 
-export class DirectionalLightComponentBabylon extends InternalGameObjectComponent implements DirectionalLightComponent {
+export class DirectionalLightComponentBabylon extends DirectionalLightComponent {
   private light: DirectionalLight;
 
   public constructor(data: GameObjectComponentData, light: DirectionalLight) {
@@ -17,5 +17,10 @@ export class DirectionalLightComponentBabylon extends InternalGameObjectComponen
   public override onDestroy(): void {
     super.onDestroy();
     this.light.dispose();
+  }
+
+  // @NOTE override to expose concrete type for internal components
+  public get gameObject(): GameObjectBabylon {
+    return super.gameObject as GameObjectBabylon;
   }
 }

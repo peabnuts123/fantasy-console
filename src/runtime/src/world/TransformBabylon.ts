@@ -3,6 +3,7 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { Scene as BabylonScene } from '@babylonjs/core/scene';
 
 import { Vector3 } from '@fantasy-console/core/util/Vector3';
+import { GameObject } from '@fantasy-console/core/world/GameObject';
 import { Transform } from '@fantasy-console/core/world/Transform';
 
 /**
@@ -17,25 +18,13 @@ export class WrappedBabylonVector3 extends Vector3 {
   }
 
   public override get x(): number { return this.vec.x; }
-  public override set x(value: number) {
-    // Write to internal value AND wrapped value, just for sanity reasons (has no real effect)
-    super.x = value;
-    this.vec.x = value;
-  }
+  public override set x(value: number) { this.vec.x = value; }
 
   public override get y(): number { return this.vec.y; }
-  public override set y(value: number) {
-    // Write to internal value AND wrapped value, just for sanity reasons (has no real effect)
-    super.y = value;
-    this.vec.y = value;
-  }
+  public override set y(value: number) { this.vec.y = value; }
 
   public override get z(): number { return this.vec.z; }
-  public override set z(value: number) {
-    // Write to internal value AND wrapped value, just for sanity reasons (has no real effect)
-    super.z = value;
-    this.vec.z = value;
-  }
+  public override set z(value: number) { this.vec.z = value; }
 }
 
 export class TransformBabylon extends Transform {
@@ -65,6 +54,10 @@ export class TransformBabylon extends Transform {
     this.position = position;
   }
 
+  public setGameObject(gameObject: GameObject): void {
+    this._gameObject = gameObject;
+  }
+
   public getPosition(): Vector3 {
     return this._position;
   }
@@ -80,13 +73,26 @@ export class TransformBabylon extends Transform {
   }
   protected setParent(value: Transform | undefined): void {
     if (!this.__hasInitialised) return; // @NOTE workaround for calling setter in super constructor
-    const valueBabylon = value as TransformBabylon;
+    const valueBabylon = value as TransformBabylon | undefined;
     if (valueBabylon !== undefined) {
       this.node.setParent(valueBabylon.node);
     } else {
       this.node.setParent(null);
     }
 
+    // Remove this transform from its current parent's children (if applicable)
+    if (this._parent !== undefined) {
+      this._parent.children.splice(
+        this._parent.children.indexOf(this),
+        1
+      );
+    }
+
+    // Set this transform's parent
     this._parent = valueBabylon;
+    // Add this transform to the new parent's children
+    if (valueBabylon !== undefined) {
+      valueBabylon.children.push(this);
+    }
   }
 }

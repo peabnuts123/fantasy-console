@@ -79,7 +79,6 @@ export class Runtime {
       scene.render();
       const deltaTime = engine.getDeltaTime() / 1000;
       Modules.onUpdate(deltaTime);
-      game.update(deltaTime);
       // Invoke all `onUpdate` callbacks
       this.onUpdateCallbacks.forEach((callback) => callback());
     });

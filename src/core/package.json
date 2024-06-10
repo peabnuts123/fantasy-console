@@ -7,7 +7,7 @@
   "module": "src/index.ts",
   "scripts": {
     "start": "nodemon --watch src --ext 'ts' --exec npm run build",
-    "build": "tsc --project tsconfig.json"
+    "build": "rm -rf dist && tsc --project tsconfig.json"
   },
   "devDependencies": {
     "nodemon": "^3.1.0",

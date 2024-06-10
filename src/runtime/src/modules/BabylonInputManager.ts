@@ -51,7 +51,6 @@ export class BabylonInputManager implements NativeInputManager {
           break;
         case DeviceType.Keyboard:
           console.log(`Device connected: "Keyboard"`, eventData);
-          let keyboard =this.manager.getDeviceSource(DeviceType.Keyboard);
           break;
         case DeviceType.Mouse:
           console.log(`Device connected: "Mouse"`, eventData);

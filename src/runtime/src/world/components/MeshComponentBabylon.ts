@@ -3,12 +3,12 @@ import type { AssetContainer, InstantiatedEntries } from "@babylonjs/core/assetC
 import { GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
 import { MeshComponent } from "@fantasy-console/core/world/components/MeshComponent";
 
-import { InternalGameObjectComponent } from "../InternalGameObjectComponent";
+import { GameObjectBabylon } from "../GameObjectBabylon";
 
 /**
  * Loads a mesh for this GameObject
  */
-export class MeshComponentBabylon extends InternalGameObjectComponent implements MeshComponent {
+export class MeshComponentBabylon extends MeshComponent {
   /** Instances (clones) of model assets in the scene */
   private readonly sceneInstances: InstantiatedEntries;
 
@@ -27,6 +27,11 @@ export class MeshComponentBabylon extends InternalGameObjectComponent implements
   public override onDestroy(): void {
     super.onDestroy();
     this.sceneInstances.dispose();
+  }
+
+  // @NOTE override to expose concrete type for internal components
+  public get gameObject(): GameObjectBabylon {
+    return super.gameObject as GameObjectBabylon;
   }
 }
 

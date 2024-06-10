@@ -23,6 +23,9 @@ import * as Util from '@fantasy-console/core/util';
 import * as ModulesIModule from '@fantasy-console/core/modules/IModule';
 import * as ModulesInput from '@fantasy-console/core/modules/Input';
 import * as Modules from '@fantasy-console/core/modules';
+import * as ModulesWorldWorldModule from '@fantasy-console/core/modules/World/WorldModule';
+import * as ModulesWorldWorldQuery from '@fantasy-console/core/modules/World/WorldQuery';
+import * as ModulesWorld from '@fantasy-console/core/modules/World';
 
 export interface CoreModuleDefinition {
   name: string;
@@ -95,5 +98,17 @@ export const CoreModules: CoreModuleDefinition[] = [
   {
     name: '@fantasy-console/core/modules',
     module: Modules,
+  },
+  {
+    name: '@fantasy-console/core/modules/World/WorldModule',
+    module: ModulesWorldWorldModule,
+  },
+  {
+    name: '@fantasy-console/core/modules/World/WorldQuery',
+    module: ModulesWorldWorldQuery,
+  },
+  {
+    name: '@fantasy-console/core/modules/World',
+    module: ModulesWorld,
   }
 ];

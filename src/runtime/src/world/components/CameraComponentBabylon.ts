@@ -5,10 +5,10 @@ import { GameObjectComponentData } from "@fantasy-console/core/world/GameObjectC
 import { CameraComponent } from "@fantasy-console/core/world/components/CameraComponent";
 import { Vector3 } from "@fantasy-console/core/util/Vector3";
 
-import { InternalGameObjectComponent } from "../InternalGameObjectComponent";
+import { GameObjectBabylon } from "../GameObjectBabylon";
 
 
-export class CameraComponentBabylon extends InternalGameObjectComponent implements CameraComponent {
+export class CameraComponentBabylon extends CameraComponent {
   private camera: FreeCamera;
 
   public constructor(data: GameObjectComponentData, camera: FreeCamera) {
@@ -18,11 +18,20 @@ export class CameraComponentBabylon extends InternalGameObjectComponent implemen
   }
 
   public pointAt(target: Vector3) {
-    this.camera.setTarget(new Vector3Babylon(target.x, target.y, target.z));
+    this.camera.target = this.toLocalCoordinates(new Vector3Babylon(target.x, target.y, target.z));
   }
 
   public override onDestroy(): void {
     super.onDestroy();
     this.camera.dispose();
+  }
+
+  // @NOTE override to expose concrete type for internal components
+  public get gameObject(): GameObjectBabylon {
+    return super.gameObject as GameObjectBabylon;
+  }
+
+  private toLocalCoordinates(worldVector: Vector3Babylon): Vector3Babylon {
+    return worldVector.subtract(this.gameObject.transform.node.position);
   }
 }

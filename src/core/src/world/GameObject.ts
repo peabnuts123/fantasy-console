@@ -1,11 +1,11 @@
-import { Vector3 } from "../util/Vector3";
 import { GameObjectComponent } from "./GameObjectComponent";
 import { Transform } from "./Transform";
+import { World } from "../modules/World";
+import { Vector3 } from "../util/Vector3";
 
 export interface GameObjectData {
   name: string;
   transform: Transform;
-  children: GameObject[];
 }
 
 /**
@@ -14,26 +14,31 @@ export interface GameObjectData {
  */
 export abstract class GameObject {
   /** Unique identifier for this GameObject */
-  protected readonly id: number;
+  public readonly id: number;
   /** Human-friendly name for this object */
-  protected readonly name: string;
+  public readonly name: string;
   /** Components attached to this GameObject */
-  protected readonly components: GameObjectComponent[];
+  public readonly components: GameObjectComponent[];
   /** Position, rotation, scale, hierarchy data */
   public readonly transform: Transform;
-  /** Child objects in the scene hierarchy */
-  private readonly children: GameObject[];
 
   public constructor(id: number, data: GameObjectData) {
     this.components = [];
     this.id = id;
     this.name = data.name;
     this.transform = data.transform;
-    this.children = data.children;
   }
 
   public addComponent(component: GameObjectComponent) {
     this.components.push(component);
+  }
+
+  /**
+   * Called once, after the game is added to the world.
+   * When a scene is loaded, all objects are loaded before this is called.
+   */
+  public init() {
+    this.components.forEach((component) => component.init());
   }
 
   /**
@@ -48,7 +53,10 @@ export abstract class GameObject {
    * Destroy this GameObject, removing it (and all of its components)
    * from the World.
    */
-  public abstract destroy(): void;
+  public destroy() {
+    // @NOTE `World.destroyObject()` calls `onDestroy()`
+    World.destroyObject(this);
+  }
 
   /**
    * Called when this GameObject is destroyed.
@@ -65,6 +73,6 @@ export abstract class GameObject {
   }
 
   public toString(): string {
-    return `GameObject(${this.id})`;
+    return `GameObject(${this.name})`;
   }
 }

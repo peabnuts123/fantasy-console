@@ -1,9 +1,14 @@
 import { Vector3 } from "../util/Vector3";
+import { GameObject } from "./GameObject";
 
 export abstract class Transform {
+  private _children: Transform[];
+  protected _gameObject!: GameObject;
+
   public constructor(parent: Transform | undefined, position: Vector3) {
     this.parent = parent;
     this.position = position;
+    this._children = [];
   }
 
   // @NOTE stupid inability for TypeScript to call abstract setters/getters in constructors??
@@ -23,5 +28,13 @@ export abstract class Transform {
   protected abstract setParent(value: Transform | undefined): void;
   public set parent(value: Transform | undefined) {
     this.setParent(value);
+  }
+
+  public get children(): Transform[] {
+    return this._children;
+  }
+
+  public get gameObject(): GameObject {
+    return this._gameObject;
   }
 }

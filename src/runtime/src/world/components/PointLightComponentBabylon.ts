@@ -3,9 +3,10 @@ import { PointLight } from "@babylonjs/core/Lights/pointLight";
 import { GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
 import { PointLightComponent } from "@fantasy-console/core/world/components/PointLightComponent";
 
-import { InternalGameObjectComponent } from "../InternalGameObjectComponent";
+import { GameObjectBabylon } from "../GameObjectBabylon";
 
-export class PointLightComponentBabylon extends InternalGameObjectComponent implements PointLightComponent {
+
+export class PointLightComponentBabylon extends PointLightComponent {
   private light: PointLight;
 
   public constructor(data: GameObjectComponentData, light: PointLight) {
@@ -17,5 +18,10 @@ export class PointLightComponentBabylon extends InternalGameObjectComponent impl
   public override onDestroy(): void {
     super.onDestroy();
     this.light.dispose();
+  }
+
+  // @NOTE override to expose concrete type for internal components
+  public get gameObject(): GameObjectBabylon {
+    return super.gameObject as GameObjectBabylon;
   }
 }

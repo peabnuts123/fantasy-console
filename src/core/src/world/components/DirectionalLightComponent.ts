@@ -1,4 +1,4 @@
 import { GameObjectComponent } from "../GameObjectComponent";
 
-export interface DirectionalLightComponent extends GameObjectComponent {
+export abstract class DirectionalLightComponent extends GameObjectComponent {
 }
