@@ -18,6 +18,30 @@
   },
   "objects": [
     {
+      "id": "8c3c9d34-d20a-4f33-aa5f-2fa4b1a9aec4",
+      "name": "Sun",
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": 0.5,
+          "z": 0
+        },
+        // "rotation": @TODO
+      },
+      // "children" @TODO
+      "components": [
+        {
+          "type": "light_directional",
+          "intensity": 0.2,
+          "color": {
+            "r": 0.8,
+            "g": 1,
+            "b": 0.9
+          }
+        },
+      ]
+    },
+    {
       "id": "f52bfa64-9e98-4384-9e46-be2aea89b710",
       "name": "Ball",
       "transform": {

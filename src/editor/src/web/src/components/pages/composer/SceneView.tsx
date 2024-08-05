@@ -19,7 +19,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ scene: SceneVie
     if (!canvas || !SceneView.hasLoaded) return;
 
     return SceneView.startBabylonView(canvas);
-  }, [SceneView.hasLoaded]);
+  }, [SceneView, SceneView.hasLoaded]);
 
   return (
     <>

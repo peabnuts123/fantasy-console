@@ -64,7 +64,7 @@ export class Composer {
   }
 
   public loadScene(sceneManifest: SceneManifest) {
-    this._currentScene = new SceneView(sceneManifest, this.currentProject.sceneDb);
+    this._currentScene = new SceneView(sceneManifest, this);
   }
 
   public get isLoadingProject() {

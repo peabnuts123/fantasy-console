@@ -1,5 +1,4 @@
 import { FunctionComponent, useEffect, useState } from "react";
-import "@babylonjs/core/Materials/standardMaterial";
 import { observer } from "mobx-react-lite";
 
 import SceneView from "@app/components/pages/composer/SceneView";
@@ -36,26 +35,25 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
       <h1>Composer</h1>
       <Condition if={Composer.hasLoadedProject}
         then={() => (
-          <Condition if={Composer.hasLoadedScene}
-            then={() => (
-              <SceneView scene={Composer.currentScene} />
-            )}
-            else={() => (
-              <>
-                {/* @TODO one day, multiple tabs */}
-                <h1>Project: {Composer.currentProject.project.manifest.projectName}</h1>
+          <>
+            {/* @TODO one day, multiple tabs */}
+            <h1>Project: {Composer.currentProject.project.manifest.projectName}</h1>
 
-                <h2>Scenes</h2>
-                <ul>
-                  {Composer.currentProject.sceneDb.allSceneManifests.map((sceneManifest) => (
-                    <li key={sceneManifest.path}>
-                      <button onClick={() => loadScene(sceneManifest)}>Load Scene: '{sceneManifest.path}'</button>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          />
+            <h2>Scenes</h2>
+            <ul>
+              {Composer.currentProject.sceneDb.allSceneManifests.map((sceneManifest) => (
+                <li key={sceneManifest.path}>
+                  <button onClick={() => loadScene(sceneManifest)}>Load Scene: '{sceneManifest.path}'</button>
+                </li>
+              ))}
+            </ul>
+
+            <Condition if={Composer.hasLoadedScene}
+              then={() => (
+                <SceneView scene={Composer.currentScene} />
+              )}
+            />
+          </>
         )}
         else={() => (
           <>
