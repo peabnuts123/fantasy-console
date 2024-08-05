@@ -69,6 +69,8 @@ function pathToModuleName(path) {
     .replace(/index$/, '')
     // Strip any trailing slashes
     .replace(/\/+$/, '')
+    // Strip invalid identifier characters (but not slashes)
+    .replace(/[^/a-zA-Z0-9]/g, '')
     // Split by path segment
     .split('/');
 

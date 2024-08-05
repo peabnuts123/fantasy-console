@@ -10,7 +10,6 @@ export type QueryFn<TQuery, TResult> = (query: TQuery) => IQueryResult<TResult>;
  * and everything loaded in the game.
  */
 export class WorldModule implements IModule {
-  /** Reference to the game's Babylon scene. */
   /** All {@link GameObject}s currently in the world. */
   public readonly gameObjects: GameObject[];
   /** Counter for unique {@link GameObject} IDs */

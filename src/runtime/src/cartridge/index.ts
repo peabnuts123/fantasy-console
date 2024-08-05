@@ -42,38 +42,6 @@ export async function loadCartridge(cartridgeArchive: CartridgeArchive): Promise
   // Build cartridge from definition
   const scenes: SceneConfig[] = [];
   for (let sceneDefinition of cartridgeDefinition.scenes) {
-    // const objects: GameObjectConfig[] = [];
-    // for (let objectDefinition of sceneDefinition.objects) {
-    //   let components: ComponentConfig[] = [];
-    //   for (let componentDefinition of objectDefinition.components) {
-    //     switch (componentDefinition.type) {
-    //       case ComponentDefinitionType.Mesh: {
-    //         const meshComponentDefinition = componentDefinition as MeshComponentDefinition;
-    //         const meshFile = fileSystem.getById(meshComponentDefinition.meshFileId, VirtualFileType.Model);
-    //         components.push(new MeshComponentConfig(meshFile));
-    //         break;
-    //       }
-    //       case ComponentDefinitionType.Script: {
-    //         const scriptComponentDefinition = componentDefinition as ScriptComponentDefinition;
-    //         const scriptFile = fileSystem.getById(scriptComponentDefinition.scriptFileId, VirtualFileType.Script);
-    //         components.push(new ScriptComponentConfig(scriptFile));
-    //         break;
-    //       }
-    //       case ComponentDefinitionType.Camera: {
-    //         const cameraComponentDefinition = componentDefinition as CameraComponentDefinition;
-    //         components.push(new CameraComponentConfig());
-    //         break;
-    //       }
-    //       default: {
-    //         throw new Error(`Unknown component type: ${componentDefinition.type}`);
-    //       }
-    //     }
-    //   }
-
-    //   let position = new Vector3(objectDefinition.position.x, objectDefinition.position.y, objectDefinition.position.z);
-    //   objects.push(new GameObjectConfig(objectDefinition.id, position, objectDefinition.rotation, components));
-    // }
-
     scenes.push(new SceneConfig(sceneDefinition, fileSystem));
   }
 

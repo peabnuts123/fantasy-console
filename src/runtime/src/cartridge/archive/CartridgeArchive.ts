@@ -44,7 +44,7 @@ export class CartridgeArchive {
   public createVirtualFileSystem(fileReferences: CartridgeArchiveFileReference[]): VirtualFileSystem {
     let files = fileReferences.map((fileReference) => {
       let fileBytes = this.getFile(fileReference.path);
-      return new VirtualFile(fileReference.id, fileReference.type as VirtualFileType, fileReference.path, fileBytes);
+      return new VirtualFile(fileReference.id, fileReference.type, fileReference.path, fileBytes);
     });
     return new VirtualFileSystem(files);
   }
