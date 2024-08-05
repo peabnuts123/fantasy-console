@@ -1,0 +1,9 @@
+.textarea {
+  display: block;
+  width: 100%;
+  background-color: $white;
+  border: 1px solid $grey-medium;
+  border-radius: $radius;
+  padding: $m;
+  min-height: 100px;
+}

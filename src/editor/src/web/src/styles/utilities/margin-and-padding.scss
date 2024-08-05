@@ -1,0 +1,58 @@
+@mixin margin($namespace: "") {
+  // Margin top
+  .u-#{$namespace}margin-top-0 { margin-top: 0 !important; }
+  .u-#{$namespace}margin-top-sm { margin-top: $m-sm !important; }
+  .u-#{$namespace}margin-top-md { margin-top: $m !important; }
+  .u-#{$namespace}margin-top-lg { margin-top: $m-lg !important; }
+  // Margin bottom
+  .u-#{$namespace}margin-bottom-0 { margin-bottom: 0 !important; }
+  .u-#{$namespace}margin-bottom-sm { margin-bottom: $m-sm !important; }
+  .u-#{$namespace}margin-bottom-md { margin-bottom: $m !important; }
+  .u-#{$namespace}margin-bottom-lg { margin-bottom: $m-lg !important; }
+  // Margin left
+  .u-#{$namespace}margin-left-0 { margin-left: 0 !important; }
+  .u-#{$namespace}margin-left-sm { margin-left: $m-sm !important; }
+  .u-#{$namespace}margin-left-md { margin-left: $m !important; }
+  .u-#{$namespace}margin-left-lg { margin-left: $m-lg !important; }
+  // Margin right
+  .u-#{$namespace}margin-right-0 { margin-right: 0 !important; }
+  .u-#{$namespace}margin-right-sm { margin-right: $m-sm !important; }
+  .u-#{$namespace}margin-right-md { margin-right: $m !important; }
+  .u-#{$namespace}margin-right-lg { margin-right: $m-lg !important; }
+}
+
+@include margin();
+@include media-query('tablet') { @include margin('md-'); }
+@include media-query('laptop') { @include margin('lg-'); }
+@include media-query('desktop') { @include margin('xl-'); }
+@include media-query('widescreen') { @include margin('xx-'); }
+
+
+@mixin padding($namespace: "") {
+  // Padding top ============
+  .u-#{$namespace}padding-top-0 { padding-top: 0 !important; }
+  .u-#{$namespace}padding-top-sm { padding-top: $m-sm !important; }
+  .u-#{$namespace}padding-top-md { padding-top: $m !important; }
+  .u-#{$namespace}padding-top-lg { padding-top: $m-lg !important; }
+  // Padding bottom ============
+  .u-#{$namespace}padding-bottom-0 { padding-bottom: 0 !important; }
+  .u-#{$namespace}padding-bottom-sm { padding-bottom: $m-sm !important; }
+  .u-#{$namespace}padding-bottom-md { padding-bottom: $m !important; }
+  .u-#{$namespace}padding-bottom-lg { padding-bottom: $m-lg !important; }
+  // Padding left ============
+  .u-#{$namespace}padding-left-0 { padding-left: 0 !important; }
+  .u-#{$namespace}padding-left-sm { padding-left: $m-sm !important; }
+  .u-#{$namespace}padding-left-md { padding-left: $m !important; }
+  .u-#{$namespace}padding-left-lg { padding-left: $m-lg !important; }
+  // Padding right ============
+  .u-#{$namespace}padding-right-0 { padding-right: 0 !important; }
+  .u-#{$namespace}padding-right-sm { padding-right: $m-sm !important; }
+  .u-#{$namespace}padding-right-md { padding-right: $m !important; }
+  .u-#{$namespace}padding-right-lg { padding-right: $m-lg !important; }
+}
+
+@include padding();
+@include media-query('tablet') { @include padding('md-'); }
+@include media-query('laptop') { @include padding('lg-'); }
+@include media-query('desktop') { @include padding('xl-'); }
+@include media-query('widescreen') { @include padding('xx-'); }

@@ -1,0 +1,14 @@
+// Apply a natural box layout model to all elements, but allowing components to override
+// http://www.paulirish.com/2012/box-sizing-border-box-ftw/
+html { box-sizing: border-box; }
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+img {
+  // Don't allow images to overflow their content
+  max-width: 100%;
+  // Make images render as blocks
+  display: block;
+}

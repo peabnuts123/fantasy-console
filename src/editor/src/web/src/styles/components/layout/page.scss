@@ -1,0 +1,8 @@
+// ========================
+// Page
+// ========================
+.page {
+  @extend .container;
+  padding-top: $m-lg;
+  padding-bottom: $m-lg;
+}

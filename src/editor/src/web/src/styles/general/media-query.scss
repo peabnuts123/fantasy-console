@@ -1,0 +1,13 @@
+@mixin media-query($query-name) {
+  @if $query-name == tablet {
+    @media (min-width: $breakpoint-mobile) { @content; }
+  } @else if $query-name == laptop {
+    @media (min-width: $breakpoint-tablet) { @content; }
+  } @else if $query-name == desktop {
+    @media (min-width: $breakpoint-laptop) { @content; }
+  } @else if $query-name == widescreen {
+    @media (min-width: $breakpoint-desktop) { @content; }
+  } @else {
+    @error "Unknown media query '#{$query-name}'";
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "config": {
+    "clearColor": {
+      "r": 1,
+      "g": 0.8,
+      "b": 0.9
+    },
+    "lighting": {
+      "ambient": {
+        "intensity": 0.3,
+        "color": {
+          "r": 1,
+          "g": 0.9,
+          "b": 0.8
+        }
+      }
+    }
+  },
+  "objects": [
+    {
+      "id": "b77feafe-7a18-49f3-97ae-ae9d1256de91",
+      "name": "Ball",
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        // "rotation": @TODO
+      },
+      // "children" @TODO
+      "components": [
+        {
+          "type": "mesh",
+          "meshFileId": "23a9c372-4cf4-4c86-9c64-ed08cdddf2dd"
+        },
+        {
+          "type": "script",
+          "scriptFileId": "17cbef89-711f-43c4-bacb-6df3d2f81c33"
+        },
+      ]
+    }
+  ]
+}

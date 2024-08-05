@@ -1,0 +1,79 @@
+@use "sass:math";
+
+// Grid - for creating responsive layouts
+
+/* Example:
+  <!-- Thirds columns -->
+  <div class="grid">
+    <div class="grid__cell col-md-1of3">1/3rd</div>
+    <div class="grid__cell col-md-2of3">2/3rds</div>
+  </div>
+
+  <!-- Quarters columns -->
+  <div class="grid">
+    <div class="grid__cell col-md-1of4">1/4th</div>
+    <div class="grid__cell col-md-2of4">2/4ths</div>
+    <div class="grid__cell col-md-1of4">1/4th</div>
+  </div>
+ */
+
+// Gutter between columns and margin around grid
+$grid-gutter: $m;
+
+// Grid container
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+// Item within grid
+.grid__item {
+  width: 100%;
+
+  @include media-query('tablet') {
+    // Grid gutters only on tablet up
+    &:first-child() {
+      padding-left: $grid-gutter;
+    }
+
+    &:last-child() {
+      padding-right: $grid-gutter;
+    }
+  }
+}
+
+// Grid column class for representing size of grid item
+// e.g. `.grid__item.col-md-1of2`
+@mixin grid-column($namespace, $width, $total) {
+  .grid__item.col-#{$namespace}#{$width}of#{$total} {
+    width: #{math.div($width, $total) * 100%};
+
+    // Padding between grid-items, but not grid gutters
+    &:not(:first-child()) {
+      padding-left: math.div($grid-gutter, 2);
+    }
+
+    &:not(:last-child()) {
+      padding-right: math.div($grid-gutter, 2);
+    }
+  }
+}
+
+// Generate a pile of grid column classes using loops instead of hand-coding them
+// Iterate through 2-column, 3-column, 4-column etc. layouts, up to 10, not-including 1.
+// Each class generates up to but not including the total, i.e. there are no classes
+//  such as 2of2, 3of3 etc.
+@mixin grid-items($namespace: "") {
+  @for $total from 2 through 10 {
+    @for $width from 1 through ($total - 1) {
+      @include grid-column($namespace, $width, $total);
+    }
+  }
+}
+
+// Generate breakpoint aliases for grid classes e.g. tablet-up
+@include grid-items();
+@include media-query('tablet') { @include grid-items('md-'); }
+@include media-query('laptop') { @include grid-items('lg-'); }
+@include media-query('desktop') { @include grid-items('xl-'); }
+@include media-query('widescreen') { @include grid-items('xx-'); }

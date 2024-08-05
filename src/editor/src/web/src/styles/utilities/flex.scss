@@ -1,0 +1,30 @@
+
+@mixin flex($namespace: '') {
+  .u-#{$namespace}flex { display: flex !important; }
+
+  // Direction
+  .u-#{$namespace}flex-row { flex-direction: row !important; }
+  .u-#{$namespace}flex-row-reverse { flex-direction: row-reverse !important; }
+  .u-#{$namespace}flex-column { flex-direction: column !important; }
+  .u-#{$namespace}flex-column-reverse { flex-direction: column-reverse !important; }
+
+  // Primary axis alignment
+  .u-#{$namespace}flex-justify-content-start { justify-content: flex-start !important; }
+  .u-#{$namespace}flex-justify-content-end { justify-content: flex-end !important; }
+  .u-#{$namespace}flex-justify-content-center { justify-content: center !important; }
+  .u-#{$namespace}flex-justify-content-between { justify-content: space-between !important; }
+  .u-#{$namespace}flex-justify-content-around { justify-content: space-around !important; }
+
+  // Cross axis alignment
+  .u-#{$namespace}flex-align-items-start { align-items: flex-start !important; }
+  .u-#{$namespace}flex-align-items-end { align-items: flex-end !important; }
+  .u-#{$namespace}flex-align-items-center { align-items: center !important; }
+  .u-#{$namespace}flex-align-items-stretch { align-items: stretch !important; }
+  .u-#{$namespace}flex-align-items-baseline { align-items: baseline !important; }
+}
+
+@include flex();
+@include media-query('tablet') { @include flex('md-'); }
+@include media-query('laptop') { @include flex('lg-'); }
+@include media-query('desktop') { @include flex('xl-'); }
+@include media-query('widescreen') { @include flex('xx-'); }

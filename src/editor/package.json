@@ -5,22 +5,35 @@
   "type": "module",
   "scripts": {
     "start": "tauri dev",
-    "start:web": "cd src/web && vite",
+    "start:web": "cd src/web && next dev",
     "build": "tauri build",
-    "build:web": "cd src/web && tsc && vite build",
+    "build:web": "cd src/web && tsc && next build",
     "debug:buildcart": "cd src/cli && cargo run",
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1"
+    "@babylonjs/core": "^7.18.0",
+    "@babylonjs/loaders": "^7.18.0",
+    "@babylonjs/materials": "^7.18.0",
+    "@tauri-apps/api": "^1",
+    "classnames": "^2.5.1",
+    "jsonc-parser": "^3.3.1",
+    "mobx": "^6.13.1",
+    "mobx-react-lite": "^4.0.7",
+    "next": "14.2.5",
+    "normalize.css": "^8.0.1",
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.14",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.5",
     "sass": "^1.74.1",
-    "typescript": "^5.0.2",
-    "vite": "^5.0.0",
-    "vite-plugin-top-level-await": "^1.4.1",
-    "vite-plugin-wasm": "^3.3.0"
+    "typescript": "^5.0.2"
   },
   "author": "peabnuts123",
   "license": "UNLICENSED"

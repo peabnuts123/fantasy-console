@@ -1,0 +1,10 @@
+// Third party styles
+@import "vendor";
+// Configuration and variables
+@import "config/index";
+// General base styles applying broadly across the whole site
+@import "general/index";
+// Styles for specific components
+@import "components/index";
+// Utilities classes for direct usage in the DOM
+@import "utilities/index";

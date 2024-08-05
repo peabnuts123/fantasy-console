@@ -1,0 +1,10 @@
+@mixin display($namespace: "") {
+  .u-#{$namespace}hidden { display: none !important; }
+  .u-#{$namespace}block { display: block !important; }
+}
+
+@include display();
+@include media-query('tablet') { @include display('md-'); }
+@include media-query('laptop') { @include display('lg-'); }
+@include media-query('desktop') { @include display('xl-'); }
+@include media-query('widescreen') { @include display('xx-'); }

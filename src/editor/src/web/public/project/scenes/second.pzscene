@@ -1,0 +1,63 @@
+{
+  "config": {
+    "clearColor": {
+      "r": 0.9,
+      "g": 1,
+      "b": 0.2
+    },
+    "lighting": {
+      "ambient": {
+        "intensity": 0.3,
+        "color": {
+          "r": 0.9,
+          "g": 1,
+          "b": 0.2
+        }
+      }
+    }
+  },
+  "objects": [
+    {
+      "id": "f52bfa64-9e98-4384-9e46-be2aea89b710",
+      "name": "Ball",
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        // "rotation": @TODO
+      },
+      // "children" @TODO
+      "components": [
+        {
+          "type": "mesh",
+          "meshFileId": "23a9c372-4cf4-4c86-9c64-ed08cdddf2dd"
+        },
+        {
+          "type": "script",
+          "scriptFileId": "17cbef89-711f-43c4-bacb-6df3d2f81c33"
+        },
+      ]
+    },
+    {
+      "id": "f52bfa64-9e98-4384-9e46-be2aea89b710",
+      "name": "Ball 2",
+      "transform": {
+        "position": {
+          "x": 5,
+          "y": 0,
+          "z": 0
+        },
+        // "rotation": @TODO
+      },
+      // "children" @TODO
+      "components": [
+        {
+          "type": "mesh",
+          "meshFileId": "23a9c372-4cf4-4c86-9c64-ed08cdddf2dd"
+        },
+      ]
+    },
+  ]
+}

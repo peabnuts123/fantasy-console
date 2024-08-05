@@ -1,0 +1,50 @@
+{
+  "manifest": {
+    "projectName": "Sample Project",
+    // @TODO, author, description, etc.?
+  },
+  "assets": [
+    {
+      "type": "mesh",
+      "id": "a02fa4f6-a143-4e3d-89e3-fb2508c2d514",
+      "path": "models/ball.mtl",
+      "hash": "fbcea83c8a378bf1", // @NOTE fake xxHash
+    },
+    {
+      "type": "mesh",
+      "id": "23a9c372-4cf4-4c86-9c64-ed08cdddf2dd",
+      "path": "models/ball.obj",
+      "hash": "a2eac5704f9c3819",
+    },
+    // etc.
+    {
+      "type": "texture",
+      "id": "66c65cef-c227-417f-ab76-7d3b8c479f9c",
+      "path": "textures/stones.png",
+      "hash": "7ed6bc44736a5887",
+    },
+    // etc.
+    {
+      "type": "script",
+      "id": "17cbef89-711f-43c4-bacb-6df3d2f81c33",
+      "path": "scripts/my-object.ts",
+      "hash": "ebbe6e0542184505",
+    },
+    // etc.
+  ],
+  "scenes": [
+    /* How do you change scenes? By file name? What about file suffix? */
+    {
+      "path": "scenes/main.pzscene",
+      "hash": "dce83a14dc185472", // @TODO needed?
+    },
+    {
+      "path": "scenes/second.pzscene",
+      "hash": "eecbf9d0036c30cd", // @TODO needed?
+    },
+  ],
+  // @TODO ???
+  // "objectTemplates": [
+
+  // ]
+}
