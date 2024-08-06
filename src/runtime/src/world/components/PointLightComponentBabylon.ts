@@ -1,7 +1,7 @@
 import { PointLight } from "@babylonjs/core/Lights/pointLight";
 
-import { GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
-import { PointLightComponent } from "@fantasy-console/core/world/components/PointLightComponent";
+import { GameObjectComponentData } from "@fantasy-console/core/src/world/GameObjectComponent";
+import { PointLightComponent } from "@fantasy-console/core/src/world/components/PointLightComponent";
 
 import { GameObjectBabylon } from "../GameObjectBabylon";
 

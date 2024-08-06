@@ -19,11 +19,6 @@
     ],
     "paths": {
       "@app/*": ["./src/*"],
-      "@fantasy-console/runtime/*": ["../../../runtime/src/*"],
-      "@fantasy-console/runtime": ["../../../runtime/src"],
-      "@fantasy-console/core/*": ["../../../core/src/*"],
-      "@fantasy-console/core": ["../../../core/src"],
-      "@babylonjs/*": ["../../../runtime/node_modules/@babylonjs/*"], // @NOTE Shared babylon with runtime for type cohesion
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

@@ -1,7 +1,7 @@
 import type { AssetContainer, InstantiatedEntries } from "@babylonjs/core/assetContainer";
 
-import { GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
-import { MeshComponent } from "@fantasy-console/core/world/components/MeshComponent";
+import { GameObjectComponentData } from "@fantasy-console/core/src/world/GameObjectComponent";
+import { MeshComponent } from "@fantasy-console/core/src/world/components/MeshComponent";
 
 import { GameObjectBabylon } from "../GameObjectBabylon";
 

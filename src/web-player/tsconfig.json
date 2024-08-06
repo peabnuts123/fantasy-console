@@ -13,12 +13,6 @@
     "isolatedModules": true,
     "noEmit": true,
 
-    "baseUrl": ".",
-    "paths": {
-      "@fantasy-console/runtime": ["../runtime/src"],
-      "@fantasy-console/core": ["../core/src"],
-    },
-
     "strict": true,
   },
   "include": ["src/**/*.ts"],

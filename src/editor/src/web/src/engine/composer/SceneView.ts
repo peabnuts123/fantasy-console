@@ -8,10 +8,10 @@ import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 import "@babylonjs/loaders/OBJ";
 
-import { TransformBabylon } from '@fantasy-console/runtime/world/TransformBabylon';
-import { GameObject } from '@fantasy-console/core/world';
-import { GameObjectBabylon } from '@fantasy-console/runtime/world/GameObjectBabylon';
-import { DirectionalLightComponentBabylon, MeshComponentBabylon } from '@fantasy-console/runtime/world/components';
+import { TransformBabylon } from '@fantasy-console/runtime/src/world/TransformBabylon';
+import { GameObject } from '@fantasy-console/core/src/world';
+import { GameObjectBabylon } from '@fantasy-console/runtime/src/world/GameObjectBabylon';
+import { DirectionalLightComponentBabylon, MeshComponentBabylon } from '@fantasy-console/runtime/src/world/components';
 import { toColor3, toColor4 } from '@app/engine/composer/project/util/Color';
 
 import { SceneDefinition, SceneManifest } from "./project/scene";

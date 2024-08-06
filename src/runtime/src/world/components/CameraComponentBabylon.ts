@@ -1,9 +1,9 @@
 import { FreeCamera } from "@babylonjs/core/Cameras/freeCamera";
 import { Vector3 as Vector3Babylon } from "@babylonjs/core/Maths/math.vector";
 
-import { GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
-import { CameraComponent } from "@fantasy-console/core/world/components/CameraComponent";
-import { Vector3 } from "@fantasy-console/core/util/Vector3";
+import { GameObjectComponentData } from "@fantasy-console/core/src/world/GameObjectComponent";
+import { CameraComponent } from "@fantasy-console/core/src/world/components/CameraComponent";
+import { Vector3 } from "@fantasy-console/core/src/util/Vector3";
 
 import { GameObjectBabylon } from "../GameObjectBabylon";
 

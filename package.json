@@ -1,0 +1,14 @@
+{
+  "name": "@fantasy-console/root",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Fantasy Console is a fully integrated environment to quickly and easily build, publish and share PS1 and N64 style games.",
+  "author": "peabnuts123",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "src/core",
+    "src/editor",
+    "src/runtime",
+    "src/web-player"
+  ]
+}

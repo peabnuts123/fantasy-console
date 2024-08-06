@@ -1,6 +1,6 @@
 import { Color3 } from "@babylonjs/core/Maths/math.color";
 
-import type { PointLightComponent } from '@fantasy-console/core/world/components/PointLightComponent';
+import type { PointLightComponent } from '@fantasy-console/core/src/world/components/PointLightComponent';
 
 import { ComponentConfig } from "./ComponentConfig";
 

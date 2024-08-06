@@ -2,7 +2,7 @@ import { DeviceType } from "@babylonjs/core/DeviceInput/InputDevices/deviceEnums
 import { DeviceSourceManager } from "@babylonjs/core/DeviceInput/InputDevices/deviceSourceManager";
 import { Engine } from "@babylonjs/core/Engines/engine";
 
-import { InputButton, NativeInputManager } from '@fantasy-console/core/modules/Input'
+import { InputButton, NativeInputManager } from '@fantasy-console/core/src/modules/Input'
 
 enum KeyCodes {
   'Tilde' = 192,

@@ -8,9 +8,9 @@ import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { PointLight } from "@babylonjs/core/Lights/pointLight";
 
-import { GameObjectComponent, GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
-import { GameObject } from "@fantasy-console/core/world/GameObject";
-import { World } from '@fantasy-console/core/modules/World';
+import { GameObjectComponent, GameObjectComponentData } from "@fantasy-console/core/src/world/GameObjectComponent";
+import { GameObject } from "@fantasy-console/core/src/world/GameObject";
+import { World } from '@fantasy-console/core/src/modules/World';
 
 import { ScriptLoader } from './ScriptLoader';
 import { WorldState } from './world/WorldState';

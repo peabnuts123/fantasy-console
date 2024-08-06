@@ -1,4 +1,4 @@
-import { GameObject, GameObjectData } from '@fantasy-console/core/world/GameObject';
+import { GameObject, GameObjectData } from '@fantasy-console/core/src/world/GameObject';
 
 import { TransformBabylon } from './TransformBabylon';
 

@@ -3,7 +3,7 @@ import { Engine } from "@babylonjs/core/Engines/engine";
 import { Scene } from "@babylonjs/core/scene";
 import "@babylonjs/loaders/OBJ/objFileLoader";
 
-import { Input } from '@fantasy-console/core/modules/Input';
+import { Input } from '@fantasy-console/core/src/modules/Input';
 
 import { loadCartridge, fetchCartridge } from './cartridge';
 import Resolver from './Resolver';

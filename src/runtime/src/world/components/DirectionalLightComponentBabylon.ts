@@ -1,7 +1,7 @@
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 
-import { GameObjectComponentData } from "@fantasy-console/core/world/GameObjectComponent";
-import { DirectionalLightComponent } from "@fantasy-console/core/world/components/DirectionalLightComponent";
+import { GameObjectComponentData } from "@fantasy-console/core/src/world/GameObjectComponent";
+import { DirectionalLightComponent } from "@fantasy-console/core/src/world/components/DirectionalLightComponent";
 
 import { GameObjectBabylon } from "../GameObjectBabylon";
 

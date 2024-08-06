@@ -8,24 +8,24 @@
  */
 
 import * as Core from '@fantasy-console/core';
-import * as WorldGameObject from '@fantasy-console/core/world/GameObject';
-import * as WorldGameObjectComponent from '@fantasy-console/core/world/GameObjectComponent';
-import * as WorldTransform from '@fantasy-console/core/world/Transform';
-import * as World from '@fantasy-console/core/world';
-import * as WorldComponentsCameraComponent from '@fantasy-console/core/world/components/CameraComponent';
-import * as WorldComponentsDirectionalLightComponent from '@fantasy-console/core/world/components/DirectionalLightComponent';
-import * as WorldComponentsMeshComponent from '@fantasy-console/core/world/components/MeshComponent';
-import * as WorldComponentsPointLightComponent from '@fantasy-console/core/world/components/PointLightComponent';
-import * as WorldComponents from '@fantasy-console/core/world/components';
-import * as UtilVector2 from '@fantasy-console/core/util/Vector2';
-import * as UtilVector3 from '@fantasy-console/core/util/Vector3';
-import * as Util from '@fantasy-console/core/util';
-import * as ModulesIModule from '@fantasy-console/core/modules/IModule';
-import * as ModulesInput from '@fantasy-console/core/modules/Input';
-import * as Modules from '@fantasy-console/core/modules';
-import * as ModulesWorldWorldModule from '@fantasy-console/core/modules/World/WorldModule';
-import * as ModulesWorldWorldQuery from '@fantasy-console/core/modules/World/WorldQuery';
-import * as ModulesWorld from '@fantasy-console/core/modules/World';
+import * as WorldGameObject from '@fantasy-console/core/src/world/GameObject';
+import * as WorldGameObjectComponent from '@fantasy-console/core/src/world/GameObjectComponent';
+import * as WorldTransform from '@fantasy-console/core/src/world/Transform';
+import * as World from '@fantasy-console/core/src/world';
+import * as WorldComponentsCameraComponent from '@fantasy-console/core/src/world/components/CameraComponent';
+import * as WorldComponentsDirectionalLightComponent from '@fantasy-console/core/src/world/components/DirectionalLightComponent';
+import * as WorldComponentsMeshComponent from '@fantasy-console/core/src/world/components/MeshComponent';
+import * as WorldComponentsPointLightComponent from '@fantasy-console/core/src/world/components/PointLightComponent';
+import * as WorldComponents from '@fantasy-console/core/src/world/components';
+import * as UtilVector2 from '@fantasy-console/core/src/util/Vector2';
+import * as UtilVector3 from '@fantasy-console/core/src/util/Vector3';
+import * as Util from '@fantasy-console/core/src/util';
+import * as ModulesIModule from '@fantasy-console/core/src/modules/IModule';
+import * as ModulesInput from '@fantasy-console/core/src/modules/Input';
+import * as Modules from '@fantasy-console/core/src/modules';
+import * as ModulesWorldWorldModule from '@fantasy-console/core/src/modules/World/WorldModule';
+import * as ModulesWorldWorldQuery from '@fantasy-console/core/src/modules/World/WorldQuery';
+import * as ModulesWorld from '@fantasy-console/core/src/modules/World';
 
 export interface CoreModuleDefinition {
   name: string;

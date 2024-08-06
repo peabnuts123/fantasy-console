@@ -11,12 +11,6 @@ export default defineConfig(async (env) => {
     server: {
       port: 1420,
     },
-    resolve: {
-      alias: {
-        '@fantasy-console/runtime': path.resolve(__dirname, "../runtime/src"),
-        '@fantasy-console/core': path.resolve(__dirname, "../core/src"),
-      }
-    },
   };
 
   if (env.command !== 'build') {

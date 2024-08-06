@@ -1,4 +1,4 @@
-import type { MeshComponent } from '@fantasy-console/core/world/components/MeshComponent';
+import type { MeshComponent } from '@fantasy-console/core/src/world/components/MeshComponent';
 
 import { ComponentConfig } from "./ComponentConfig";
 import { VirtualFile, VirtualFileType } from "../VirtualFile";

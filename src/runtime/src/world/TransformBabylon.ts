@@ -2,9 +2,9 @@ import { Vector3 as Vector3Babylon } from '@babylonjs/core/Maths/math.vector';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { Scene as BabylonScene } from '@babylonjs/core/scene';
 
-import { Vector3 } from '@fantasy-console/core/util/Vector3';
-import { GameObject } from '@fantasy-console/core/world/GameObject';
-import { Transform } from '@fantasy-console/core/world/Transform';
+import { Vector3 } from '@fantasy-console/core/src/util/Vector3';
+import { GameObject } from '@fantasy-console/core/src/world/GameObject';
+import { Transform } from '@fantasy-console/core/src/world/Transform';
 
 /**
  * A Vector3 that is implemented around wrapping a Babylon Vector3 internally.

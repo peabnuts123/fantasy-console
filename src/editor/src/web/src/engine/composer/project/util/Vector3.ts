@@ -1,4 +1,4 @@
-import { Vector3 as RuntimeVector3 } from '@fantasy-console/core/util';
+import { Vector3 as RuntimeVector3 } from '@fantasy-console/core/src/util';
 
 export interface Vector3 {
   x: number;

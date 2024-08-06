@@ -1,4 +1,4 @@
-import type { Vector3 } from '@fantasy-console/core/util/Vector3';
+import type { Vector3 } from '@fantasy-console/core/src/util/Vector3';
 
 import { ComponentConfig } from './components/ComponentConfig';
 

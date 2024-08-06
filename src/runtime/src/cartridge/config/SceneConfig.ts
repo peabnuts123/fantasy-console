@@ -1,6 +1,6 @@
 import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
 
-import { Vector3 } from "@fantasy-console/core/util/Vector3";
+import { Vector3 } from "@fantasy-console/core/src/util/Vector3";
 
 import { GameObjectConfig } from "./GameObjectConfig";
 import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, SceneDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition, SceneObjectDefinition } from "../archive";
