@@ -1,7 +1,9 @@
-import { ComponentDefinition, ComponentDefinitionType } from "./ComponentDefinition";
-
-import { CartridgeArchive } from '../CartridgeArchive';
+import type { CartridgeArchive } from '../CartridgeArchive';
 import type { ScriptComponentConfig } from '../../config/components/ScriptComponentConfig';
+
+import { ComponentDefinition } from "./ComponentDefinition";
+import { ComponentDefinitionType } from "./ComponentDefinitionType";
+
 
 /**
  * Raw script component data within the {@link CartridgeArchive}.
@@ -9,5 +11,5 @@ import type { ScriptComponentConfig } from '../../config/components/ScriptCompon
  */
 export interface ScriptComponentDefinition extends ComponentDefinition {
   type: ComponentDefinitionType.Script;
-  scriptFileId: number;
+  scriptFileId: string;
 }

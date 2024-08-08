@@ -1,42 +1,63 @@
 {
   "scenes": [
     {
-      "id": 0,
+      "path": "scenes/main",
+      "config": {
+        "clearColor": {
+          "r": 1,
+          "g": 0.8,
+          "b": 0.9
+        },
+        "lighting": {
+          "ambient": {
+            "intensity": 0.3,
+            "color": {
+              "r": 1,
+              "g": 0.9,
+              "b": 0.8
+            }
+          }
+        }
+      },
       "objects": [
         {
+          "id": "81dbde77-14d3-4766-851d-e3616e4ce8c6",
           "name": "Map",
-          "position": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+          "transform": {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
           },
-          "rotation": 0,
           "components": [
             {
-              "type": 0,
-              "meshFileId": 1009
+              "type": "mesh",
+              "meshFileId": "6e77e14a-0d3c-4472-a9b1-71a13a888b9b"
             }
           ]
         },
         {
+          "id": "60237d75-6fb3-44ac-b6a9-e7b9a5bd1bea",
           "name": "Burger",
-          "position": {
-            "x": 2,
-            "y": 0,
-            "z": 1
+          "transform": {
+            "position": {
+              "x": 2,
+              "y": 0,
+              "z": 1
+            }
           },
-          "rotation": 0,
           "components": [
             {
-              "type": 0,
-              "meshFileId": 1003
+              "type": "mesh",
+              "meshFileId": "59e2bfad-f6f0-471a-a0a4-7b25b76152dc"
             },
             {
-              "type": 1,
-              "scriptFileId": 2000
+              "type": "script",
+              "scriptFileId": "58189dec-56a3-44db-b7a5-c8171abfb3aa"
             },
             {
-              "type": 4,
+              "type": "light_point",
               "intensity": 1,
               "color": {
                 "r": 1,
@@ -47,47 +68,53 @@
           ],
           "children": [
             {
+              "id": "69377d6d-2429-41d9-9034-83428a256b2c",
               "name": "Dumpster",
-              "position": {
-                "x": 0,
-                "y": 0.5,
-                "z": 0
+              "transform": {
+                "position": {
+                  "x": 0,
+                  "y": 0.5,
+                  "z": 0
+                }
               },
-              "rotation": 0,
               "components": [
                 {
-                  "type": 0,
-                  "meshFileId": 1005
+                  "type": "mesh",
+                  "meshFileId": "a0bfe951-b0e3-449c-a9ef-37734a81a6e6"
                 }
               ]
             }
           ]
         },
         {
+          "id": "ca063719-fe9f-4ac8-a061-35ea8f05193e",
           "name": "Main Camera",
-          "position": {
-            "x": 0,
-            "y": 2.5,
-            "z": -4
+          "transform": {
+            "position": {
+              "x": 0,
+              "y": 2.5,
+              "z": -4
+            }
           },
-          "rotation": 0,
           "components": [
             {
-              "type": 2
+              "type": "camera"
             }
           ]
         },
         {
+          "id": "16d54758-3095-4d32-b108-457d56f2d7f9",
           "name": "Sun",
-          "position": {
-            "x": 0,
-            "y": 0.5,
-            "z": 0
+          "transform": {
+            "position": {
+              "x": 0,
+              "y": 0.5,
+              "z": 0
+            }
           },
-          "rotation": 0,
           "components": [
             {
-              "type": 3,
+              "type": "light_directional",
               "intensity": 0.2,
               "color": {
                 "r": 0.8,
@@ -97,181 +124,168 @@
             }
           ]
         }
-      ],
-      "clearColor": {
-        "r": 1,
-        "g": 0.8,
-        "b": 0.9
-      },
-      "ambientLight": {
-        "intensity": 0.3,
-        "color": {
-          "r": 1,
-          "g": 0.9,
-          "b": 0.8
-        }
-      }
+      ]
     }
   ],
-  "files": [
+  "assets": [
     {
-      "id": 1000,
-      "type": 0,
+      "id": "4bed3ede-8532-40bd-b247-d21319375dfc",
+      "type": "mesh",
       "path": "models/ball.mtl"
     },
     {
-      "id": 1001,
-      "type": 0,
+      "id": "dba91ca4-6ab9-4336-ac9b-b758e59e881e",
+      "type": "mesh",
       "path": "models/ball.obj"
     },
     {
-      "id": 1002,
-      "type": 0,
+      "id": "9b38b1c4-2b70-4d46-b969-fe4e1382014b",
+      "type": "mesh",
       "path": "models/burgerCheese.mtl"
     },
     {
-      "id": 1003,
-      "type": 0,
+      "id": "59e2bfad-f6f0-471a-a0a4-7b25b76152dc",
+      "type": "mesh",
       "path": "models/burgerCheese.obj"
     },
     {
-      "id": 1004,
-      "type": 0,
+      "id": "b4a36730-18cc-487e-b00b-d3881ed1eb99",
+      "type": "mesh",
       "path": "models/detailDumpster_closed.mtl"
     },
     {
-      "id": 1005,
-      "type": 0,
+      "id": "a0bfe951-b0e3-449c-a9ef-37734a81a6e6",
+      "type": "mesh",
       "path": "models/detailDumpster_closed.obj"
     },
     {
-      "id": 1008,
-      "type": 0,
+      "id": "c8d495af-3ff4-49ca-ad1b-c794aaf813c1",
+      "type": "mesh",
       "path": "models/scene.mtl"
     },
     {
-      "id": 1009,
-      "type": 0,
+      "id": "6e77e14a-0d3c-4472-a9b1-71a13a888b9b",
+      "type": "mesh",
       "path": "models/scene.obj"
     },
     {
-      "id": 3000,
-      "type": 1,
+      "id": "5077f008-68cf-46b5-90f2-314dc0d3b508",
+      "type": "texture",
       "path": "textures/asphalt.png"
     },
     {
-      "id": 3001,
-      "type": 1,
+      "id": "e565ac63-6c97-4bd1-94d9-5cf318f58577",
+      "type": "texture",
       "path": "textures/bars.png"
     },
     {
-      "id": 3002,
-      "type": 1,
+      "id": "28dc1397-3f67-4f91-9a82-9f555b7a3308",
+      "type": "texture",
       "path": "textures/clock texture.png"
     },
     {
-      "id": 3003,
-      "type": 1,
+      "id": "02f2b77c-950b-4756-8b43-6e694743f10f",
+      "type": "texture",
       "path": "textures/concrete.png"
     },
     {
-      "id": 3004,
-      "type": 1,
+      "id": "e8dd265c-035e-447f-bd0b-ea295b3d41e7",
+      "type": "texture",
       "path": "textures/concreteSmooth.png"
     },
     {
-      "id": 3005,
-      "type": 1,
+      "id": "1d0c647c-7825-4b6f-b3fe-da4601b23f0c",
+      "type": "texture",
       "path": "textures/dirt.png"
     },
     {
-      "id": 3006,
-      "type": 1,
+      "id": "b4256ba4-c7a5-4fd0-846b-7fed7113cb59",
+      "type": "texture",
       "path": "textures/doors.png"
     },
     {
-      "id": 3007,
-      "type": 1,
+      "id": "ba3a722e-44a2-4e2c-ac7e-f87f2d2a6cdc",
+      "type": "texture",
       "path": "textures/grass.png"
     },
     {
-      "id": 3008,
-      "type": 1,
+      "id": "9d6c6041-97c7-4fa2-a289-40d1c9c052b4",
+      "type": "texture",
       "path": "textures/metal.png"
     },
     {
-      "id": 3009,
-      "type": 1,
+      "id": "0d76192a-da29-4bef-8b67-2342ffcf4318",
+      "type": "texture",
       "path": "textures/picture on shelf texture.png"
     },
     {
-      "id": 3010,
-      "type": 1,
+      "id": "e3d3446d-6bc6-4b9a-a801-b748bdffc5b8",
+      "type": "texture",
       "path": "textures/roof.png"
     },
     {
-      "id": 3011,
-      "type": 1,
+      "id": "64b8a023-97eb-4f1f-8eaf-45bdee70dccf",
+      "type": "texture",
       "path": "textures/roof_plates.png"
     },
     {
-      "id": 3012,
-      "type": 1,
+      "id": "aa185d8e-13ae-45de-bc41-1e892ced05cf",
+      "type": "texture",
       "path": "textures/signs.png"
     },
     {
-      "id": 3013,
-      "type": 1,
+      "id": "b9b7ca3b-3f47-400d-879c-e1a24be5a8d2",
+      "type": "texture",
       "path": "textures/stones.png"
     },
     {
-      "id": 3014,
-      "type": 1,
+      "id": "f17a66a4-2d64-434d-ad6c-1e13bee4946c",
+      "type": "texture",
       "path": "textures/treeA.png"
     },
     {
-      "id": 3015,
-      "type": 1,
+      "id": "807db9eb-8fc6-480a-b06d-50ac8eb74c5e",
+      "type": "texture",
       "path": "textures/treeB.png"
     },
     {
-      "id": 3016,
-      "type": 1,
+      "id": "480efd7b-6a6d-4952-859c-9e13a8f73552",
+      "type": "texture",
       "path": "textures/truck.png"
     },
     {
-      "id": 3017,
-      "type": 1,
+      "id": "4e75fb2b-0f2b-4a45-b4f9-73ee2a888309",
+      "type": "texture",
       "path": "textures/truck_alien.png"
     },
     {
-      "id": 3019,
-      "type": 1,
+      "id": "8e6c2083-572f-41f9-9fea-ca9af889091d",
+      "type": "texture",
       "path": "textures/wall.png"
     },
     {
-      "id": 3020,
-      "type": 1,
+      "id": "5560727b-71eb-440c-bf76-a3e708d00c34",
+      "type": "texture",
       "path": "textures/wall_garage.png"
     },
     {
-      "id": 3021,
-      "type": 1,
+      "id": "7f1fdb0b-78be-4d59-8354-6e676481815d",
+      "type": "texture",
       "path": "textures/wall_lines.png"
     },
     {
-      "id": 3022,
-      "type": 1,
+      "id": "ef90eadf-b096-475c-b2d0-37d160293485",
+      "type": "texture",
       "path": "textures/wall_metal.png"
     },
     {
-      "id": 3023,
-      "type": 1,
+      "id": "c87ddc93-4247-44d4-9f60-d0625e186efa",
+      "type": "texture",
       "path": "textures/windows.png"
     },
     {
-      "id": 2000,
-      "type": 2,
+      "id": "58189dec-56a3-44db-b7a5-c8171abfb3aa",
+      "type": "script",
       "path": "scripts/my-object.js"
     }
   ]

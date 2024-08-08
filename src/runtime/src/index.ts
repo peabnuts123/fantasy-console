@@ -10,7 +10,7 @@ import Resolver from './Resolver';
 import { Game } from "./Game";
 import { BabylonInputManager } from './modules/BabylonInputManager';
 import Modules from './modules';
-
+import { RuntimeAssetResolverProtocol } from "./constants";
 
 export type OnUpdateCallback = () => void;
 
@@ -53,10 +53,12 @@ export class Runtime {
     // Load cartridge
     // @NOTE Load hard-coded cartridge from URL
     let timerStart = performance.now();
-    const cartridgeRaw = await fetchCartridge(SAMPLE_CARTRIDGE_URL);
-    let cartridge = await loadCartridge(cartridgeRaw);
-    Resolver.bindTo(cartridge.files);
+    const cartridgeArchive = await fetchCartridge(SAMPLE_CARTRIDGE_URL);
+    let cartridge = await loadCartridge(cartridgeArchive);
     console.log(`Loaded cartridge in ${(performance.now() - timerStart).toFixed(1)}ms`);
+
+    // Bind resolver to cartridge asset DB
+    Resolver.registerAssetDb(RuntimeAssetResolverProtocol, cartridge.assetDb);
 
     // Boot game
     // *blows on cartridge*
@@ -67,13 +69,8 @@ export class Runtime {
     // Wait for scene
     await scene.whenReadyAsync();
 
-    // Graphics overrides
-    // @TODO remove specular, add gouraud shading, flat shading, etc.
-    // @TODO I guess write a big shader that I can use to do all the things I want
-    scene.textures.forEach((texture) => {
-      texture.updateSamplingMode(Texture.NEAREST_SAMPLINGMODE)
-      texture.anisotropicFilteringLevel = 0;
-    });
+    // @DEBUG hack the textures to look a bit cooler
+    debug_modTextures(scene);
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -85,3 +82,12 @@ export class Runtime {
   }
 }
 
+export function debug_modTextures(scene: Scene): void {
+  // Graphics overrides
+  // @TODO remove specular, add gouraud shading, flat shading, etc.
+  // @TODO I guess write a big shader that I can use to do all the things I want
+  scene.textures.forEach((texture) => {
+    texture.updateSamplingMode(Texture.NEAREST_SAMPLINGMODE)
+    texture.anisotropicFilteringLevel = 0;
+  });
+}

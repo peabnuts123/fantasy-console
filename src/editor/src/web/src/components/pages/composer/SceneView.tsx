@@ -1,9 +1,7 @@
 import React, { FunctionComponent, useEffect, useRef } from "react";
 
-import { SceneView as SceneViewEngine } from "@app/engine/composer/SceneView";
+import { SceneView as SceneViewEngine } from "@lib/composer/SceneView";
 import { observer } from "mobx-react-lite";
-import { Condition } from "@app/components/util/condition";
-import Spinner from "@app/components/spinner";
 
 
 interface Props {
@@ -16,34 +14,18 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ scene: SceneVie
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !SceneView.hasLoaded) return;
+    if (!canvas) return;
 
     return SceneView.startBabylonView(canvas);
-  }, [SceneView, SceneView.hasLoaded]);
+  }, [SceneView]);
 
   return (
     <>
-      <h1>Scene: {SceneView.manifest.path}</h1>
-      <Condition if={SceneView.hasLoaded}
-        then={() => (
-          <>
-            <h1>Viewport</h1>
-            <canvas
-              style={{ width: "100%" }}
-              ref={canvasRef}
-            />
-          </>
-        )}
-        else={() => (
-          <Condition if={SceneView.isLoading}
-            then={() => (
-              <Spinner message="Loading scene..." />
-            )}
-            else={() => (
-              <code>Erk - invalid state</code>
-            )}
-          />
-        )}
+      <h1>Scene: {SceneView.scene.path}</h1>
+      <h1>Viewport</h1>
+      <canvas
+        style={{ width: "100%" }}
+        ref={canvasRef}
       />
     </>
   );

@@ -1,4 +1,4 @@
-import type { CameraComponent } from '@fantasy-console/core/src/world/components/CameraComponent';
+import type { CameraComponent } from '@fantasy-console/core/src/world/components';
 
 import { ComponentConfig } from "./ComponentConfig";
 

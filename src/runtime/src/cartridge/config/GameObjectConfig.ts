@@ -1,22 +1,25 @@
-import type { Vector3 } from '@fantasy-console/core/src/util/Vector3';
+import type { Vector3 } from '@fantasy-console/core/src/util';
 
-import { ComponentConfig } from './components/ComponentConfig';
+import type { ComponentConfig } from './components/ComponentConfig';
+
+export interface GameObjectTransformConfig {
+  position: Vector3;
+  rotation: number; // @TODO expressed as a 1D angle for now
+}
 
 /**
  * Preconfigured GameObject i.e. a GameObject loaded from the raw cartridge file
- * but not yet loaded into the game. Think of it like a template (Unity's "Prefabs", Unreal's "Blueprints", Godot's "Scenes", etc.)
+ * but not yet loaded into the game.
  */
 export class GameObjectConfig {
-  public name: string;
-  public position: Vector3;
-  public rotation: number; // @TODO expressed as a 1D angle for now
-  public components: ComponentConfig[];
-  public children: GameObjectConfig[];
+  public readonly name: string;
+  public readonly transform: GameObjectTransformConfig;
+  public readonly components: ComponentConfig[];
+  public readonly children: GameObjectConfig[];
 
-  public constructor(name: string, position: Vector3, rotation: number, components: ComponentConfig[], children: GameObjectConfig[]) {
+  public constructor(name: string, transform: GameObjectTransformConfig, components: ComponentConfig[], children: GameObjectConfig[]) {
     this.name = name;
-    this.position = position;
-    this.rotation = rotation;
+    this.transform = transform;
     this.components = components;
     this.children = children;
   }

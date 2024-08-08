@@ -1,4 +1,4 @@
-import { VirtualFile, VirtualFileType } from './cartridge';
+import { AssetConfig, AssetType } from './cartridge';
 import { CoreModules } from './core.g';
 
 const SCRIPT_PATH_PREFIX = `scripts/`;
@@ -43,21 +43,21 @@ export class ScriptLoader {
    * Load a script module from a {@link VirtualFile} into the cache.
    * @param scriptFile The script file to load.
    */
-  public loadModule(scriptFile: VirtualFile) {
-    if (scriptFile.type !== VirtualFileType.Script) {
-      throw new Error(`Cannot load non-script file as module: ${scriptFile}`);
+  public loadModule(scriptAsset: AssetConfig) {
+    if (scriptAsset.type !== AssetType.Script) {
+      throw new Error(`Cannot load non-script asset as module: ${scriptAsset}`);
     }
 
-    let moduleId = this.pathToModuleId(scriptFile.path);
+    let moduleId = this.pathToModuleId(scriptAsset.path);
     if (this.moduleDefinitions[moduleId] !== undefined) {
       // @TODO just no-op / warn
-      throw new Error(`Tried to load duplicate module: ${scriptFile.path}`)
+      throw new Error(`Tried to load duplicate module: ${scriptAsset.path}`)
     }
 
     let moduleDefinition: ModuleDefinition = undefined!;
-    let scriptSource = new TextDecoder().decode(scriptFile.bytes);
+    let scriptSource = new TextDecoder().decode(scriptAsset.file.bytes);
     // @NOTE use magic "source map" keyword `sourceURL` to make script show up in devtools sources under `cartridge/`
-    new Function('define', `"use strict";\n${scriptSource}\n//# sourceURL=cartridge/${scriptFile.path}`)(this.defineModule.bind(this, (result) => {
+    new Function('define', `"use strict";\n${scriptSource}\n//# sourceURL=cartridge/${scriptAsset.path}`)(this.defineModule.bind(this, (result) => {
       moduleDefinition = result;
     }));
 
@@ -65,20 +65,20 @@ export class ScriptLoader {
       throw new Error("Defining module did not produce a result");
     } else {
       moduleDefinition.id = moduleId;
-      console.log(`Loaded module '${moduleId}' (from path: '${scriptFile.path}')`, moduleDefinition);
+      console.log(`Loaded module '${moduleId}' (from path: '${scriptAsset.path}')`, moduleDefinition);
       this.moduleDefinitions[moduleId] = moduleDefinition;
     }
   }
 
   /**
    * Get the default-exported module of a (previously loaded) script file.
-   * @param scriptFile The script file to get the module of.
+   * @param scriptAsset The script file to get the module of.
    */
-  public getModule(scriptFile: VirtualFile): Module {
-    if (scriptFile.type !== VirtualFileType.Script) {
-      throw new Error(`Cannot get module for non-script file: ${scriptFile}`);
+  public getModule(scriptAsset: AssetConfig): Module {
+    if (scriptAsset.type !== AssetType.Script) {
+      throw new Error(`Cannot get module for non-script file: ${scriptAsset}`);
     }
-    let moduleId = this.pathToModuleId(scriptFile.path);
+    let moduleId = this.pathToModuleId(scriptAsset.path);
     return this.getModuleById(moduleId);
   }
 

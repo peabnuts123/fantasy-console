@@ -3,9 +3,9 @@ import { Unzipped, unzip } from 'fflate';
 export * from './archive';
 export * from './config';
 
+import { RuntimeAssetResolverProtocol } from '../constants';
 import { CartridgeArchive } from './archive/CartridgeArchive';
-import { Cartridge } from './config/Cartridge';
-import { SceneConfig } from './config/SceneConfig';
+import { AssetDb, Cartridge, SceneDb } from './config';
 
 
 /**
@@ -34,16 +34,12 @@ export async function fetchCartridge(url: string): Promise<CartridgeArchive> {
  */
 export async function loadCartridge(cartridgeArchive: CartridgeArchive): Promise<Cartridge> {
   // @TODO validate DTO
-  const cartridgeDefinition = cartridgeArchive.manifest;
+  const cartridgeManifest = cartridgeArchive.manifest;
 
   // Read the files in the manifest into a virtual file system from cartridge archive data
-  const fileSystem = cartridgeArchive.createVirtualFileSystem(cartridgeDefinition.files);
+  // Create asset and scene databases from this virtual file system
+  const assetDb = await AssetDb.build(cartridgeManifest.assets, cartridgeArchive.fileSystem, RuntimeAssetResolverProtocol);
+  const sceneDb = SceneDb.build(cartridgeManifest.scenes, assetDb);
 
-  // Build cartridge from definition
-  const scenes: SceneConfig[] = [];
-  for (let sceneDefinition of cartridgeDefinition.scenes) {
-    scenes.push(new SceneConfig(sceneDefinition, fileSystem));
-  }
-
-  return new Cartridge(scenes, fileSystem);
+  return new Cartridge(sceneDb, assetDb);
 }

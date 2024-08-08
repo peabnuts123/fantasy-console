@@ -1,7 +1,9 @@
-import { ComponentDefinition, ComponentDefinitionType } from "./ComponentDefinition";
-
-import { CartridgeArchive } from '../CartridgeArchive';
+import type { CartridgeArchive } from '../CartridgeArchive';
 import type { CameraComponentConfig } from '../../config/components/CameraComponentConfig';
+
+import { ComponentDefinition } from "./ComponentDefinition";
+import { ComponentDefinitionType } from "./ComponentDefinitionType";
+
 
 /**
  * Raw camera component data within the {@link CartridgeArchive}.

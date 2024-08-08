@@ -1,4 +1,4 @@
-export enum SceneObjectComponentType {
+export enum ComponentDefinitionType {
   Mesh = "mesh",
   Script = "script",
   Camera = "camera",

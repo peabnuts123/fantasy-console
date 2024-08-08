@@ -1,5 +1,7 @@
 import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
 
+/* @TODO these probably need better names */
+
 export interface Color {
   r: number;
   g: number;

@@ -1,12 +1,13 @@
-import { FunctionComponent, useEffect, useState } from "react";
+import { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 
-import SceneView from "@app/components/pages/composer/SceneView";
-import { useComposer } from "@app/engine/composer/Composer";
-import { Condition } from '@app/components/util/condition';
+import { SceneConfig } from "@fantasy-console/runtime/src/cartridge";
 
+import SceneView from "@app/components/pages/composer/SceneView";
+import { Condition } from '@app/components/util/condition';
 import Spinner from "@app/components/spinner";
-import { SceneManifest } from "@app/engine/composer/project/scene";
+import { useComposer } from "@lib/composer/Composer";
+
 
 interface Props { }
 
@@ -16,9 +17,9 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   const Composer = useComposer();
 
   // Computed state
-  let firstScene: SceneManifest | undefined = undefined;
+  let firstScene: SceneConfig | undefined = undefined;
   if (Composer.hasLoadedProject) {
-    firstScene = Composer.currentProject.sceneDb.allSceneManifests[0];
+    firstScene = Composer.sceneDb.allScenes[0];
   }
 
   const loadProject = async () => {
@@ -26,8 +27,8 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
     await Composer.loadProject(ProjectName);
   };
 
-  const loadScene = async (sceneManifest: SceneManifest) => {
-    await Composer.loadScene(sceneManifest);
+  const loadScene = async (scene: SceneConfig) => {
+    await Composer.loadScene(scene);
   };
 
   return (
@@ -37,13 +38,13 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
         then={() => (
           <>
             {/* @TODO one day, multiple tabs */}
-            <h1>Project: {Composer.currentProject.project.manifest.projectName}</h1>
+            <h1>Project: {Composer.currentProjectManifest.projectName}</h1>
 
             <h2>Scenes</h2>
             <ul>
-              {Composer.currentProject.sceneDb.allSceneManifests.map((sceneManifest) => (
-                <li key={sceneManifest.path}>
-                  <button onClick={() => loadScene(sceneManifest)}>Load Scene: '{sceneManifest.path}'</button>
+              {Composer.sceneDb.allScenes.map((scene) => (
+                <li key={scene.path}>
+                  <button onClick={() => loadScene(scene)}>Load Scene: {scene.path}</button>
                 </li>
               ))}
             </ul>

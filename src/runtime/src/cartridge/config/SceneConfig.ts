@@ -1,16 +1,24 @@
 import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
 
-import { Vector3 } from "@fantasy-console/core/src/util/Vector3";
+import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, SceneDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition, SceneObjectDefinition } from "../archive";
+import { toColor3, toColor4, toRuntimeVector3 } from "../archive/util";
 
 import { GameObjectConfig } from "./GameObjectConfig";
-import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, SceneDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition, SceneObjectDefinition } from "../archive";
 import { CameraComponentConfig, ComponentConfig, DirectionalLightComponentConfig, MeshComponentConfig, PointLightComponentConfig, ScriptComponentConfig } from "./components";
-import { VirtualFileType } from "./VirtualFile";
-import { VirtualFileSystem } from "./VirtualFileSystem";
+import { AssetDb } from "./AssetDb";
+import { AssetType } from "./AssetType";
 
-export interface SceneAmbientLightConfig {
-  intensity: number;
-  color: Color3;
+/**
+ * @NOTE whoops... sorry about this type name
+ */
+export interface SceneConfigConfiguration {
+  clearColor: Color4,
+  lighting: {
+    ambient: {
+      intensity: number;
+      color: Color3;
+    },
+  }
 }
 
 /**
@@ -18,54 +26,46 @@ export interface SceneAmbientLightConfig {
  * but not yet loaded into the game. Think of it like a template.
  */
 export class SceneConfig {
-  public id: number;
-  public objects: GameObjectConfig[];
-  public ambientLight: SceneAmbientLightConfig;
-  public clearColor: Color4;
+  public readonly path: string;
+  public readonly objects: GameObjectConfig[];
+  public readonly config: SceneConfigConfiguration;
 
-  public constructor(sceneDefinition: SceneDefinition, fileSystem: VirtualFileSystem) {
-    /* ID */
-    this.id = sceneDefinition.id;
+  public constructor(sceneDefinition: SceneDefinition, assetDb: AssetDb) {
+    /* Path */
+    this.path = sceneDefinition.path;
 
-    /* Ambient light config */
-    this.ambientLight = {
-      intensity: sceneDefinition.ambientLight.intensity,
-      color: new Color3(
-        sceneDefinition.ambientLight.color.r,
-        sceneDefinition.ambientLight.color.g,
-        sceneDefinition.ambientLight.color.b
-      ),
-    };
-
-    /* Clear color */
-    this.clearColor = new Color4(
-      sceneDefinition.clearColor.r,
-      sceneDefinition.clearColor.g,
-      sceneDefinition.clearColor.b,
-      1
-    );
+    /* Config */
+    this.config = {
+      clearColor: toColor4(sceneDefinition.config.clearColor),
+      lighting: {
+        ambient: {
+          intensity: sceneDefinition.config.lighting.ambient.intensity,
+          color: toColor3(sceneDefinition.config.lighting.ambient.color),
+        },
+      }
+    }
 
     /* Game Objects */
     this.objects = [];
     for (let objectDefinition of sceneDefinition.objects) {
-      this.objects.push(this.loadObjectDefinition(objectDefinition, fileSystem));
+      this.objects.push(this.loadObjectDefinition(objectDefinition, assetDb));
     }
   }
 
-  private loadObjectDefinition(objectDefinition: SceneObjectDefinition, fileSystem: VirtualFileSystem): GameObjectConfig {
+  private loadObjectDefinition(objectDefinition: SceneObjectDefinition, assetDb: AssetDb): GameObjectConfig {
     let components: ComponentConfig[] = [];
     for (let componentDefinition of objectDefinition.components) {
       switch (componentDefinition.type) {
         case ComponentDefinitionType.Mesh: {
           const meshComponentDefinition = componentDefinition as MeshComponentDefinition;
-          const meshFile = fileSystem.getById(meshComponentDefinition.meshFileId, VirtualFileType.Model);
-          components.push(new MeshComponentConfig(meshFile));
+          const meshAsset = assetDb.getById(meshComponentDefinition.meshFileId, AssetType.Mesh);
+          components.push(new MeshComponentConfig(meshAsset));
           break;
         }
         case ComponentDefinitionType.Script: {
           const scriptComponentDefinition = componentDefinition as ScriptComponentDefinition;
-          const scriptFile = fileSystem.getById(scriptComponentDefinition.scriptFileId, VirtualFileType.Script);
-          components.push(new ScriptComponentConfig(scriptFile));
+          const scriptAsset = assetDb.getById(scriptComponentDefinition.scriptFileId, AssetType.Script);
+          components.push(new ScriptComponentConfig(scriptAsset));
           break;
         }
         case ComponentDefinitionType.Camera: {
@@ -75,21 +75,13 @@ export class SceneConfig {
         }
         case ComponentDefinitionType.DirectionalLight: {
           const directionalLightComponentDefinition = componentDefinition as DirectionalLightComponentDefinition;
-          const color = new Color3(
-            directionalLightComponentDefinition.color.r,
-            directionalLightComponentDefinition.color.g,
-            directionalLightComponentDefinition.color.b,
-          );
+          const color = toColor3(directionalLightComponentDefinition.color);
           components.push(new DirectionalLightComponentConfig(directionalLightComponentDefinition.intensity, color));
           break;
         }
         case ComponentDefinitionType.PointLight: {
           const pointLightComponentDefinition = componentDefinition as PointLightComponentDefinition;
-          const color = new Color3(
-            pointLightComponentDefinition.color.r,
-            pointLightComponentDefinition.color.g,
-            pointLightComponentDefinition.color.b,
-          );
+          const color = toColor3(pointLightComponentDefinition.color);
           components.push(new PointLightComponentConfig(pointLightComponentDefinition.intensity, color));
           break;
         }
@@ -102,10 +94,17 @@ export class SceneConfig {
     // Load children (recursively)
     let children: GameObjectConfig[] = [];
     if (objectDefinition.children !== undefined) {
-      children = objectDefinition.children.map((childObjectDefinition) => this.loadObjectDefinition(childObjectDefinition, fileSystem));
+      children = objectDefinition.children.map((childObjectDefinition) => this.loadObjectDefinition(childObjectDefinition, assetDb));
     }
 
-    let position = new Vector3(objectDefinition.position.x, objectDefinition.position.y, objectDefinition.position.z);
-    return new GameObjectConfig(objectDefinition.name, position, objectDefinition.rotation, components, children);
+    return new GameObjectConfig(
+      objectDefinition.name,
+      {
+        position: toRuntimeVector3(objectDefinition.transform.position),
+        rotation: 0 /* @TODO */,
+      },
+      components,
+      children
+    );
   }
 }

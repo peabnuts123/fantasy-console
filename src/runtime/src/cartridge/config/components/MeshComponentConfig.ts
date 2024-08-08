@@ -1,7 +1,9 @@
-import type { MeshComponent } from '@fantasy-console/core/src/world/components/MeshComponent';
+import type { MeshComponent } from '@fantasy-console/core/src/world/components';
+
+import type { AssetConfig } from '../AssetConfig';
+import { AssetType } from '../AssetType';
 
 import { ComponentConfig } from "./ComponentConfig";
-import { VirtualFile, VirtualFileType } from "../VirtualFile";
 
 
 /**
@@ -10,17 +12,18 @@ import { VirtualFile, VirtualFileType } from "../VirtualFile";
  */
 export class MeshComponentConfig extends ComponentConfig {
   /**
-   * {@link VirtualFile} containing the mesh asset.
+   * {@link AssetConfig} containing the mesh asset.
    */
-  public meshFile: VirtualFile;
-  public constructor(meshFile: VirtualFile) {
+  public readonly meshAsset: AssetConfig;
+  public constructor(meshAsset: AssetConfig) {
     super();
 
     // Validate
-    if (meshFile.type !== VirtualFileType.Model) {
-      throw new Error(`Cannot construct MeshComponent from non-model file ${meshFile}`);
+    // @NOTE a subclass would give us a guarantee here
+    if (meshAsset.type !== AssetType.Mesh) {
+      throw new Error(`Cannot construct MeshComponent from non-model asset ${meshAsset}`);
     }
 
-    this.meshFile = meshFile;
+    this.meshAsset = meshAsset;
   }
 }

@@ -1,7 +1,10 @@
-import { ComponentDefinition, ComponentDefinitionType } from "./ComponentDefinition";
-
 import type { CartridgeArchive } from '../CartridgeArchive';
 import type { PointLightComponentConfig } from '../../config/components/PointLightComponentConfig';
+import { Color } from "../util";
+
+import { ComponentDefinition } from "./ComponentDefinition";
+import { ComponentDefinitionType } from "./ComponentDefinitionType";
+
 
 /**
  * Raw point light component data within the {@link CartridgeArchive}.
@@ -10,5 +13,5 @@ import type { PointLightComponentConfig } from '../../config/components/PointLig
 export interface PointLightComponentDefinition extends ComponentDefinition {
   type: ComponentDefinitionType.PointLight;
   intensity: number;
-  color: { r: number, g: number, b: number };
+  color: Color;
 }

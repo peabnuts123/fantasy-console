@@ -1,11 +1,4 @@
-/* @TODO space these out like 100, 200, etc. */
-export enum ComponentDefinitionType {
-  Mesh = 0,
-  Script = 1,
-  Camera = 2,
-  DirectionalLight = 3,
-  PointLight = 4,
-}
+import { ComponentDefinitionType } from "./ComponentDefinitionType";
 
 /**
  * Raw game object component data within the {@link CartridgeArchive}.

@@ -1,7 +1,10 @@
-import { ComponentDefinition, ComponentDefinitionType } from "./ComponentDefinition";
-
-import type { CartridgeArchive } from '../CartridgeArchive';
 import type { DirectionalLightComponentConfig } from '../../config/components/DirectionalLightComponentConfig';
+import type { CartridgeArchive } from '../CartridgeArchive';
+import { Color } from "../util";
+
+import { ComponentDefinition } from "./ComponentDefinition";
+import { ComponentDefinitionType } from "./ComponentDefinitionType";
+
 
 /**
  * Raw directional light component data within the {@link CartridgeArchive}.
@@ -10,5 +13,5 @@ import type { DirectionalLightComponentConfig } from '../../config/components/Di
 export interface DirectionalLightComponentDefinition extends ComponentDefinition {
   type: ComponentDefinitionType.DirectionalLight;
   intensity: number;
-  color: { r: number, g: number, b: number };
+  color: Color;
 }

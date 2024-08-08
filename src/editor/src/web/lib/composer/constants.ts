@@ -1,0 +1,1 @@
+export const ComposerAssetResolverProtocol: string = `composer://`;

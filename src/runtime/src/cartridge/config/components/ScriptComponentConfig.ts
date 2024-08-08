@@ -1,5 +1,7 @@
+import type { AssetConfig } from "../AssetConfig";
+import { AssetType } from "../AssetType";
+
 import { ComponentConfig } from "./ComponentConfig";
-import { VirtualFile, VirtualFileType } from "../VirtualFile";
 
 /**
  * Configuration data for a custom component script written by the user.
@@ -9,15 +11,15 @@ export class ScriptComponentConfig extends ComponentConfig {
   /**
    * {@link VirtualFile} containing the script asset.
    */
-  public scriptFile: VirtualFile;
-  public constructor(scriptFile: VirtualFile) {
+  public readonly scriptAsset: AssetConfig;
+  public constructor(scriptAsset: AssetConfig) {
     super();
 
     // Validate
-    if (scriptFile.type !== VirtualFileType.Script) {
-      throw new Error(`Cannot construct ScriptComponent from non-script file ${scriptFile}`);
+    if (scriptAsset.type !== AssetType.Script) {
+      throw new Error(`Cannot construct ScriptComponent from non-script asset ${scriptAsset}`);
     }
 
-    this.scriptFile = scriptFile;
+    this.scriptAsset = scriptAsset;
   }
 }
