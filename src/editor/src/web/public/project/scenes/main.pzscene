@@ -18,17 +18,97 @@
   },
   "objects": [
     {
-      "id": "8c3c9d34-d20a-4f33-aa5f-2fa4b1a9aec4",
+      "id": "81dbde77-14d3-4766-851d-e3616e4ce8c6",
+      "name": "Map",
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "components": [
+        {
+          "type": "mesh",
+          "meshFileId": "6e77e14a-0d3c-4472-a9b1-71a13a888b9b"
+        }
+      ]
+    },
+    {
+      "id": "60237d75-6fb3-44ac-b6a9-e7b9a5bd1bea",
+      "name": "Burger",
+      "transform": {
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 1
+        }
+      },
+      "components": [
+        {
+          "type": "mesh",
+          "meshFileId": "59e2bfad-f6f0-471a-a0a4-7b25b76152dc"
+        },
+        {
+          "type": "script",
+          "scriptFileId": "58189dec-56a3-44db-b7a5-c8171abfb3aa"
+        },
+        {
+          "type": "light_point",
+          "intensity": 1,
+          "color": {
+            "r": 1,
+            "g": 0.5,
+            "b": 0
+          }
+        }
+      ],
+      "children": [
+        {
+          "id": "69377d6d-2429-41d9-9034-83428a256b2c",
+          "name": "Dumpster",
+          "transform": {
+            "position": {
+              "x": 0,
+              "y": 0.5,
+              "z": 0
+            }
+          },
+          "components": [
+            {
+              "type": "mesh",
+              "meshFileId": "a0bfe951-b0e3-449c-a9ef-37734a81a6e6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ca063719-fe9f-4ac8-a061-35ea8f05193e",
+      "name": "Main Camera",
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": 2.5,
+          "z": -4
+        }
+      },
+      "components": [
+        {
+          "type": "camera"
+        }
+      ]
+    },
+    {
+      "id": "16d54758-3095-4d32-b108-457d56f2d7f9",
       "name": "Sun",
       "transform": {
         "position": {
           "x": 0,
           "y": 0.5,
           "z": 0
-        },
-        // "rotation": @TODO
+        }
       },
-      // "children" @TODO
       "components": [
         {
           "type": "light_directional",
@@ -38,30 +118,7 @@
             "g": 1,
             "b": 0.9
           }
-        },
-      ]
-    },
-    {
-      "id": "b77feafe-7a18-49f3-97ae-ae9d1256de91",
-      "name": "Ball",
-      "transform": {
-        "position": {
-          "x": 0,
-          "y": 0,
-          "z": 0
-        },
-        // "rotation": @TODO
-      },
-      // "children" @TODO
-      "components": [
-        {
-          "type": "mesh",
-          "meshFileId": "23a9c372-4cf4-4c86-9c64-ed08cdddf2dd"
-        },
-        {
-          "type": "script",
-          "scriptFileId": "17cbef89-711f-43c4-bacb-6df3d2f81c33"
-        },
+        }
       ]
     }
   ]

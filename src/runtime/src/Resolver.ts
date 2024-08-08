@@ -48,7 +48,7 @@ class Resolver {
       throw new Error(`Protocol must be in the format 'foo://'`);
     }
     if (this.assetDatabases.has(protocol)) {
-      throw new Error(`Resolver already has handler for protocol: ${protocol}`)
+      console.warn(`Resolver already has handler for protocol: ${protocol}`)
     }
     this.assetDatabases.set(protocol, assetDb);
   }

@@ -12,9 +12,10 @@ import "@babylonjs/loaders/OBJ/objFileLoader";
 import { TransformBabylon } from '@fantasy-console/runtime/src/world/TransformBabylon';
 import { GameObject } from '@fantasy-console/core/src/world';
 import { GameObjectBabylon } from '@fantasy-console/runtime/src/world/GameObjectBabylon';
-import { DirectionalLightComponentBabylon, MeshComponentBabylon } from '@fantasy-console/runtime/src/world/components';
-import { DirectionalLightComponentConfig, GameObjectConfig, MeshComponentConfig, SceneConfig } from '@fantasy-console/runtime/src/cartridge';
+import { DirectionalLightComponentBabylon, MeshComponentBabylon, PointLightComponentBabylon } from '@fantasy-console/runtime/src/world/components';
+import { DirectionalLightComponentConfig, GameObjectConfig, MeshComponentConfig, PointLightComponentConfig, SceneConfig, ScriptComponentConfig } from '@fantasy-console/runtime/src/cartridge';
 import { debug_modTextures } from '@fantasy-console/runtime';
+import { PointLight } from '@babylonjs/core/Lights/pointLight';
 
 
 export class SceneView {
@@ -46,9 +47,12 @@ export class SceneView {
 
     // Build scene (async)
     void (async () => {
+      // @DEBUG Random camera constants
       const camera = new FreeCamera("main", new Vector3(0, 5, -10), this.babylonScene);
       camera.setTarget(Vector3.Zero());
       camera.attachControl(canvas, true);
+      camera.speed = 0.5;
+      camera.minZ = 0.1;
 
       await this.loadScene()
 
@@ -139,7 +143,6 @@ export class SceneView {
     for (let componentConfig of sceneObject.components) {
       if (componentConfig instanceof MeshComponentConfig) {
         /* Mesh component */
-        // @TODO put a protocol this to switch between sources? or something? a host?
         // @TODO load through cache
         let meshAsset = await SceneLoader.LoadAssetContainerAsync(
           componentConfig.meshAsset.fetchUri,
@@ -149,6 +152,8 @@ export class SceneView {
           componentConfig.meshAsset.fileExtension
         );
         gameObject.addComponent(new MeshComponentBabylon({ gameObject }, meshAsset));
+      } else if (componentConfig instanceof ScriptComponentConfig) {
+        /* @NOTE Script has no effect in the Composer */
       } else if (componentConfig instanceof DirectionalLightComponentConfig) {
         /* Directional Light component */
         const light = new DirectionalLight(`light_directional`, Vector3.Down(), this.babylonScene);
@@ -156,9 +161,14 @@ export class SceneView {
         light.intensity = componentConfig.intensity;
         light.diffuse = componentConfig.color;
         gameObject.addComponent(new DirectionalLightComponentBabylon({ gameObject }, light));
-      }
-      // @TODO etc.
-      else {
+      } else if (componentConfig instanceof PointLightComponentConfig) {
+        /* Point Light component */
+        const light = new PointLight(`light_point`, Vector3.Zero(), this.babylonScene);
+        light.specular = Color3.Black();
+        light.intensity = componentConfig.intensity;
+        light.diffuse = componentConfig.color;
+        gameObject.addComponent(new PointLightComponentBabylon({ gameObject }, light));
+      } else {
         console.error(`[SceneView] (loadSceneObject) Unrecognised component config: `, componentConfig);
       }
     }

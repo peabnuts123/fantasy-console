@@ -5,32 +5,197 @@
   },
   "assets": [
     {
+      "id": "4bed3ede-8532-40bd-b247-d21319375dfc",
       "type": "mesh",
-      "id": "a02fa4f6-a143-4e3d-89e3-fb2508c2d514",
       "path": "models/ball.mtl",
-      "hash": "fbcea83c8a378bf1", // @NOTE fake xxHash
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
     },
     {
+      "id": "dba91ca4-6ab9-4336-ac9b-b758e59e881e",
       "type": "mesh",
-      "id": "23a9c372-4cf4-4c86-9c64-ed08cdddf2dd",
       "path": "models/ball.obj",
-      "hash": "a2eac5704f9c3819",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
     },
-    // etc.
     {
+      "id": "9b38b1c4-2b70-4d46-b969-fe4e1382014b",
+      "type": "mesh",
+      "path": "models/burgerCheese.mtl",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "59e2bfad-f6f0-471a-a0a4-7b25b76152dc",
+      "type": "mesh",
+      "path": "models/burgerCheese.obj",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "b4a36730-18cc-487e-b00b-d3881ed1eb99",
+      "type": "mesh",
+      "path": "models/detailDumpster_closed.mtl",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "a0bfe951-b0e3-449c-a9ef-37734a81a6e6",
+      "type": "mesh",
+      "path": "models/detailDumpster_closed.obj",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "c8d495af-3ff4-49ca-ad1b-c794aaf813c1",
+      "type": "mesh",
+      "path": "models/scene.mtl",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "6e77e14a-0d3c-4472-a9b1-71a13a888b9b",
+      "type": "mesh",
+      "path": "models/scene.obj",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "5077f008-68cf-46b5-90f2-314dc0d3b508",
       "type": "texture",
-      "id": "66c65cef-c227-417f-ab76-7d3b8c479f9c",
-      "path": "textures/stones.png",
-      "hash": "7ed6bc44736a5887",
+      "path": "textures/asphalt.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
     },
-    // etc.
     {
-      "type": "script",
-      "id": "17cbef89-711f-43c4-bacb-6df3d2f81c33",
-      "path": "scripts/my-object.ts",
-      "hash": "ebbe6e0542184505",
+      "id": "e565ac63-6c97-4bd1-94d9-5cf318f58577",
+      "type": "texture",
+      "path": "textures/bars.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
     },
-    // etc.
+    {
+      "id": "28dc1397-3f67-4f91-9a82-9f555b7a3308",
+      "type": "texture",
+      "path": "textures/clock texture.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "02f2b77c-950b-4756-8b43-6e694743f10f",
+      "type": "texture",
+      "path": "textures/concrete.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "e8dd265c-035e-447f-bd0b-ea295b3d41e7",
+      "type": "texture",
+      "path": "textures/concreteSmooth.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "1d0c647c-7825-4b6f-b3fe-da4601b23f0c",
+      "type": "texture",
+      "path": "textures/dirt.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "b4256ba4-c7a5-4fd0-846b-7fed7113cb59",
+      "type": "texture",
+      "path": "textures/doors.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "ba3a722e-44a2-4e2c-ac7e-f87f2d2a6cdc",
+      "type": "texture",
+      "path": "textures/grass.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "9d6c6041-97c7-4fa2-a289-40d1c9c052b4",
+      "type": "texture",
+      "path": "textures/metal.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "0d76192a-da29-4bef-8b67-2342ffcf4318",
+      "type": "texture",
+      "path": "textures/picture on shelf texture.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "e3d3446d-6bc6-4b9a-a801-b748bdffc5b8",
+      "type": "texture",
+      "path": "textures/roof.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "64b8a023-97eb-4f1f-8eaf-45bdee70dccf",
+      "type": "texture",
+      "path": "textures/roof_plates.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "aa185d8e-13ae-45de-bc41-1e892ced05cf",
+      "type": "texture",
+      "path": "textures/signs.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "b9b7ca3b-3f47-400d-879c-e1a24be5a8d2",
+      "type": "texture",
+      "path": "textures/stones.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "f17a66a4-2d64-434d-ad6c-1e13bee4946c",
+      "type": "texture",
+      "path": "textures/treeA.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "807db9eb-8fc6-480a-b06d-50ac8eb74c5e",
+      "type": "texture",
+      "path": "textures/treeB.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "480efd7b-6a6d-4952-859c-9e13a8f73552",
+      "type": "texture",
+      "path": "textures/truck.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "4e75fb2b-0f2b-4a45-b4f9-73ee2a888309",
+      "type": "texture",
+      "path": "textures/truck_alien.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "8e6c2083-572f-41f9-9fea-ca9af889091d",
+      "type": "texture",
+      "path": "textures/wall.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "5560727b-71eb-440c-bf76-a3e708d00c34",
+      "type": "texture",
+      "path": "textures/wall_garage.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "7f1fdb0b-78be-4d59-8354-6e676481815d",
+      "type": "texture",
+      "path": "textures/wall_lines.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "ef90eadf-b096-475c-b2d0-37d160293485",
+      "type": "texture",
+      "path": "textures/wall_metal.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "c87ddc93-4247-44d4-9f60-d0625e186efa",
+      "type": "texture",
+      "path": "textures/windows.png",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    },
+    {
+      "id": "58189dec-56a3-44db-b7a5-c8171abfb3aa",
+      "type": "script",
+      "path": "scripts/my-object.ts",
+      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+    }
   ],
   "scenes": [
     /* How do you change scenes? By file name? What about file suffix? */

@@ -56,11 +56,11 @@
       "components": [
         {
           "type": "mesh",
-          "meshFileId": "23a9c372-4cf4-4c86-9c64-ed08cdddf2dd"
+          "meshFileId": "dba91ca4-6ab9-4336-ac9b-b758e59e881e"
         },
         {
           "type": "script",
-          "scriptFileId": "17cbef89-711f-43c4-bacb-6df3d2f81c33"
+          "scriptFileId": "58189dec-56a3-44db-b7a5-c8171abfb3aa"
         },
       ]
     },
@@ -79,7 +79,7 @@
       "components": [
         {
           "type": "mesh",
-          "meshFileId": "23a9c372-4cf4-4c86-9c64-ed08cdddf2dd"
+          "meshFileId": "dba91ca4-6ab9-4336-ac9b-b758e59e881e"
         },
       ]
     },
