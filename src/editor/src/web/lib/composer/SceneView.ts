@@ -9,12 +9,13 @@ import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight';
 import * as Jsonc from 'jsonc-parser';
 import "@babylonjs/loaders/OBJ/objFileLoader";
+import { AssetContainer } from '@babylonjs/core/assetContainer';
 
 import { TransformBabylon } from '@fantasy-console/runtime/src/world/TransformBabylon';
 import { GameObject } from '@fantasy-console/core/src/world';
 import { GameObjectBabylon } from '@fantasy-console/runtime/src/world/GameObjectBabylon';
 import { DirectionalLightComponentBabylon, MeshComponentBabylon, PointLightComponentBabylon } from '@fantasy-console/runtime/src/world/components';
-import { AssetDb, DirectionalLightComponentConfig, GameObjectConfig, MeshComponentConfig, PointLightComponentConfig, SceneConfig, SceneDefinition, SceneObjectDefinition, ScriptComponentConfig } from '@fantasy-console/runtime/src/cartridge';
+import { AssetConfig, AssetDb, DirectionalLightComponentConfig, GameObjectConfig, MeshComponentConfig, PointLightComponentConfig, SceneConfig, SceneDefinition, SceneObjectDefinition, ScriptComponentConfig } from '@fantasy-console/runtime/src/cartridge';
 import { debug_modTextures } from '@fantasy-console/runtime';
 import { PointLight } from '@babylonjs/core/Lights/pointLight';
 import { SceneManifest } from './project';
@@ -28,9 +29,11 @@ export class SceneView {
   private babylonScene?: BabylonScene = undefined;
   /** Counter for unique {@link GameObject} IDs */
   private nextGameObjectId = 1000;
+  private assetCache: Map<AssetConfig, AssetContainer>;
 
   public constructor(scene: SceneConfig) {
     this._scene = scene;
+    this.assetCache = new Map();
 
     // @NOTE Class properties MUST have a value explicitly assigned
     // by this point otherwise mobx won't pick them up.
@@ -97,24 +100,6 @@ export class SceneView {
   }
 
   /*
-    @TODO micro backlog
-      // - hydrate raw definitions into "config" objects a-la Runtime
-      // - put loaded project properties directly onto composer
-      // - Add children to pzscene
-      // - Add common resolver
-      //   - Is this a common component?
-      //   - register a provider for a scheme, something like this
-      - Add asset cache
-        - Can this be a common component?
-      // - Ponder how code sharing between editor and runtime looks
-      //   - Cartridge archive
-      //   - .pzproj
-      //   - Concept of a "World" with objects in it
-      //   - Probably editor and runtime are actually quite different, they just happen to be doing similar things
-      //   - raw "Color" and "Vector3" types?
-  */
-
-  /*
     @TODO next steps?
       - Build manifest from project files
       - Implement real file system in Composer
@@ -125,7 +110,7 @@ export class SceneView {
    */
 
   // @TODO this is basically identical to @fantasy-console/runtime/src/Game.createGameObjectFromConfig()
-  // We should just re-use this functionality
+  //  We should just re-use this functionality
   private async createSceneObject(sceneObject: GameObjectConfig, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObject> {
     console.log(`Loading scene object: `, sceneObject.name);
     // Construct game object transform for constructing scene's hierarchy
@@ -157,13 +142,7 @@ export class SceneView {
       if (componentConfig instanceof MeshComponentConfig) {
         /* Mesh component */
         // @TODO load through cache
-        let meshAsset = await SceneLoader.LoadAssetContainerAsync(
-          componentConfig.meshAsset.babylonFetchUrl,
-          undefined,
-          this.babylonScene,
-          undefined,
-          componentConfig.meshAsset.fileExtension
-        );
+        let meshAsset = await this.loadAssetCached(componentConfig.meshAsset);
         gameObject.addComponent(new MeshComponentBabylon({ gameObject }, meshAsset));
       } else if (componentConfig instanceof ScriptComponentConfig) {
         /* @NOTE Script has no effect in the Composer */
@@ -188,6 +167,29 @@ export class SceneView {
 
     return gameObject;
   }
+
+  /**
+   * Load an {@link AssetConfig} through a cache.
+   * @param asset Asset to load.
+   * @returns The new asset, or a reference to the existing asset if it existed in the cache.
+   */
+  private async loadAssetCached(asset: AssetConfig): Promise<AssetContainer> {
+    let cached = this.assetCache.get(asset);
+    if (cached) {
+      return cached;
+    } else {
+      let assetContainer = await SceneLoader.LoadAssetContainerAsync(
+        asset.babylonFetchUrl,
+        undefined,
+        this.babylonScene,
+        undefined,
+        asset.fileExtension
+      );
+      this.assetCache.set(asset, assetContainer);
+      return assetContainer;
+    }
+  }
+
 
 
   public static async loadFromManifest(sceneManifest: SceneManifest, fileSystem: IFileSystem, assetDb: AssetDb): Promise<SceneView> {
