@@ -1,27 +1,26 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { createContext, useContext } from "react";
 import * as Jsonc from 'jsonc-parser';
+import * as path from '@tauri-apps/api/path';
 
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 import { AssetDb } from '@fantasy-console/runtime/src/cartridge';
 import Resolver from '@fantasy-console/runtime/src/Resolver';
 
+import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
+
 import { SceneView } from './SceneView';
 import { ProjectDefinition, ProjectManifest, SceneManifest } from './project/definition';
-import { DebugFileSystem } from './DebugFileSystem';
 import { ComposerAssetResolverProtocol } from './constants';
 
 export class Composer {
-  private fileSystem: IFileSystem;
+  private fileSystem: IFileSystem = undefined!; // @NOTE explicit `undefined` for mobx
   private _isLoadingProject: boolean = false;
   private _currentProject: ProjectDefinition | undefined = undefined; // @NOTE explicit `undefined` for mobx
   private _currentScene: SceneView | undefined = undefined; // @NOTE explicit `undefined` for mobx
   private _assetDb?: AssetDb = undefined;
 
   public constructor() {
-    // @NOTE debug file system serves from public URL
-    this.fileSystem = new DebugFileSystem();
-
     // @NOTE Class properties MUST have a value explicitly assigned
     // by this point otherwise mobx won't pick them up.
     makeAutoObservable(this);
@@ -30,7 +29,15 @@ export class Composer {
   public async loadProject(projectPath: string): Promise<void> {
     this._isLoadingProject = true;
 
-    var projectFile = await this.fileSystem.readFile(projectPath);
+    // Create file system relative to project
+    const projectFileName = await path.basename(projectPath);
+    const projectDirRoot = await path.resolve(projectPath, '..');
+    this.fileSystem = new TauriFileSystem(projectDirRoot);
+
+    // Bind file system to babylon resolver
+    Resolver.registerFileSystem(ComposerAssetResolverProtocol, this.fileSystem);
+
+    var projectFile = await this.fileSystem.readFile(projectFileName);
     var project = Jsonc.parse(projectFile.textContent) as ProjectDefinition;
 
     // Asset database
@@ -39,9 +46,6 @@ export class Composer {
       this.fileSystem,
       ComposerAssetResolverProtocol,
     );
-
-    // Bind file system to babylon resolver
-    Resolver.registerFileSystem(ComposerAssetResolverProtocol, this.fileSystem);
 
     runInAction(() => {
       this._currentProject = project;

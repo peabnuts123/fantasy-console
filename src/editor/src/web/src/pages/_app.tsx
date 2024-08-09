@@ -1,6 +1,7 @@
 import { FunctionComponent } from 'react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import Link from 'next/link';
 
 import '@app/styles/index.scss';
 
@@ -19,8 +20,9 @@ const App: FunctionComponent<AppProps> = ({ Component }) => {
     </Head>
 
     <nav className="u-flex">
-      <ul><a href="/">Home</a></ul>
-      <ul><a href="/player">Player</a></ul>
+      <ul><Link href="/">Home</Link></ul>
+      <ul><Link href="/player">Player</Link></ul>
+      <ul><Link href="/tauri">Tauri</Link></ul>
     </nav>
 
     <Component />

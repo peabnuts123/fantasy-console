@@ -1,5 +1,6 @@
 import { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
+import { open } from '@tauri-apps/api/dialog';
 
 import SceneView from "@app/components/pages/composer/SceneView";
 import { Condition } from '@app/components/util/condition';
@@ -10,14 +11,20 @@ import { SceneManifest } from "@lib/composer/project";
 
 interface Props { }
 
-const ProjectName: string = 'sample.pzproj'
-
 const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   const Composer = useComposer();
 
   const loadProject = async () => {
-    // @DEBUG just load a hard-coded project
-    await Composer.loadProject(ProjectName);
+    const selected = await open({
+      filters: [{
+        name: 'PolyZone Project',
+        extensions: ['pzproj']
+      }]
+    }) as string | null;
+
+    if (selected === null) return;
+
+    await Composer.loadProject(selected);
   };
 
   const loadScene = async (scene: SceneManifest) => {

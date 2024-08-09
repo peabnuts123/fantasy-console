@@ -9,10 +9,13 @@ use swc_common::{errors::Handler, source_map::SourceMap, sync::Lrc, GLOBALS};
 use swc_ecma_ast::EsVersion;
 use swc_ecma_parser::{Syntax, TsConfig};
 
+// @TODO watch fs: https://docs.rs/notify/latest/notify/index.html#examples
+
 // @NOTE Hard coded constants for now
 const CARTRIDGE_CONTENT_PATH: &str = "../../../sample-cartridge/cartridge";
 const CARTRIDGE_SRC_PATH: &str = "../../../sample-cartridge/src/scripts";
 const CARTRIDGE_ARCHIVED_OUTPUT_PATH: &str = "../../../web-player/public/sample-cartridge.pzcart";
+const CARTRIDGE_ARCHIVED_OUTPUT_PATH2: &str = "../web/public/sample-cartridge.pzcart";
 
 fn main() {
     let content_path = Path::new(CARTRIDGE_CONTENT_PATH);
@@ -122,5 +125,9 @@ fn main() {
 
     let result = zip.finish().expect("Failed to write zip file");
 
+    // Write a second copy to the web project
+    std::fs::copy(CARTRIDGE_ARCHIVED_OUTPUT_PATH, CARTRIDGE_ARCHIVED_OUTPUT_PATH2).expect("Failed to copy zip file");
+
     println!("Wrote cartridge: {} ({} bytes)", CARTRIDGE_ARCHIVED_OUTPUT_PATH, result.metadata().unwrap().len());
+    println!("Wrote cartridge: {} ({} bytes)", CARTRIDGE_ARCHIVED_OUTPUT_PATH2, result.metadata().unwrap().len());
 }

@@ -12,10 +12,39 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false,
       "shell": {
         "all": false,
         "open": true
+      },
+      "fs": {
+        "readFile": true,
+        "writeFile": true,
+        "readDir": true,
+        "copyFile": false,
+        "createDir": false,
+        "removeDir": false,
+        "removeFile": false,
+        "renameFile": false,
+        "exists": false,
+        "scope": [
+          "**/*"
+        ]
+      },
+      "dialog": {
+        "ask": false,
+        "confirm": false,
+        "message": false,
+        "open": true,
+        "save": false
+      },
+      "protocol": {
+        "asset": true,
+        "assetScope": [
+          "**/*"
+        ]
+      },
+      "path": {
+        "all": true
       }
     },
     "windows": [
