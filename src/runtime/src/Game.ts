@@ -60,17 +60,20 @@ export class Game {
    */
   public async loadCartridge(cartridge: Cartridge): Promise<void> {
     // @TODO unload previous cartridge
-
     this.cartridge = cartridge;
 
     // Load all scripts from the cartridge
     // We do this proactively because scripts can depend on other scripts
     // which need to be injected when they are requested
-    for (let asset of cartridge.assetDb.assets) {
-      if (asset.type === AssetType.Script) {
-        this.scriptLoader.loadModule(asset);
-      }
-    }
+    await Promise.all(cartridge.assetDb.assets
+      .filter((asset) => asset.type === AssetType.Script)
+      .map((asset) =>
+        cartridge.assetDb.loadAsset(asset)
+          .then((file) => {
+            this.scriptLoader.loadModule(asset, file);
+          })
+      ))
+
 
     // Load the first scene on the cartridge
     // @TODO add concept of "initial" scene to cartridge manifest
@@ -195,7 +198,7 @@ export class Game {
     if (cached) {
       return cached;
     } else {
-      let assetContainer = await SceneLoader.LoadAssetContainerAsync(asset.fetchUri, undefined, this.babylonScene, undefined, asset.fileExtension);
+      let assetContainer = await SceneLoader.LoadAssetContainerAsync(asset.babylonFetchUrl, undefined, this.babylonScene, undefined, asset.fileExtension);
       this.assetCache.set(asset, assetContainer);
       return assetContainer;
     }

@@ -5,8 +5,10 @@ import { AssetDb, SceneConfig } from './';
 export class SceneDb {
   private scenes: SceneConfig[];
 
-  private constructor(scenes: SceneConfig[]) {
-    this.scenes = scenes;
+  public constructor(sceneDefinitions: SceneDefinition[], assetDb: AssetDb) {
+    this.scenes = sceneDefinitions.map((sceneDefinition) =>
+      new SceneConfig(sceneDefinition, assetDb)
+    );
   }
 
   public getByPathSuffix(pathSuffix: string): SceneConfig {
@@ -32,13 +34,5 @@ export class SceneDb {
 
   public get allScenes(): SceneConfig[] {
     return this.scenes;
-  }
-
-  public static build(sceneDefinitions: SceneDefinition[], assetDb: AssetDb): SceneDb {
-    const scenes = sceneDefinitions.map((sceneDefinition) =>
-      new SceneConfig(sceneDefinition, assetDb)
-    );
-
-    return new SceneDb(scenes);
   }
 }

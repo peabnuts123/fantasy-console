@@ -54,11 +54,11 @@ export class Runtime {
     // @NOTE Load hard-coded cartridge from URL
     let timerStart = performance.now();
     const cartridgeArchive = await fetchCartridge(SAMPLE_CARTRIDGE_URL);
+    // Bind resolver to cartridge asset DB
+    Resolver.registerFileSystem(RuntimeAssetResolverProtocol, cartridgeArchive.fileSystem);
     let cartridge = await loadCartridge(cartridgeArchive);
     console.log(`Loaded cartridge in ${(performance.now() - timerStart).toFixed(1)}ms`);
 
-    // Bind resolver to cartridge asset DB
-    Resolver.registerAssetDb(RuntimeAssetResolverProtocol, cartridge.assetDb);
 
     // Boot game
     // *blows on cartridge*

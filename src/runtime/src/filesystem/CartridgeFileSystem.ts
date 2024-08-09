@@ -10,11 +10,23 @@ export class CartridgeFileSystem implements IFileSystem {
     this.cartridgeData = cartridgeData;
   }
 
-  public getByPath(path: string): Promise<VirtualFile> {
-    return Promise.resolve(this.getByPathSync(path));
+  public getUrlForPath(path: string): string {
+    // Create an "object URL" that can be used to fetch the file at this path
+    const file = this.readFileSync(path);
+    const objectUrl = URL.createObjectURL(new Blob([file.bytes]));
+    // @NOTE release object URL after 10 seconds
+    // Is this chill?
+    setTimeout(() => {
+      URL.revokeObjectURL(objectUrl);
+    }, 10_000);
+    return objectUrl;
   }
 
-  public getByPathSync(path: string): VirtualFile {
+  public readFile(path: string): Promise<VirtualFile> {
+    return Promise.resolve(this.readFileSync(path));
+  }
+
+  public readFileSync(path: string): VirtualFile {
     let fileBytes = this.cartridgeData[path];
     if (!fileBytes) {
       throw new NotFoundError(`No file found at path: '${path}'`);

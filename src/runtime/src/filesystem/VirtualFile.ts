@@ -11,15 +11,9 @@ export class VirtualFile {
   }
 
   /**
-   * "Object URL" that can be used to fetch this file. Created with `URL.createObjectURL()`.
+   * The contents of this file, as UTF-8 encoded text.
    */
-  public get url(): string {
-    const objectUrl = URL.createObjectURL(new Blob([this.bytes]));
-    // @NOTE release object URL after 10 seconds
-    // Is this chill?
-    setTimeout(() => {
-      URL.revokeObjectURL(objectUrl);
-    }, 10_000);
-    return objectUrl;
+  public get textContent(): string {
+    return new TextDecoder('utf-8').decode(this.bytes);
   }
 }

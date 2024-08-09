@@ -36,10 +36,8 @@ export async function loadCartridge(cartridgeArchive: CartridgeArchive): Promise
   // @TODO validate DTO
   const cartridgeManifest = cartridgeArchive.manifest;
 
-  // Read the files in the manifest into a virtual file system from cartridge archive data
-  // Create asset and scene databases from this virtual file system
-  const assetDb = await AssetDb.build(cartridgeManifest.assets, cartridgeArchive.fileSystem, RuntimeAssetResolverProtocol);
-  const sceneDb = SceneDb.build(cartridgeManifest.scenes, assetDb);
+  const assetDb = new AssetDb(cartridgeManifest.assets, cartridgeArchive.fileSystem, RuntimeAssetResolverProtocol);
+  const sceneDb = new SceneDb(cartridgeManifest.scenes, assetDb);
 
   return new Cartridge(sceneDb, assetDb);
 }

@@ -20,7 +20,7 @@ export class CartridgeArchive {
    * The cartridge manifest defining all the data of the game.
    */
   public get manifest(): CartridgeArchiveManifest {
-    const file = this.fileSystem.getByPathSync(CARTRIDGE_MANIFEST_FILENAME);
+    const file = this.fileSystem.readFileSync(CARTRIDGE_MANIFEST_FILENAME);
     const json = new TextDecoder().decode(file.bytes);
     return JSON.parse(json) as CartridgeArchiveManifest;
   }

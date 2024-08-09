@@ -1,16 +1,16 @@
 import { Tools } from '@babylonjs/core/Misc/tools';
-import { AssetDb } from './cartridge';
+import { IFileSystem } from './filesystem';
 
 /**
  * Wrapper around Babylon URL resolving to read files from
  * a cartridge's virtual file system instead of external URLs.
  */
 class Resolver {
-  private assetDatabases: Map<string, AssetDb>;
+  private fileSystems: Map<string, IFileSystem>;
 
   constructor() {
     Tools.PreprocessUrl = this.resolve.bind(this);
-    this.assetDatabases = new Map();
+    this.fileSystems = new Map();
   }
 
   /**
@@ -20,7 +20,7 @@ class Resolver {
    * @param url The URL to resolve.
    */
   private resolve(url: string): string {
-    for (let [protocol, assetDb] of this.assetDatabases) {
+    for (let [protocol, fileSystem] of this.fileSystems) {
       if (url.startsWith(protocol)) {
         // @NOTE lo-fi canonicalisation hack using `decodeURIComponent` + trim leading slash
         // @NOTE crazy bug in browsers (!) non-http protocols are not parsed correctly,
@@ -29,8 +29,7 @@ class Resolver {
           new URL(url.substring(protocol.length), 'http://foo.bar').pathname
         ).replace(/^\//, '');
 
-        const asset = assetDb.getByPath(canonical);
-        return asset.file.url;
+        return fileSystem.getUrlForPath(canonical);
       }
     }
 
@@ -41,20 +40,20 @@ class Resolver {
   /**
    * Register an AssetDB that will be used to resolve Urls for a given a URL protocol.
    * @param protocol Url protocol prefix like `runtime://`
-   * @param assetDb AssetDb for resolving Urls with this protocol
+   * @param fileSystem AssetDb for resolving Urls with this protocol
    */
-  public registerAssetDb(protocol: string, assetDb: AssetDb) {
+  public registerFileSystem(protocol: string, fileSystem: IFileSystem) {
     if (!/^\w+:\/\/$/.test(protocol)) {
       throw new Error(`Protocol must be in the format 'foo://'`);
     }
-    if (this.assetDatabases.has(protocol)) {
+    if (this.fileSystems.has(protocol)) {
       console.warn(`Resolver already has handler for protocol: ${protocol}`)
     }
-    this.assetDatabases.set(protocol, assetDb);
+    this.fileSystems.set(protocol, fileSystem);
   }
 
-  public deregisterAssetDb(protocol: string) {
-    this.assetDatabases.delete(protocol);
+  public deregisterFileSystem(protocol: string) {
+    this.fileSystems.delete(protocol);
   }
 }
 

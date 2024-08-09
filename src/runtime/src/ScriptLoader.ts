@@ -1,5 +1,6 @@
 import { AssetConfig, AssetType } from './cartridge';
 import { CoreModules } from './core.g';
+import { VirtualFile } from './filesystem';
 
 const SCRIPT_PATH_PREFIX = `scripts/`;
 
@@ -43,7 +44,7 @@ export class ScriptLoader {
    * Load a script module from a {@link VirtualFile} into the cache.
    * @param scriptFile The script file to load.
    */
-  public loadModule(scriptAsset: AssetConfig) {
+  public loadModule(scriptAsset: AssetConfig, file: VirtualFile) {
     if (scriptAsset.type !== AssetType.Script) {
       throw new Error(`Cannot load non-script asset as module: ${scriptAsset}`);
     }
@@ -55,9 +56,8 @@ export class ScriptLoader {
     }
 
     let moduleDefinition: ModuleDefinition = undefined!;
-    let scriptSource = new TextDecoder().decode(scriptAsset.file.bytes);
     // @NOTE use magic "source map" keyword `sourceURL` to make script show up in devtools sources under `cartridge/`
-    new Function('define', `"use strict";\n${scriptSource}\n//# sourceURL=cartridge/${scriptAsset.path}`)(this.defineModule.bind(this, (result) => {
+    new Function('define', `"use strict";\n${file.textContent}\n//# sourceURL=cartridge/${scriptAsset.path}`)(this.defineModule.bind(this, (result) => {
       moduleDefinition = result;
     }));
 
@@ -73,6 +73,10 @@ export class ScriptLoader {
   /**
    * Get the default-exported module of a (previously loaded) script file.
    * @param scriptAsset The script file to get the module of.
+   */
+  /*
+    @TODO this could just be cached and async, removing the need
+    to pre-load all the modules
    */
   public getModule(scriptAsset: AssetConfig): Module {
     if (scriptAsset.type !== AssetType.Script) {

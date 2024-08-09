@@ -1,12 +1,11 @@
 import { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 
-import { SceneConfig } from "@fantasy-console/runtime/src/cartridge";
-
 import SceneView from "@app/components/pages/composer/SceneView";
 import { Condition } from '@app/components/util/condition';
 import Spinner from "@app/components/spinner";
 import { useComposer } from "@lib/composer/Composer";
+import { SceneManifest } from "@lib/composer/project";
 
 
 interface Props { }
@@ -16,18 +15,12 @@ const ProjectName: string = 'sample.pzproj'
 const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   const Composer = useComposer();
 
-  // Computed state
-  let firstScene: SceneConfig | undefined = undefined;
-  if (Composer.hasLoadedProject) {
-    firstScene = Composer.sceneDb.allScenes[0];
-  }
-
   const loadProject = async () => {
     // @DEBUG just load a hard-coded project
     await Composer.loadProject(ProjectName);
   };
 
-  const loadScene = async (scene: SceneConfig) => {
+  const loadScene = async (scene: SceneManifest) => {
     await Composer.loadScene(scene);
   };
 
@@ -42,9 +35,9 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
 
             <h2>Scenes</h2>
             <ul>
-              {Composer.sceneDb.allScenes.map((scene) => (
-                <li key={scene.path}>
-                  <button onClick={() => loadScene(scene)}>Load Scene: {scene.path}</button>
+              {Composer.currentProject.scenes.map((sceneManifest) => (
+                <li key={sceneManifest.path}>
+                  <button onClick={() => loadScene(sceneManifest)}>Load Scene: {sceneManifest.path}</button>
                 </li>
               ))}
             </ul>

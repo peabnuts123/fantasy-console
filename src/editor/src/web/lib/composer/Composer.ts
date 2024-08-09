@@ -3,22 +3,20 @@ import { createContext, useContext } from "react";
 import * as Jsonc from 'jsonc-parser';
 
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
-import { AssetDb, SceneConfig, SceneDb, SceneDefinition } from '@fantasy-console/runtime/src/cartridge';
+import { AssetDb } from '@fantasy-console/runtime/src/cartridge';
 import Resolver from '@fantasy-console/runtime/src/Resolver';
 
 import { SceneView } from './SceneView';
-import { ProjectDefinition, ProjectManifest } from './project/definition';
+import { ProjectDefinition, ProjectManifest, SceneManifest } from './project/definition';
 import { DebugFileSystem } from './DebugFileSystem';
 import { ComposerAssetResolverProtocol } from './constants';
 
 export class Composer {
   private fileSystem: IFileSystem;
   private _isLoadingProject: boolean = false;
-  // @TODO Feel like these properties should maybe live on Composer itself
-  private _currentScene?: SceneView = undefined; // @NOTE explicit `undefined` for mobx
-  private _currentProjectManifest?: ProjectManifest = undefined;
+  private _currentProject: ProjectDefinition | undefined = undefined; // @NOTE explicit `undefined` for mobx
+  private _currentScene: SceneView | undefined = undefined; // @NOTE explicit `undefined` for mobx
   private _assetDb?: AssetDb = undefined;
-  private _sceneDb?: SceneDb = undefined;
 
   public constructor() {
     // @NOTE debug file system serves from public URL
@@ -32,46 +30,31 @@ export class Composer {
   public async loadProject(projectPath: string): Promise<void> {
     this._isLoadingProject = true;
 
-    var projectFile = await this.fileSystem.getByPath(projectPath);
-    var projectFileJson = new TextDecoder().decode(projectFile.bytes);
-    var project = Jsonc.parse(projectFileJson) as ProjectDefinition;
+    var projectFile = await this.fileSystem.readFile(projectPath);
+    var project = Jsonc.parse(projectFile.textContent) as ProjectDefinition;
 
     // Asset database
-    const assetDb = await AssetDb.build(
+    const assetDb = new AssetDb(
       project.assets,
       this.fileSystem,
       ComposerAssetResolverProtocol,
     );
 
-    // Bind assetDb to babylon resolver
-    Resolver.registerAssetDb(ComposerAssetResolverProtocol, assetDb);
-
-    // Scene database
-    const sceneDefinitions = await Promise.all(
-      project.scenes.map(async (sceneManifest) => {
-        const file = await this.fileSystem.getByPath(sceneManifest.path);
-        const json = new TextDecoder().decode(file.bytes);
-        const sceneDefinition = Jsonc.parse(json) as SceneDefinition;
-        // @NOTE path property comes from manifest
-        sceneDefinition.path = sceneManifest.path;
-        return sceneDefinition;
-      })
-    );
-    const sceneDb = SceneDb.build(
-      sceneDefinitions,
-      assetDb,
-    );
+    // Bind file system to babylon resolver
+    Resolver.registerFileSystem(ComposerAssetResolverProtocol, this.fileSystem);
 
     runInAction(() => {
-      this._currentProjectManifest = project.manifest;
+      this._currentProject = project;
       this._assetDb = assetDb;
-      this._sceneDb = sceneDb;
       this._isLoadingProject = false
     });
   }
 
-  public loadScene(scene: SceneConfig) {
-    this._currentScene = new SceneView(scene);
+  public async loadScene(sceneManifest: SceneManifest) {
+    const scene = await SceneView.loadFromManifest(sceneManifest, this.fileSystem, this.assetDb);
+    runInAction(() => {
+      this._currentScene = scene;
+    })
   }
 
   public get assetDb(): AssetDb {
@@ -81,26 +64,25 @@ export class Composer {
     return this._assetDb;
   }
 
-  public get sceneDb(): SceneDb {
-    if (this._sceneDb === undefined) {
-      throw new Error(`SceneDb is undefined - is a project loaded?`)
-    }
-    return this._sceneDb;
-  }
-
   public get isLoadingProject() {
     return this._isLoadingProject;
   }
 
   public get hasLoadedProject() {
-    return this._currentProjectManifest !== undefined;
+    return this._currentProject !== undefined;
   }
 
+  public get currentProject(): ProjectDefinition {
+    if (this._currentProject === undefined) {
+      throw new Error(`No project is currently loaded`);
+    }
+    return this._currentProject;
+  }
   public get currentProjectManifest(): ProjectManifest {
-    if (this._currentProjectManifest === undefined) {
+    if (this._currentProject === undefined) {
       throw new Error(`No project is currently loaded`)
     }
-    return this._currentProjectManifest;
+    return this.currentProject.manifest;
   }
 
   public get hasLoadedScene() {

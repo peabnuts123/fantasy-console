@@ -7,15 +7,18 @@ import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight';
+import * as Jsonc from 'jsonc-parser';
 import "@babylonjs/loaders/OBJ/objFileLoader";
 
 import { TransformBabylon } from '@fantasy-console/runtime/src/world/TransformBabylon';
 import { GameObject } from '@fantasy-console/core/src/world';
 import { GameObjectBabylon } from '@fantasy-console/runtime/src/world/GameObjectBabylon';
 import { DirectionalLightComponentBabylon, MeshComponentBabylon, PointLightComponentBabylon } from '@fantasy-console/runtime/src/world/components';
-import { DirectionalLightComponentConfig, GameObjectConfig, MeshComponentConfig, PointLightComponentConfig, SceneConfig, ScriptComponentConfig } from '@fantasy-console/runtime/src/cartridge';
+import { AssetDb, DirectionalLightComponentConfig, GameObjectConfig, MeshComponentConfig, PointLightComponentConfig, SceneConfig, SceneDefinition, SceneObjectDefinition, ScriptComponentConfig } from '@fantasy-console/runtime/src/cartridge';
 import { debug_modTextures } from '@fantasy-console/runtime';
 import { PointLight } from '@babylonjs/core/Lights/pointLight';
+import { SceneManifest } from './project';
+import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 
 
 export class SceneView {
@@ -54,7 +57,7 @@ export class SceneView {
       camera.speed = 0.5;
       camera.minZ = 0.1;
 
-      await this.loadScene()
+      await this.createScene()
 
       await this.babylonScene!.whenReadyAsync()
 
@@ -76,7 +79,7 @@ export class SceneView {
     return onDestroyView;
   }
 
-  private async loadScene() {
+  private async createScene() {
     /* Scene clear color */
     this.babylonScene!.clearColor = this.scene.config.clearColor;
 
@@ -89,7 +92,7 @@ export class SceneView {
 
     for (let sceneObject of this.scene.objects) {
       // @TODO do something with this game object?
-      const _gameObject = await this.loadSceneObject(sceneObject);
+      const _gameObject = await this.createSceneObject(sceneObject);
     }
   }
 
@@ -100,7 +103,7 @@ export class SceneView {
       // - Add children to pzscene
       // - Add common resolver
       //   - Is this a common component?
-      //   - register a provider for a scheme, something liek this
+      //   - register a provider for a scheme, something like this
       - Add asset cache
         - Can this be a common component?
       // - Ponder how code sharing between editor and runtime looks
@@ -111,9 +114,19 @@ export class SceneView {
       //   - raw "Color" and "Vector3" types?
   */
 
+  /*
+    @TODO next steps?
+      - Build manifest from project files
+      - Implement real file system in Composer
+      - ? Play button?
+      - Scene hierarchy UI
+      - dumb version of autoload => "Reload" button or something
+        - We might as well get over this painful hump
+   */
+
   // @TODO this is basically identical to @fantasy-console/runtime/src/Game.createGameObjectFromConfig()
   // We should just re-use this functionality
-  private async loadSceneObject(sceneObject: GameObjectConfig, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObject> {
+  private async createSceneObject(sceneObject: GameObjectConfig, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObject> {
     console.log(`Loading scene object: `, sceneObject.name);
     // Construct game object transform for constructing scene's hierarchy
     const gameObjectTransform = new TransformBabylon(
@@ -126,7 +139,7 @@ export class SceneView {
 
     // Create all child objects first
     // @TODO children
-    await Promise.all(sceneObject.children.map((childSceneObject) => this.loadSceneObject(childSceneObject, gameObjectTransform)));
+    await Promise.all(sceneObject.children.map((childSceneObject) => this.createSceneObject(childSceneObject, gameObjectTransform)));
 
     // Create blank object
     const gameObject: GameObject = new GameObjectBabylon(
@@ -145,7 +158,7 @@ export class SceneView {
         /* Mesh component */
         // @TODO load through cache
         let meshAsset = await SceneLoader.LoadAssetContainerAsync(
-          componentConfig.meshAsset.fetchUri,
+          componentConfig.meshAsset.babylonFetchUrl,
           undefined,
           this.babylonScene,
           undefined,
@@ -176,6 +189,14 @@ export class SceneView {
     return gameObject;
   }
 
+
+  public static async loadFromManifest(sceneManifest: SceneManifest, fileSystem: IFileSystem, assetDb: AssetDb): Promise<SceneView> {
+    const sceneFile = await fileSystem.readFile(sceneManifest.path);
+    const sceneDefinition = Jsonc.parse(sceneFile.textContent) as SceneDefinition;
+    // @NOTE path property comes from manifest in the composer
+    sceneDefinition.path = sceneManifest.path;
+    return new SceneView(new SceneConfig(sceneDefinition, assetDb));
+  }
 
   public get scene(): SceneConfig {
     return this._scene;
