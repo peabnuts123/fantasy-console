@@ -1,13 +1,13 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { createContext, useContext } from "react";
 import * as Jsonc from 'jsonc-parser';
-import * as path from '@tauri-apps/api/path';
 
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 import { AssetDb } from '@fantasy-console/runtime/src/cartridge';
 import Resolver from '@fantasy-console/runtime/src/Resolver';
 
 import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
+import * as path from '@lib/tauri/path';
 
 import { SceneView } from './SceneView';
 import { ProjectDefinition, ProjectManifest, SceneManifest } from './project/definition';

@@ -1,10 +1,11 @@
 import { FunctionComponent } from "react";
 import { open } from '@tauri-apps/api/dialog';
-import { readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
-import * as path from '@tauri-apps/api/path';
+import { readTextFile } from '@tauri-apps/api/fs';
 import * as Jsonc from 'jsonc-parser';
 
 import { TauriFileSystem } from "@lib/filesystem/TauriFileSystem";
+import * as path from '@lib/tauri/path';
+
 
 
 interface Props { }
@@ -19,7 +20,6 @@ const Tauri: FunctionComponent<Props> = ({ }) => {
     }) as string | null;
     if (selected === null) return;
 
-    // Read the text file in the `$APPCONFIG/app.conf` path
     const projectJson = await readTextFile(selected);
     const projectDefinition = Jsonc.parse(projectJson);
 

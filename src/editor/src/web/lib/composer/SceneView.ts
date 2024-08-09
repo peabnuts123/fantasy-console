@@ -102,7 +102,8 @@ export class SceneView {
   /*
     @TODO next steps?
       - Build manifest from project files
-      - Implement real file system in Composer
+        - Make sure to rename the references to the script files
+      // - Implement real file system in Composer
       - ? Play button?
       - Scene hierarchy UI
       - dumb version of autoload => "Reload" button or something

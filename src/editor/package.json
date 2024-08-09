@@ -8,7 +8,7 @@
     "start:web": "cd src/web && next dev",
     "type-check": "cd src/web && tsc",
     "build": "tauri build",
-    "build:web": "cd src/web && tsc && next build",
+    "build:web": "cd src/web && next build",
     "debug:buildcart": "cd src/cli && cargo run",
     "tauri": "tauri"
   },
