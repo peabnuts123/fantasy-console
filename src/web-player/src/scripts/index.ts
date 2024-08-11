@@ -1,10 +1,14 @@
 import { Runtime } from '@fantasy-console/runtime';
 
+const CARTRIDGE_URL = `/sample.pzcart`;
+
 async function main() {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   const fpsCounter = document.getElementById('debug_framerate') as HTMLDivElement;
 
   const runtime = new Runtime(canvas);
+
+  await runtime.loadCartridge(CARTRIDGE_URL);
 
   // Count number of frames drawn per second
   let framesDrawn = 0;

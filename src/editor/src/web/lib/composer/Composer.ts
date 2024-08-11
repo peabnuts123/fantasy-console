@@ -1,9 +1,10 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { createContext, useContext } from "react";
 import * as Jsonc from 'jsonc-parser';
+import { invoke } from '@tauri-apps/api/tauri'
 
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
-import { AssetDb } from '@fantasy-console/runtime/src/cartridge';
+import { AssetDb, AssetType, CartridgeArchiveManifest } from '@fantasy-console/runtime/src/cartridge';
 import Resolver from '@fantasy-console/runtime/src/Resolver';
 
 import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
@@ -18,6 +19,7 @@ export class Composer {
   private _isLoadingProject: boolean = false;
   private _currentProject: ProjectDefinition | undefined = undefined; // @NOTE explicit `undefined` for mobx
   private _currentScene: SceneView | undefined = undefined; // @NOTE explicit `undefined` for mobx
+  private currentProjectRoot: string | undefined = undefined; // @NOTE explicit `undefined` for mobx
   private _assetDb?: AssetDb = undefined;
 
   public constructor() {
@@ -31,7 +33,7 @@ export class Composer {
 
     // Create file system relative to project
     const projectFileName = await path.basename(projectPath);
-    const projectDirRoot = await path.resolve(projectPath, '..');
+    const projectDirRoot = this.currentProjectRoot = await path.resolve(projectPath, '..');
     this.fileSystem = new TauriFileSystem(projectDirRoot);
 
     // Bind file system to babylon resolver
@@ -99,6 +101,60 @@ export class Composer {
     }
 
     return this._currentScene;
+  }
+
+  public async debug_buildCartridge() {
+
+    /*
+      @TODO
+      Is there a way we can do this from Rust, so that we
+      could do this from a CLI?
+    */
+
+    // Load scene definitions
+    const scenes = await Promise.all(
+      this.currentProject.scenes.map(async (sceneManifest) =>
+        await SceneView.loadSceneDefinition(sceneManifest, this.fileSystem)
+      )
+    );
+
+    // Build cartridge manifest
+    const manifest: CartridgeArchiveManifest = {
+      assets: this.currentProject!.assets
+        .map((asset) => {
+          // @NOTE map assets to pluck only desired properties
+          if (asset.type === AssetType.Script) {
+            // @NOTE Scripts need to be renamed to .js
+            return {
+              id: asset.id,
+              type: asset.type,
+              path: asset.path.replace(/\.\w+$/, '.js'),
+            };
+          } else {
+            return {
+              id: asset.id,
+              type: asset.type,
+              path: asset.path,
+            };
+          }
+        }),
+      scenes
+    };
+
+    // Compile cartridge file
+    const createCartridgeResult = await invoke<number[]>('create_cartridge', {
+      manifestFileBytes: JSON.stringify(manifest),
+      projectRootPath: this.currentProjectRoot!,
+      assetPaths: this.assetDb.assets
+        .filter((asset) => asset.type !== AssetType.Script)
+        .map((asset) => asset.path),
+      scriptPaths: this.assetDb.assets
+        .filter((asset) => asset.type === AssetType.Script)
+        .map((asset) => asset.path),
+    })
+
+    const bytes = new Uint8Array(createCartridgeResult);
+    return bytes;
   }
 }
 

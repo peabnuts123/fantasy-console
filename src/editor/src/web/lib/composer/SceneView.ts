@@ -191,13 +191,16 @@ export class SceneView {
     }
   }
 
-
-
-  public static async loadFromManifest(sceneManifest: SceneManifest, fileSystem: IFileSystem, assetDb: AssetDb): Promise<SceneView> {
+  public static async loadSceneDefinition(sceneManifest: SceneManifest, fileSystem: IFileSystem): Promise<SceneDefinition> {
     const sceneFile = await fileSystem.readFile(sceneManifest.path);
     const sceneDefinition = Jsonc.parse(sceneFile.textContent) as SceneDefinition;
     // @NOTE path property comes from manifest in the composer
     sceneDefinition.path = sceneManifest.path;
+    return sceneDefinition;
+  }
+
+  public static async loadFromManifest(sceneManifest: SceneManifest, fileSystem: IFileSystem, assetDb: AssetDb): Promise<SceneView> {
+    const sceneDefinition = await SceneView.loadSceneDefinition(sceneManifest, fileSystem);
     return new SceneView(new SceneConfig(sceneDefinition, assetDb));
   }
 

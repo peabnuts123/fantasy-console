@@ -9,7 +9,6 @@
     "type-check": "cd src/web && tsc",
     "build": "tauri build",
     "build:web": "cd src/web && next build",
-    "debug:buildcart": "cd src/cli && cargo run",
     "tauri": "tauri"
   },
   "dependencies": {

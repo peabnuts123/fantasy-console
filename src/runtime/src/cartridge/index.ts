@@ -8,6 +8,17 @@ import { CartridgeArchive } from './archive/CartridgeArchive';
 import { AssetDb, Cartridge, SceneDb } from './config';
 
 
+export async function readCartridgeArchive(cartridgeBytes: ArrayBuffer): Promise<CartridgeArchive> {
+  const cartridgeData = await new Promise<Unzipped>((resolve, reject) => {
+    unzip(new Uint8Array(cartridgeBytes), (err, data) => {
+      if (err) reject(err);
+      else resolve(data);
+    });
+  });
+
+  return new CartridgeArchive(cartridgeData);
+}
+
 /**
  * Fetch and parse a {@link CartridgeArchive} file from a URL.
  * @param url URL for the cartridge archive file
@@ -17,14 +28,7 @@ export async function fetchCartridge(url: string): Promise<CartridgeArchive> {
   const cartridgeBytes = await response.arrayBuffer();
   console.log(`Got cartridge data: ${Math.round(cartridgeBytes.byteLength / 1024)}kb`);
 
-  const cartridgeData = await new Promise<Unzipped>((resolve, reject) => {
-    unzip(new Uint8Array(cartridgeBytes), (err, data) => {
-      if (err) reject(err);
-      else resolve(data);
-    });
-  });
-
-  return new CartridgeArchive(cartridgeData);
+  return readCartridgeArchive(cartridgeBytes);
 }
 
 /**

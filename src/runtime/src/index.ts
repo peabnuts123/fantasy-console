@@ -5,7 +5,7 @@ import "@babylonjs/loaders/OBJ/objFileLoader";
 
 import { Input } from '@fantasy-console/core/src/modules/Input';
 
-import { loadCartridge, fetchCartridge } from './cartridge';
+import { readCartridgeArchive, loadCartridge, fetchCartridge, Cartridge, CartridgeArchive } from './cartridge';
 import Resolver from './Resolver';
 import { Game } from "./Game";
 import { BabylonInputManager } from './modules/BabylonInputManager';
@@ -14,8 +14,6 @@ import { RuntimeAssetResolverProtocol } from "./constants";
 
 export type OnUpdateCallback = () => void;
 
-const SAMPLE_CARTRIDGE_URL = "/sample-cartridge.pzcart";
-
 /**
  * Runtime for Fantasy Console.
  * Use this to run game cartridges.
@@ -23,6 +21,7 @@ const SAMPLE_CARTRIDGE_URL = "/sample-cartridge.pzcart";
 export class Runtime {
   private canvas: HTMLCanvasElement;
   private onUpdateCallbacks: OnUpdateCallback[];
+  private cartridge?: Cartridge;
 
   public constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -33,7 +32,39 @@ export class Runtime {
     this.onUpdateCallbacks.push(callback);
   }
 
+  /**
+   * Load a cartridge into the runtime. Boot the cartridge with {@link run()}.
+   * @param cartridgeBytes Raw bytes of the cartridge file
+   */
+  public async loadCartridge(cartridgeBytes: ArrayBuffer): Promise<void>;
+  /**
+   * Load a cartridge into the runtime. Boot the cartridge with {@link run()}.
+   * @param url URL of the cartridge to fetch
+   */
+  public async loadCartridge(url: string): Promise<void>;
+  public async loadCartridge(source: ArrayBuffer | string): Promise<void> {
+    let timerStart = performance.now();
+
+    let cartridgeArchive: CartridgeArchive;
+    if (source instanceof ArrayBuffer) {
+      // Load cartridge from ArrayBuffer
+      cartridgeArchive = await readCartridgeArchive(source);
+    } else {
+      // Load cartridge from URL
+      cartridgeArchive = await fetchCartridge(source);
+    }
+
+    // Bind resolver to cartridge asset DB
+    Resolver.registerFileSystem(RuntimeAssetResolverProtocol, cartridgeArchive.fileSystem);
+    this.cartridge = await loadCartridge(cartridgeArchive);
+    console.log(`Loaded cartridge in ${(performance.now() - timerStart).toFixed(1)}ms`);
+  }
+
   public async run() {
+    if (this.cartridge === undefined) {
+      throw new Error('No cartridge loaded');
+    }
+
     let initialCanvasWidth = this.canvas.width;
     let initialCanvasHeight = this.canvas.height;
 
@@ -50,20 +81,10 @@ export class Runtime {
     // Game system singleton
     const game = new Game(scene);
 
-    // Load cartridge
-    // @NOTE Load hard-coded cartridge from URL
-    let timerStart = performance.now();
-    const cartridgeArchive = await fetchCartridge(SAMPLE_CARTRIDGE_URL);
-    // Bind resolver to cartridge asset DB
-    Resolver.registerFileSystem(RuntimeAssetResolverProtocol, cartridgeArchive.fileSystem);
-    let cartridge = await loadCartridge(cartridgeArchive);
-    console.log(`Loaded cartridge in ${(performance.now() - timerStart).toFixed(1)}ms`);
-
-
     // Boot game
     // *blows on cartridge*
-    timerStart = performance.now();
-    await game.loadCartridge(cartridge);
+    let timerStart = performance.now();
+    await game.loadCartridge(this.cartridge);
     console.log(`Loaded game in ${(performance.now() - timerStart).toFixed(1)}ms`);
 
     // Wait for scene

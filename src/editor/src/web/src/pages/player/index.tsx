@@ -2,6 +2,9 @@ import { FunctionComponent, useEffect, useRef } from "react";
 
 import { Runtime } from '@fantasy-console/runtime';
 
+// const CARTRIDGE_URL = `/sample-cartridge.pzcart`;
+const CARTRIDGE_URL = `/debug.pzcart`;
+
 interface Props { }
 
 const PlayerPage: FunctionComponent<Props> = ({ }) => {
@@ -10,7 +13,11 @@ const PlayerPage: FunctionComponent<Props> = ({ }) => {
   useEffect(() => {
     if (canvas.current) {
       const runtime = new Runtime(canvas.current);
-      void runtime.run();
+
+      void runtime.loadCartridge(CARTRIDGE_URL)
+        .then(() =>
+          runtime.run()
+        );
     }
   }, []);
 
