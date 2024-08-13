@@ -46,19 +46,19 @@ export class Runtime {
    * Load a cartridge into the runtime. Boot the cartridge with {@link run()}.
    * @param cartridgeBytes Raw bytes of the cartridge file
    */
-  public async loadCartridge(cartridgeBytes: ArrayBuffer): Promise<void>;
+  public async loadCartridge(cartridgeBytes: Uint8Array): Promise<void>;
   /**
    * Load a cartridge into the runtime. Boot the cartridge with {@link run()}.
    * @param url URL of the cartridge to fetch
    */
   public async loadCartridge(url: string): Promise<void>;
-  public async loadCartridge(source: ArrayBuffer | string): Promise<void>;
-  public async loadCartridge(source: ArrayBuffer | string): Promise<void> {
+  public async loadCartridge(source: Uint8Array | string): Promise<void>;
+  public async loadCartridge(source: Uint8Array | string): Promise<void> {
     let timerStart = performance.now();
 
     let cartridgeArchive: CartridgeArchive;
-    if (source instanceof ArrayBuffer) {
-      // Load cartridge from ArrayBuffer
+    if (source instanceof Uint8Array) {
+      // Load cartridge from Uint8Array
       cartridgeArchive = await readCartridgeArchive(source);
     } else {
       // Load cartridge from URL

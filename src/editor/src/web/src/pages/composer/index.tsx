@@ -18,7 +18,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   const Composer = useComposer();
 
   // State
-  const [tempCartridge, setTempCartridge] = useState<ArrayBuffer | undefined>(undefined);
+  const [tempCartridge, setTempCartridge] = useState<Uint8Array | undefined>(undefined);
 
   // Computed State
   const isPlaying = tempCartridge !== undefined;

@@ -1,8 +1,8 @@
 export class VirtualFile {
   /** Raw bytes of this file. */
-  public readonly bytes: ArrayBuffer;
+  public readonly bytes: Uint8Array;
 
-  public constructor(bytes: ArrayBuffer) {
+  public constructor(bytes: Uint8Array) {
     this.bytes = bytes;
   }
 

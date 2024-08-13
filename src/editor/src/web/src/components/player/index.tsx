@@ -3,7 +3,7 @@ import { FunctionComponent, useEffect, useRef } from "react";
 import { Runtime } from '@fantasy-console/runtime';
 
 interface Props {
-  cartridge: ArrayBuffer | string;
+  cartridge: Uint8Array | string;
 }
 
 const Player: FunctionComponent<Props> = ({ cartridge }) => {

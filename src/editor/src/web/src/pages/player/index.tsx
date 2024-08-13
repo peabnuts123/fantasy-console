@@ -10,7 +10,7 @@ import Link from "next/link";
 interface Props { }
 
 const PlayerPage: FunctionComponent<Props> = ({ }) => {
-  const [cartridge, setCartridge] = useState<ArrayBuffer | undefined>(undefined);
+  const [cartridge, setCartridge] = useState<Uint8Array | undefined>(undefined);
 
   const loadCartridge = async () => {
     const selected = await open({
@@ -22,7 +22,7 @@ const PlayerPage: FunctionComponent<Props> = ({ }) => {
     if (selected === null) return;
 
     const bytes = await readBinaryFile(selected);
-    setCartridge(bytes.buffer);
+    setCartridge(bytes);
   };
 
   return <>

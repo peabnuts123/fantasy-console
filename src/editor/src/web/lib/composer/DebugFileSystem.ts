@@ -27,7 +27,7 @@ export class DebugFileSystem implements IFileSystem {
     const result = await fetch(url);
     const fileBytes = await result.arrayBuffer();
     return new VirtualFile(
-      fileBytes
+      new Uint8Array(fileBytes),
     );
   }
 }

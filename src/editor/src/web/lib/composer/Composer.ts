@@ -103,7 +103,7 @@ export class Composer {
     return this._currentScene;
   }
 
-  public async debug_buildCartridge() {
+  public async debug_buildCartridge(): Promise<Uint8Array> {
 
     /*
       @TODO
@@ -153,8 +153,7 @@ export class Composer {
         .map((asset) => asset.path),
     })
 
-    const bytes = new Uint8Array(createCartridgeResult);
-    return bytes.buffer;
+    return new Uint8Array(createCartridgeResult);
   }
 }
 
