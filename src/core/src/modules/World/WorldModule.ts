@@ -20,6 +20,13 @@ export class WorldModule implements IModule {
   }
 
   /**
+   * @internal
+   */
+  public onInit() {
+    this.nextGameObjectId = 1000;
+  }
+
+  /**
    * Called once per frame.
    * @param deltaTime Time (in seconds) since the last frame.
    */
@@ -30,10 +37,6 @@ export class WorldModule implements IModule {
   /**
    * Destroy the world and everything in it.
    */
-  // @TODO clear / reset etc.
-  // public destroy() {
-  //   this.gameObjects.forEach(gameObject => gameObject.destroy());
-  // }
   public addObject(gameObject: GameObject) {
     this.gameObjects.push(gameObject);
   }
@@ -56,7 +59,7 @@ export class WorldModule implements IModule {
     return this.nextGameObjectId++;
   }
 
-  public query<TResult>(queryFn: QueryFn<WorldQuery,TResult>): TResult;
+  public query<TResult>(queryFn: QueryFn<WorldQuery, TResult>): TResult;
   public query<TResult>(relativeTo: GameObject, queryFn: QueryFn<GameObjectQuery, TResult>): TResult;
   public query<TResult>(relativeToOrQueryFn: GameObject | QueryFn<WorldQuery, TResult>, maybeQueryFn?: QueryFn<GameObjectQuery, TResult>): TResult {
     let result: IQueryResult<TResult>;
@@ -72,6 +75,14 @@ export class WorldModule implements IModule {
     }
 
     return result.result;
+  }
+
+  /**
+   * @internal
+   */
+  public dispose(): void {
+    // @NOTE copy into temp array to modify `this.gameObjects` while iterating
+    [...this.gameObjects].forEach(gameObject => gameObject.destroy());
   }
 }
 

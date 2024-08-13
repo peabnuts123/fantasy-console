@@ -53,8 +53,16 @@ class Modules {
     World,
   ]
 
+  public onInit(): void {
+    this.modules.forEach((module) => module.onInit());
+  }
+
   public onUpdate(deltaTime: number): void {
     this.modules.forEach((module) => module.onUpdate(deltaTime));
+  }
+
+  public dispose() {
+    this.modules.forEach((module) => module.dispose());
   }
 }
 

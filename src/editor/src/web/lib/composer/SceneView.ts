@@ -34,10 +34,18 @@ export class SceneView {
   public constructor(scene: SceneConfig) {
     this._scene = scene;
     this.assetCache = new Map();
+    this.reset();
 
     // @NOTE Class properties MUST have a value explicitly assigned
     // by this point otherwise mobx won't pick them up.
     makeAutoObservable(this);
+  }
+
+  private reset() {
+    this.engine = undefined;
+    this.babylonScene = undefined;
+    this.nextGameObjectId = 1000;
+    this.assetCache = new Map();
   }
 
   public startBabylonView(canvas: HTMLCanvasElement) {
@@ -74,7 +82,10 @@ export class SceneView {
     /* Teardown - when scene view is unloaded */
     const onDestroyView = () => {
       console.log(`[SceneView] (onDestroyView) Goodbye!`);
-      this.engine?.dispose();
+      this.babylonScene!.dispose();
+      this.engine!.dispose();
+      this.reset();
+      // @TODO destroy GameObjects once we sort out what the abstraction difference between this and Runtime is
       if (window) {
         window.removeEventListener("resize", onResize);
       }
@@ -98,17 +109,6 @@ export class SceneView {
       const _gameObject = await this.createSceneObject(sceneObject);
     }
   }
-
-  /*
-    @TODO next steps?
-      - Build manifest from project files
-        - Make sure to rename the references to the script files
-      // - Implement real file system in Composer
-      - ? Play button?
-      - Scene hierarchy UI
-      - dumb version of autoload => "Reload" button or something
-        - We might as well get over this painful hump
-   */
 
   // @TODO this is basically identical to @fantasy-console/runtime/src/Game.createGameObjectFromConfig()
   //  We should just re-use this functionality

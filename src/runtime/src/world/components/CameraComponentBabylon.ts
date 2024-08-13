@@ -18,7 +18,7 @@ export class CameraComponentBabylon extends CameraComponent {
   }
 
   public pointAt(target: Vector3) {
-    this.camera.target = this.toLocalCoordinates(new Vector3Babylon(target.x, target.y, target.z));
+    this.camera.setTarget(this.toLocalCoordinates(new Vector3Babylon(target.x, target.y, target.z)));
   }
 
   public override onDestroy(): void {

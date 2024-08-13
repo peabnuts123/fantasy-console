@@ -34,6 +34,7 @@ import {
   PointLightComponentBabylon,
 } from './world/components';
 import { GameObjectBabylon } from "./world/GameObjectBabylon";
+import Modules from './modules';
 
 /**
  * Top-level system containing the entire game and all content
@@ -52,6 +53,16 @@ export class Game {
     this.worldState = {};
     this.assetCache = new Map();
     this.scriptLoader = new ScriptLoader();
+
+    Modules.onInit();
+  }
+
+  public onUpdate(deltaTime: number): void {
+    Modules.onUpdate(deltaTime);
+  }
+
+  public dispose(): void {
+    Modules.dispose();
   }
 
   /**

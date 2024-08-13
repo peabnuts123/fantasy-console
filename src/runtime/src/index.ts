@@ -9,10 +9,10 @@ import { readCartridgeArchive, loadCartridge, fetchCartridge, Cartridge, Cartrid
 import Resolver from './Resolver';
 import { Game } from "./Game";
 import { BabylonInputManager } from './modules/BabylonInputManager';
-import Modules from './modules';
 import { RuntimeAssetResolverProtocol } from "./constants";
 
 export type OnUpdateCallback = () => void;
+export type OnDisposeCallback = () => void;
 
 /**
  * Runtime for Fantasy Console.
@@ -21,15 +21,25 @@ export type OnUpdateCallback = () => void;
 export class Runtime {
   private canvas: HTMLCanvasElement;
   private onUpdateCallbacks: OnUpdateCallback[];
+  private onDisposeCallbacks: OnDisposeCallback[];
   private cartridge?: Cartridge;
+
+  private engine?: Engine;
+  private scene?: Scene;
+  private game?: Game;
 
   public constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.onUpdateCallbacks = [];
+    this.onDisposeCallbacks = [];
   }
 
   public onUpdate(callback: OnUpdateCallback): void {
     this.onUpdateCallbacks.push(callback);
+  }
+
+  public onDispose(callback: OnDisposeCallback): void {
+    this.onDisposeCallbacks.push(callback);
   }
 
   /**
@@ -42,6 +52,7 @@ export class Runtime {
    * @param url URL of the cartridge to fetch
    */
   public async loadCartridge(url: string): Promise<void>;
+  public async loadCartridge(source: ArrayBuffer | string): Promise<void>;
   public async loadCartridge(source: ArrayBuffer | string): Promise<void> {
     let timerStart = performance.now();
 
@@ -68,39 +79,56 @@ export class Runtime {
     let initialCanvasWidth = this.canvas.width;
     let initialCanvasHeight = this.canvas.height;
 
-    const engine = new Engine(this.canvas, false);
+    this.engine = new Engine(this.canvas, false);
     // Override application resolution to fixed resolution
-    engine.setSize(initialCanvasWidth, initialCanvasHeight);
+    this.engine.setSize(initialCanvasWidth, initialCanvasHeight);
 
     // Initialize singleton modules
-    Input.init(new BabylonInputManager(engine));
+    Input.init(new BabylonInputManager(this.engine));
 
     // Babylon scene (NOT game scene)
-    var scene = new Scene(engine);
+    this.scene = new Scene(this.engine);
 
     // Game system singleton
-    const game = new Game(scene);
+    this.game = new Game(this.scene);
 
     // Boot game
     // *blows on cartridge*
     let timerStart = performance.now();
-    await game.loadCartridge(this.cartridge);
+    await this.game.loadCartridge(this.cartridge);
     console.log(`Loaded game in ${(performance.now() - timerStart).toFixed(1)}ms`);
 
     // Wait for scene
-    await scene.whenReadyAsync();
+    await this.scene.whenReadyAsync();
 
     // @DEBUG hack the textures to look a bit cooler
-    debug_modTextures(scene);
+    debug_modTextures(this.scene);
 
-    engine.runRenderLoop(() => {
-      scene.render();
-      const deltaTime = engine.getDeltaTime() / 1000;
-      Modules.onUpdate(deltaTime);
+    this.engine.runRenderLoop(() => {
+      const deltaTime = this.engine!.getDeltaTime() / 1000;
+      this.scene!.render();
+      this.game!.onUpdate(deltaTime);
       // Invoke all `onUpdate` callbacks
       this.onUpdateCallbacks.forEach((callback) => callback());
     });
   }
+
+  public dispose() {
+    console.log(`[Runtime] (dispose) Destroying runtime`);
+    this.cartridge = undefined;
+
+    this.game!.dispose();
+    this.game = undefined;
+
+    this.scene!.dispose();
+    this.scene = undefined;
+
+    this.engine!.dispose();
+    this.engine = undefined;
+
+    this.onDisposeCallbacks.forEach((callback) => callback());
+  }
+
 }
 
 export function debug_modTextures(scene: Scene): void {

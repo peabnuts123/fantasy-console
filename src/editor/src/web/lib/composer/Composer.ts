@@ -154,7 +154,7 @@ export class Composer {
     })
 
     const bytes = new Uint8Array(createCartridgeResult);
-    return bytes;
+    return bytes.buffer;
   }
 }
 

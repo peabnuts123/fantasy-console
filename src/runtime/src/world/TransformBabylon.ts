@@ -18,13 +18,22 @@ export class WrappedBabylonVector3 extends Vector3 {
   }
 
   public override get x(): number { return this.vec.x; }
-  public override set x(value: number) { this.vec.x = value; }
+  public override set x(value: number) {
+    super.x = value;
+    this.vec.x = value;
+  }
 
   public override get y(): number { return this.vec.y; }
-  public override set y(value: number) { this.vec.y = value; }
+  public override set y(value: number) {
+    super.y = value;
+    this.vec.y = value;
+  }
 
   public override get z(): number { return this.vec.z; }
-  public override set z(value: number) { this.vec.z = value; }
+  public override set z(value: number) {
+    super.z = value;
+    this.vec.z = value;
+  }
 }
 
 export class TransformBabylon extends Transform {

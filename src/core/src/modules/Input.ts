@@ -40,6 +40,11 @@ class InputModule implements IModule {
   private currentInputState: InputState | undefined;
   private lastFrameInputState: InputState | undefined;
 
+  public onInit(): void {
+    this.currentInputState = undefined;
+    this.lastFrameInputState = undefined;
+  }
+
   public onUpdate(_deltaTime: number): void {
     this.lastFrameInputState = this.currentInputState;
     this.currentInputState = this.getCurrentKeyboardState();
@@ -91,6 +96,13 @@ class InputModule implements IModule {
    */
   public init(manager: NativeInputManager) {
     this.manager = manager;
+  }
+
+  /**
+   * @internal
+   */
+  public dispose() {
+    this.manager = undefined!;
   }
 }
 
