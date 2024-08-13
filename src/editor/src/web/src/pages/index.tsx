@@ -9,7 +9,9 @@ const IndexPage: FunctionComponent = () => {
         <Link href="/composer" className="menu__item">
             <span className="title">Composer</span>
         </Link>
-        <div className="menu__item">Soon&trade;</div>
+        <Link href="/player" className="menu__item">
+            <span className="title">Player</span>
+        </Link>
         <div className="menu__item">Soon&trade;</div>
         <div className="menu__item">Soon&trade;</div>
         <div className="menu__item">Soon&trade;</div>

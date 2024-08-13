@@ -1,14 +1,37 @@
 import Player from "@app/components/player";
-import { FunctionComponent, useEffect, useRef } from "react";
+import Condition from "@app/components/util/condition";
+import { FunctionComponent, useState } from "react";
+import { open } from '@tauri-apps/api/dialog';
+import { readBinaryFile } from '@tauri-apps/api/fs';
+import Link from "next/link";
 
 
-// const CARTRIDGE_URL = `/sample-cartridge.pzcart`;
-const CARTRIDGE_URL = `/debug.pzcart`;
 
 interface Props { }
 
 const PlayerPage: FunctionComponent<Props> = ({ }) => {
-  return <Player cartridge={CARTRIDGE_URL} />
+  const [cartridge, setCartridge] = useState<ArrayBuffer | undefined>(undefined);
+
+  const loadCartridge = async () => {
+    const selected = await open({
+      filters: [{
+        name: 'PolyZone Cartridge',
+        extensions: ['pzcart']
+      }]
+    }) as string | null;
+    if (selected === null) return;
+
+    const bytes = await readBinaryFile(selected);
+    setCartridge(bytes.buffer);
+  };
+
+  return <>
+    <Link href="/">&lt; Back</Link>
+    <button onClick={loadCartridge}>Open...</button>
+    <Condition if={cartridge !== undefined}
+      then={() => <Player cartridge={cartridge!} />}
+     />
+  </>
 };
 
 export default PlayerPage;

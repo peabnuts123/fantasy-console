@@ -9,6 +9,7 @@ import Spinner from "@app/components/spinner";
 import { useComposer } from "@lib/composer/Composer";
 import { SceneManifest } from "@lib/composer/project";
 import Player from "@app/components/player";
+import Link from "next/link";
 
 
 interface Props { }
@@ -63,7 +64,8 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   };
 
   return (
-    <div className="page">
+    <>
+      <Link href="/">&lt; Back</Link>
       <h1>Composer</h1>
       <Condition if={Composer.hasLoadedProject}
         then={() => (
@@ -117,7 +119,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
           </>
         )}
       />
-    </div>
+    </>
   )
 });
 
