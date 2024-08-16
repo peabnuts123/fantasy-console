@@ -1,4 +1,4 @@
-import { FunctionComponent, PropsWithChildren } from 'react';
+import { FunctionComponent } from 'react';
 import { observer } from 'mobx-react-lite';
 
 interface Props {

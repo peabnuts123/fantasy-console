@@ -14,6 +14,13 @@ import { SceneView } from './SceneView';
 import { ProjectDefinition, ProjectManifest, SceneManifest } from './project/definition';
 import { ComposerAssetResolverProtocol } from './constants';
 
+export interface CreateCartridgeCmdArgs {
+  manifestFileBytes: string;
+  projectRootPath: string;
+  assetPaths: string[];
+  scriptPaths: string[];
+}
+
 export class Composer {
   private fileSystem: IFileSystem = undefined!; // @NOTE explicit `undefined` for mobx
   private _isLoadingProject: boolean = false;
@@ -151,7 +158,7 @@ export class Composer {
       scriptPaths: this.assetDb.assets
         .filter((asset) => asset.type === AssetType.Script)
         .map((asset) => asset.path),
-    })
+    } satisfies CreateCartridgeCmdArgs)
 
     return new Uint8Array(createCartridgeResult);
   }

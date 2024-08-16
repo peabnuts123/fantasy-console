@@ -2,7 +2,17 @@ import { FunctionComponent } from 'react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 
-import '@app/styles/index.scss';
+import '@app/styles/index.css';
+
+/* Mock Tauri IPC if not running in Tauri */
+if (typeof window !== "undefined") {
+  if ((window as any).__TAURI_IPC__) {
+    console.log(`Running in Tauri`);
+  } else {
+    console.log(`Running in browser`);
+    void import('@lib/tauri/mock').then(({ mockTauri }) => mockTauri())
+  }
+}
 
 const App: FunctionComponent<AppProps> = ({ Component }) => {
   return <>
