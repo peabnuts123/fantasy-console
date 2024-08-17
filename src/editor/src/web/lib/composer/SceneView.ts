@@ -54,10 +54,11 @@ export class SceneView {
     this.babylonScene = new BabylonScene(this.engine);
 
     /* Lifecycle */
-    const onResize = () => this.engine?.resize();
-    if (window) {
-      window.addEventListener("resize", onResize);
-    }
+    const resizeObserver = new ResizeObserver((entries) => {
+      const newSize = entries[0].contentRect;
+      this.engine!.setSize(newSize.width * devicePixelRatio, newSize.height * devicePixelRatio, true);
+    });
+    resizeObserver.observe(canvas);
 
     // Build scene (async)
     void (async () => {
@@ -65,8 +66,15 @@ export class SceneView {
       const camera = new FreeCamera("main", new Vector3(0, 5, -10), this.babylonScene);
       camera.setTarget(Vector3.Zero());
       camera.attachControl(canvas, true);
-      camera.speed = 0.5;
+      camera.speed = 0.3;
       camera.minZ = 0.1;
+      /* @NOTE WASD+Shift+Space */
+      camera.keysUp.push(87);
+      camera.keysLeft.push(65);
+      camera.keysRight.push(68);
+      camera.keysDown.push(83);
+      camera.keysUpward.push(32);
+      camera.keysDownward.push(16);
 
       await this.createScene()
 
@@ -82,13 +90,11 @@ export class SceneView {
     /* Teardown - when scene view is unloaded */
     const onDestroyView = () => {
       console.log(`[SceneView] (onDestroyView) Goodbye!`);
+      // @TODO destroy GameObjects once we sort out what the abstraction difference between this and Runtime is
       this.babylonScene!.dispose();
       this.engine!.dispose();
       this.reset();
-      // @TODO destroy GameObjects once we sort out what the abstraction difference between this and Runtime is
-      if (window) {
-        window.removeEventListener("resize", onResize);
-      }
+      resizeObserver.unobserve(canvas);
     }
     return onDestroyView;
   }

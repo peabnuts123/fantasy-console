@@ -3,8 +3,9 @@ import Link from 'next/link';
 
 const IndexPage: FunctionComponent = () => {
   return (
-    <div className="p-3 bg-fuchsia-400 h-full bg-gradient-to-b from-[blue] to-black text-white">
-      <h1 className="text-5xl italic mb-3 font-serif [text-shadow:_4px_4px_0_black]">Fantasy Console</h1>
+    <div className="p-3 h-full bg-gradient-to-b from-[blue] to-black text-white">
+      <h1 className="text-h1 italic mb-3 font-serif text-retro-shadow">Fantasy Console</h1>
+      <h2 className="text-h2 italic mb-3 font-serif text-retro-shadow">Tools</h2>
       <div className="grid sm:grid-cols-3 md:grid-cols-4 gap-3 py-3">
         <AppTile href="/composer" label="Composer" description="Create, edit and arrange objects and scenes. Test your game." />
         <AppTile href="/player" label="Player" description="Play game cartridges." />
@@ -49,9 +50,13 @@ const AppTile: FunctionComponent<AppTileProps> = ({ href, label, description }: 
   // Common styles between both buttons
   return (
     <Tile className="flex text-center justify-center items-center p-5 bg-white no-underline
-    text-black min-h-32 shadow-[4px_4px_0_black] active:[border-style:inset] group select-none
+      text-black min-h-32 select-none
+      //_Inactive_styles
+      [&:not(:active)]:retro-shadow [&:not(:active)]:mb-1 [&:not(:active)]:mr-1
+      //_Active_styles
+      active:[border-style:inset] active:mt-1 active:ml-1
     ">
-      <div className="flex flex-col group-active:mt-1 group-active:ml-1">
+      <div className="flex flex-col">
         <div className="font-bold ">{label}</div>
         <p>{description}</p>
       </div>

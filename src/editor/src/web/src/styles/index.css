@@ -1,15 +1,57 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import './components/spinner.css';
 
 @layer base {
   #__next {
-    @apply h-full;
+    @apply h-full flex flex-col overflow-hidden;
+  }
+
+  svg[data-slot="icon"] {
+    display: inline;
+    width: 24px;
+  }
+  [data-resize-handle] {
+    @apply bg-slate-300
+    ;
+  }
+  [data-resize-handle][data-panel-group-direction="vertical"] {
+    /* Horizontal resize handle */
+    @apply border-y-2 border-slate-400 h-[6px]
+  }
+  [data-resize-handle][data-panel-group-direction="horizontal"] {
+    /* Vertical resize handle */
+    @apply border-x-2 border-slate-400 w-[6px]
   }
 }
 
 @layer components {
   .button {
+    @apply border border-black mt-1 ml-1 mr-2 mb-2 py-1 px-2 bg-white text-black retro-shadow hover:bg-blue-300 focus:bg-blue-300
+      active:bg-blue-500 flex flex-row items-center [&>svg]:mr-1
+    ;
+  }
+}
 
+@layer utilities {
+  .text-h1 { @apply text-5xl; }
+  .text-h2 { @apply text-3xl; }
+  .text-h3 { @apply text-xl; }
+
+  .text-retro-shadow {
+    text-shadow:
+      1px 1px black,
+      2px 2px black,
+      3px 3px black,
+      4px 4px black;
+  }
+
+  .retro-shadow {
+    box-shadow:
+      1px 1px 0 black,
+      2px 2px 0 black,
+      3px 3px 0 black,
+      4px 4px 0 black;
   }
 }
