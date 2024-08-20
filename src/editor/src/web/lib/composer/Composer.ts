@@ -9,6 +9,7 @@ import Resolver from '@fantasy-console/runtime/src/Resolver';
 
 import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
 import * as path from '@lib/tauri/path';
+import { watchImmediate } from '@lib/tauri/watch';
 
 import { SceneView } from './SceneView';
 import { ProjectDefinition, ProjectManifest, SceneManifest } from './project/definition';
@@ -28,6 +29,9 @@ export class Composer {
   private _currentScene: SceneView | undefined = undefined; // @NOTE explicit `undefined` for mobx
   private currentProjectRoot: string | undefined = undefined; // @NOTE explicit `undefined` for mobx
   private _assetDb?: AssetDb = undefined;
+
+  private _stopWatchingFs?: Function = undefined;
+
 
   public constructor() {
     // @NOTE Class properties MUST have a value explicitly assigned
@@ -55,6 +59,13 @@ export class Composer {
       this.fileSystem,
       ComposerAssetResolverProtocol,
     );
+
+    console.log(`[Composer] (loadProject) Watching '${projectDirRoot}' for changes...`);
+    this._stopWatchingFs = await watchImmediate(projectDirRoot, (event) => {
+      console.log(`FSEvent: `, event);
+    }, {
+      recursive: true,
+    });
 
     runInAction(() => {
       this._currentProject = project;
@@ -108,6 +119,14 @@ export class Composer {
     }
 
     return this._currentScene;
+  }
+
+  public dispose() {
+    /* @TODO hold up, the Composer is a whack singleton and needs to be sorted out */
+    if (this._stopWatchingFs) {
+      this._stopWatchingFs();
+      this._stopWatchingFs = undefined;
+    }
   }
 
   public async debug_buildCartridge(): Promise<Uint8Array> {
@@ -164,6 +183,7 @@ export class Composer {
   }
 }
 
+// @TODO does this really need to be a singleton?
 // @TODO mostly redundant in its current form (i.e. no provider)
 const ComposerContext = createContext<Composer>(new Composer());
 export const useComposer = (): Composer => useContext(ComposerContext);

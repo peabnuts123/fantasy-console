@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { open, save } from '@tauri-apps/api/dialog';
@@ -24,6 +24,12 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
 
   // Computed State
   const isPlaying = tempCartridge !== undefined;
+
+  useEffect(() => {
+    return () => {
+      Composer.dispose();
+    };
+  });
 
   // Functions
   const loadProject = async () => {

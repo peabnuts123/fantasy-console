@@ -1,9 +1,11 @@
 import { mockIPC } from "@tauri-apps/api/mocks";
 
-import * as TauriDialog from '@tauri-apps/api/dialog';
-import * as TauriPath from '@tauri-apps/api/path';
-import * as TauriFs from '@tauri-apps/api/fs';
-import { CreateCartridgeCmdArgs } from "@lib/composer/Composer";
+import type * as TauriDialog from '@tauri-apps/api/dialog';
+import type * as TauriPath from '@tauri-apps/api/path';
+import type * as TauriFs from '@tauri-apps/api/fs';
+import type * as TauriEvent from '@tauri-apps/api/event';
+import type { CreateCartridgeCmdArgs } from "@lib/composer/Composer";
+import type * as WatchFsPlugin from "tauri-plugin-fs-watch-api";
 
 /* Configuration */
 /**
@@ -33,6 +35,8 @@ export class BrowserMock {
         return this.mockTauri(args);
       case 'create_cartridge':
         return this.mockCreateCartridge(args);
+      case 'plugin:fs-watch|watch':
+        return this.mockFsWatchPlugin(args);
       default:
         throwUnhandled(`[BrowserMock] (handle) Unimplemented Tauri API. cmd: ${cmd}, args: `, args);
     }
@@ -59,6 +63,11 @@ export class BrowserMock {
     } else {
       throw throwUnhandled(`[BrowserMock] (mockCreateCartridge) Failed fetching mock cartridge: `, result);
     }
+  }
+
+  private mockFsWatchPlugin(args: WatchFsPluginWatchCommandArgs) {
+    console.log(`[BrowserMock] (mockFsWatchPlugin) Calling no-op 'watch' mock`)
+    // @NOTE no-op
   }
 }
 
@@ -108,6 +117,9 @@ interface ITauriMock {
   Fs: {
     readFile: MockHandlerWith2Args<'path', 'options', typeof TauriFs.readBinaryFile>;
     writeFile: MockHandlerWith3Args<'path', 'content', 'options', typeof TauriFs.writeBinaryFile>;
+  },
+  Event: {
+    listen: MockHandlerWith2Args<'event', 'handler', typeof TauriEvent.listen>
   }
 }
 
@@ -167,6 +179,12 @@ const TauriMock: ITauriMock = {
     writeFile({ path, content, options }) {
       console.warn(`[Fs] (writeFile) Tauri is mocked - no file actually written`);
     },
+  },
+  Event: {
+    listen(args) {
+      console.log(`[TauriMock] (listen) got args: `, args);
+      return () => {};
+    },
   }
 }
 
@@ -181,6 +199,11 @@ interface TauriCommandIPCArgs<TModuleName extends TauriMockModuleName> {
   message: {
     "cmd": keyof (ITauriMock[TModuleName]),
   } & Record<string, any>
+}
+
+interface WatchFsPluginWatchCommandArgs {
+  paths: string[];
+  options: Parameters<typeof WatchFsPlugin.watch>[2];
 }
 
 /** Utility type that converts any type into Promise/raw type union */

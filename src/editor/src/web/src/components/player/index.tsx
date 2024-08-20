@@ -27,7 +27,7 @@ const Player: FunctionComponent<Props> = ({ cartridge }) => {
   return (
     <div className="grow relative">
       {/* @NOTE ye-olde absolute position hacks */}
-      <div className="absolute top-0 right-0 left-0 bottom-0">
+      <div className="absolute inset-0">
         <canvas
           ref={canvas}
           className="w-full h-full object-contain [image-rendering:_pixelated]"

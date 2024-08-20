@@ -8,6 +8,7 @@ use build::build;
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![create_cartridge])
+        .plugin(tauri_plugin_fs_watch::init())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
