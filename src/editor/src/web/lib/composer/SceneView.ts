@@ -10,17 +10,17 @@ import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight';
 import * as Jsonc from 'jsonc-parser';
 import "@babylonjs/loaders/OBJ/objFileLoader";
 import { AssetContainer } from '@babylonjs/core/assetContainer';
+import { PointLight } from '@babylonjs/core/Lights/pointLight';
 
 import { TransformBabylon } from '@fantasy-console/runtime/src/world/TransformBabylon';
 import { GameObject } from '@fantasy-console/core/src/world';
 import { GameObjectBabylon } from '@fantasy-console/runtime/src/world/GameObjectBabylon';
 import { DirectionalLightComponentBabylon, MeshComponentBabylon, PointLightComponentBabylon } from '@fantasy-console/runtime/src/world/components';
-import { AssetConfig, AssetDb, DirectionalLightComponentConfig, GameObjectConfig, MeshComponentConfig, PointLightComponentConfig, SceneConfig, SceneDefinition, SceneObjectDefinition, ScriptComponentConfig } from '@fantasy-console/runtime/src/cartridge';
+import { AssetConfig, AssetDb, DirectionalLightComponentConfig, GameObjectConfig, MeshComponentConfig, PointLightComponentConfig, SceneConfig, SceneDefinition, ScriptComponentConfig } from '@fantasy-console/runtime/src/cartridge';
 import { debug_modTextures } from '@fantasy-console/runtime';
-import { PointLight } from '@babylonjs/core/Lights/pointLight';
-import { SceneManifest } from './project';
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 
+import { SceneManifest } from '@lib/project/definition/scene';
 
 export class SceneView {
   private _scene: SceneConfig;

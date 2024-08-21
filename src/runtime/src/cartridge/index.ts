@@ -3,7 +3,6 @@ import { Unzipped, unzip } from 'fflate';
 export * from './archive';
 export * from './config';
 
-import { RuntimeAssetResolverProtocol } from '../constants';
 import { CartridgeArchive } from './archive/CartridgeArchive';
 import { AssetDb, Cartridge, SceneDb } from './config';
 
@@ -41,7 +40,7 @@ export async function loadCartridge(cartridgeArchive: CartridgeArchive): Promise
   // @TODO validate DTO
   const cartridgeManifest = cartridgeArchive.manifest;
 
-  const assetDb = new AssetDb(cartridgeManifest.assets, cartridgeArchive.fileSystem, RuntimeAssetResolverProtocol);
+  const assetDb = new AssetDb(cartridgeManifest.assets, cartridgeArchive.fileSystem);
   const sceneDb = new SceneDb(cartridgeManifest.scenes, assetDb);
 
   return new Cartridge(sceneDb, assetDb);

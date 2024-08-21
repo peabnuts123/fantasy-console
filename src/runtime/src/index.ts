@@ -9,7 +9,6 @@ import { readCartridgeArchive, loadCartridge, fetchCartridge, Cartridge, Cartrid
 import Resolver from './Resolver';
 import { Game } from "./Game";
 import { BabylonInputManager } from './modules/BabylonInputManager';
-import { RuntimeAssetResolverProtocol } from "./constants";
 
 export type OnUpdateCallback = () => void;
 export type OnDisposeCallback = () => void;
@@ -66,7 +65,7 @@ export class Runtime {
     }
 
     // Bind resolver to cartridge asset DB
-    Resolver.registerFileSystem(RuntimeAssetResolverProtocol, cartridgeArchive.fileSystem);
+    Resolver.registerFileSystem(cartridgeArchive.fileSystem);
     this.cartridge = await loadCartridge(cartridgeArchive);
     console.log(`Loaded cartridge in ${(performance.now() - timerStart).toFixed(1)}ms`);
   }

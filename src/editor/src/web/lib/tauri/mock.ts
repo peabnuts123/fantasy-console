@@ -4,7 +4,7 @@ import type * as TauriDialog from '@tauri-apps/api/dialog';
 import type * as TauriPath from '@tauri-apps/api/path';
 import type * as TauriFs from '@tauri-apps/api/fs';
 import type * as TauriEvent from '@tauri-apps/api/event';
-import type { CreateCartridgeCmdArgs } from "@lib/composer/Composer";
+import type { CreateCartridgeCmdArgs } from "@lib/composer/ComposerController";
 import type * as WatchFsPlugin from "tauri-plugin-fs-watch-api";
 
 /* Configuration */

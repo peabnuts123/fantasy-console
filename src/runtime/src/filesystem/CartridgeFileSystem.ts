@@ -3,10 +3,11 @@ import { Unzipped } from "fflate";
 import { IFileSystem } from "./IFileSystem";
 import { VirtualFile } from "./VirtualFile";
 
-export class CartridgeFileSystem implements IFileSystem {
+export class CartridgeFileSystem extends IFileSystem {
   private readonly cartridgeData: Unzipped;
 
   public constructor(cartridgeData: Unzipped) {
+    super(`pzcartfs`);
     this.cartridgeData = cartridgeData;
   }
 

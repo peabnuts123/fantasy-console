@@ -1,8 +1,9 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useState } from 'react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 
 import '@app/styles/index.css';
+import { createLibrary, Library, LibraryContext } from '@lib/index';
 
 /* Mock Tauri IPC if not running in Tauri */
 if (typeof window !== "undefined") {
@@ -15,6 +16,9 @@ if (typeof window !== "undefined") {
 }
 
 const App: FunctionComponent<AppProps> = ({ Component }) => {
+
+  const [library, setLibrary] = useState<Library>(createLibrary());
+
   return <>
     <Head>
       <meta charSet="UTF-8" />
@@ -28,7 +32,9 @@ const App: FunctionComponent<AppProps> = ({ Component }) => {
       {/* <meta name="app-version" content={Config.AppVersion} /> */}
     </Head>
 
-    <Component />
+    <LibraryContext.Provider value={library}>
+      <Component />
+    </LibraryContext.Provider>
   </>;
 };
 

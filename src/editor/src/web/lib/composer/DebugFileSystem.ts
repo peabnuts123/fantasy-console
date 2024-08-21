@@ -2,10 +2,11 @@ import { IFileSystem, VirtualFile } from "@fantasy-console/runtime/src/filesyste
 
 export const DebugFileSystemRoot: string = `/project`;
 
-export class DebugFileSystem implements IFileSystem {
+export class DebugFileSystem extends IFileSystem {
   private fileSystemRoot: string;
 
   public constructor() {
+    super(`debugfs`);
     this.fileSystemRoot = DebugFileSystemRoot;
   }
 

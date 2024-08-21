@@ -1,7 +1,10 @@
 import { FunctionComponent, HTMLAttributes, PropsWithChildren } from "react";
 import Link from 'next/link';
+import { useLibrary } from "@lib/index";
 
 const IndexPage: FunctionComponent = () => {
+  const { ProjectController } = useLibrary();
+
   return (
     <div className="p-3 h-full bg-gradient-to-b from-[blue] to-black text-white">
       <h1 className="text-h1 italic mb-3 font-serif text-retro-shadow">Fantasy Console</h1>

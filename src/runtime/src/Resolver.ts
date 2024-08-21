@@ -42,14 +42,11 @@ class Resolver {
    * @param protocol Url protocol prefix like `runtime://`
    * @param fileSystem AssetDb for resolving Urls with this protocol
    */
-  public registerFileSystem(protocol: string, fileSystem: IFileSystem) {
-    if (!/^\w+:\/\/$/.test(protocol)) {
-      throw new Error(`Protocol must be in the format 'foo://'`);
+  public registerFileSystem(fileSystem: IFileSystem) {
+    if (this.fileSystems.has(fileSystem.resolverProtocol)) {
+      console.error(`fileSystem is already registered in Resolver: ${fileSystem.resolverProtocol}`)
     }
-    if (this.fileSystems.has(protocol)) {
-      console.warn(`Resolver already has handler for protocol: ${protocol}`)
-    }
-    this.fileSystems.set(protocol, fileSystem);
+    this.fileSystems.set(fileSystem.resolverProtocol, fileSystem);
   }
 
   public deregisterFileSystem(protocol: string) {

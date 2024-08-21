@@ -8,16 +8,16 @@ export class AssetDb {
   public readonly assets: AssetConfig[];
   private readonly fileSystem: IFileSystem;
 
-  public constructor(assetDefinitions: AssetDefinition[], fileSystem: IFileSystem, assetResolverProtocol: string) {
+  public constructor(assetDefinitions: AssetDefinition[], fileSystem: IFileSystem) {
+    this.fileSystem = fileSystem;
     this.assets = assetDefinitions.map((assetDefinition) => {
       return new AssetConfig(
         assetDefinition.id,
         assetDefinition.type,
         assetDefinition.path,
-        assetResolverProtocol,
+        fileSystem.resolverProtocol,
       );
     });
-    this.fileSystem = fileSystem;
   }
 
   public getById(assetId: string, expectedType: AssetType): AssetConfig {

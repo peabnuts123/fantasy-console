@@ -6,18 +6,18 @@ import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon } from '@heroicons/react/24/solid'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
+import { useLibrary } from "@lib/index";
+import { SceneManifest } from "@lib/project/definition/scene";
 import SceneView from "@app/components/pages/composer/SceneView";
 import { Condition } from '@app/components/util/condition';
 import Spinner from "@app/components/spinner";
-import { useComposer } from "@lib/composer/Composer";
-import { SceneManifest } from "@lib/composer/project";
 import Player from "@app/components/player";
 
 
 interface Props { }
 
 const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
-  const Composer = useComposer();
+  const { ComposerController, ProjectController } = useLibrary();
 
   // State
   const [tempCartridge, setTempCartridge] = useState<Uint8Array | undefined>(undefined);
@@ -26,8 +26,9 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   const isPlaying = tempCartridge !== undefined;
 
   useEffect(() => {
+    ComposerController.onEnter();
     return () => {
-      Composer.dispose();
+      ComposerController.onExit();
     };
   });
 
@@ -42,15 +43,15 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
 
     if (selected === null) return;
 
-    await Composer.loadProject(selected);
+    await ProjectController.loadProject(selected);
   };
 
   const loadScene = async (scene: SceneManifest) => {
-    await Composer.loadScene(scene);
+    await ComposerController.loadScene(scene);
   };
 
   const debug_exportScene = async () => {
-    const bytes = await Composer.debug_buildCartridge();
+    const bytes = await ComposerController.debug_buildCartridge();
     const savePath = await save({
       filters: [{
         name: 'Fantasy Console Cartridge',
@@ -63,7 +64,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   };
 
   const debug_playProject = async () => {
-    const bytes = await Composer.debug_buildCartridge();
+    const bytes = await ComposerController.debug_buildCartridge();
     setTempCartridge(bytes);
   };
 
@@ -92,7 +93,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
       </header>
 
 
-      <Condition if={Composer.hasLoadedProject}
+      <Condition if={ProjectController.hasLoadedProject}
         then={() => (
           /* Project is loaded */
           <>
@@ -101,10 +102,10 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
                 /* Editing scene (not playing) */
                 <PanelGroup direction="vertical">
                   <Panel defaultSize={75} minSize={25}>
-                    <Condition if={Composer.hasLoadedScene}
+                    <Condition if={ComposerController.hasLoadedScene}
                       then={() => (
                         /* Scene loaded */
-                        <SceneView scene={Composer.currentScene} />
+                        <SceneView scene={ComposerController.currentScene} />
                       )}
                       else={() => (
                         /* No scene loaded */
@@ -112,7 +113,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
                           <h1 className="text-h2">No scene loaded</h1>
                           <p>Select a scene to load</p>
                           <ul className="flex flex-col items-center">
-                            {Composer.currentProject.scenes.map((sceneManifest) => (
+                            {ProjectController.currentProject.scenes.map((sceneManifest) => (
                               <button
                                 key={sceneManifest.hash}
                                 onClick={() => loadScene(sceneManifest)}
@@ -147,7 +148,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
         else={() => (
           /* No project currently loaded */
           <div className="flex flex-col justify-center items-center h-full">
-            <Condition if={Composer.isLoadingProject}
+            <Condition if={ProjectController.isLoadingProject}
               then={() => (
                 /* Project is loading... */
                 <>
