@@ -1,9 +1,11 @@
 import { FunctionComponent, useState } from 'react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 
-import '@app/styles/index.css';
 import { createLibrary, Library, LibraryContext } from '@lib/index';
+import '@app/styles/index.css';
+import Condition from '@app/components/util/condition';
 
 /* Mock Tauri IPC if not running in Tauri */
 if (typeof window !== "undefined") {
@@ -16,8 +18,19 @@ if (typeof window !== "undefined") {
 }
 
 const App: FunctionComponent<AppProps> = ({ Component }) => {
+  const Router = useRouter();
 
-  const [library, setLibrary] = useState<Library>(createLibrary());
+  const [library] = useState<Library>(createLibrary());
+
+  const { ProjectController } = library;
+
+  let isRedirecting = false;
+  if (!ProjectController.hasLoadedProject && Router.route !== '/') {
+    isRedirecting = true
+    if (typeof window !== 'undefined') {
+      void Router.push('/');
+    }
+  }
 
   return <>
     <Head>
@@ -33,7 +46,11 @@ const App: FunctionComponent<AppProps> = ({ Component }) => {
     </Head>
 
     <LibraryContext.Provider value={library}>
-      <Component />
+      <Condition if={!isRedirecting}
+        then={() => (
+          <Component />
+        )}
+      />
     </LibraryContext.Provider>
   </>;
 };

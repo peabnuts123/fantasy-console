@@ -1,14 +1,44 @@
 import { FunctionComponent, HTMLAttributes, PropsWithChildren } from "react";
 import Link from 'next/link';
-import { useLibrary } from "@lib/index";
+import { open } from '@tauri-apps/api/dialog';
+import { observer } from "mobx-react-lite";
 
-const IndexPage: FunctionComponent = () => {
+import { useLibrary } from "@lib/index";
+import Condition from "@app/components/util/condition";
+import Spinner from "@app/components/spinner";
+
+const IndexPage: FunctionComponent = observer(() => {
   const { ProjectController } = useLibrary();
 
   return (
     <div className="p-3 h-full bg-gradient-to-b from-[blue] to-black text-white">
       <h1 className="text-h1 italic mb-3 font-serif text-retro-shadow">Fantasy Console</h1>
-      <h2 className="text-h2 italic mb-3 font-serif text-retro-shadow">Tools</h2>
+      <Condition if={ProjectController.hasLoadedProject}
+        then={() => (
+          <ToolsMenu />
+        )}
+        else={() => (
+          <Condition if={ProjectController.isLoadingProject}
+            then={() => (
+              <Spinner inverted={true} message="Loading project..." />
+            )}
+            else={() => (
+              <ProjectSelect />
+            )}
+          />
+        )}
+      />
+    </div>
+  );
+});
+
+const ToolsMenu: FunctionComponent = () => {
+  const { ProjectController } = useLibrary();
+  const { currentProject } = ProjectController;
+
+  return (
+    <>
+      <h2 className="text-h2 italic mb-3 font-serif text-retro-shadow">{currentProject.manifest.projectName}</h2>
       <div className="grid sm:grid-cols-3 md:grid-cols-4 gap-3 py-3">
         <AppTile href="/composer" label="Composer" description="Create, edit and arrange objects and scenes. Test your game." />
         <AppTile href="/player" label="Player" description="Play game cartridges." />
@@ -17,9 +47,34 @@ const IndexPage: FunctionComponent = () => {
         <AppTile label="Soon&trade;" />
         <AppTile label="Soon&trade;" />
       </div>
-    </div>
+    </>
   );
 }
+
+const ProjectSelect: FunctionComponent = () => {
+  const { ProjectController } = useLibrary();
+
+  const loadProject = async () => {
+    const selected = await open({
+      filters: [{
+        name: 'PolyZone Project',
+        extensions: ['pzproj']
+      }]
+    }) as string | null;
+
+    if (selected === null) return;
+
+    await ProjectController.loadProject(selected);
+  };
+
+  return (
+    <>
+      <div className="flex flex-col justify-center items-center h-full">
+        <button onClick={() => loadProject()} className="button">Load project</button>
+      </div >
+    </>
+  )
+};
 
 interface AppTileProps {
   href?: string;

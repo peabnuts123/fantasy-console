@@ -1,7 +1,7 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
-import { open, save } from '@tauri-apps/api/dialog';
+import { save } from '@tauri-apps/api/dialog';
 import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon } from '@heroicons/react/24/solid'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -33,19 +33,6 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   });
 
   // Functions
-  const loadProject = async () => {
-    const selected = await open({
-      filters: [{
-        name: 'PolyZone Project',
-        extensions: ['pzproj']
-      }]
-    }) as string | null;
-
-    if (selected === null) return;
-
-    await ProjectController.loadProject(selected);
-  };
-
   const loadScene = async (scene: SceneManifest) => {
     await ComposerController.loadScene(scene);
   };
@@ -92,79 +79,50 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
         <button onClick={debug_exportScene} className="button"><CubeIcon /> Export</button>
       </header>
 
-
-      <Condition if={ProjectController.hasLoadedProject}
+      <Condition if={!isPlaying}
         then={() => (
-          /* Project is loaded */
-          <>
-            <Condition if={!isPlaying}
-              then={() => (
-                /* Editing scene (not playing) */
-                <PanelGroup direction="vertical">
-                  <Panel defaultSize={75} minSize={25}>
-                    <Condition if={ComposerController.hasLoadedScene}
-                      then={() => (
-                        /* Scene loaded */
-                        <SceneView scene={ComposerController.currentScene} />
-                      )}
-                      else={() => (
-                        /* No scene loaded */
-                        <div className="flex flex-col justify-center items-center h-full">
-                          <h1 className="text-h2">No scene loaded</h1>
-                          <p>Select a scene to load</p>
-                          <ul className="flex flex-col items-center">
-                            {ProjectController.currentProject.scenes.map((sceneManifest) => (
-                              <button
-                                key={sceneManifest.hash}
-                                onClick={() => loadScene(sceneManifest)}
-                                className="button"
-                              >{sceneManifest.path}</button>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    />
-                  </Panel>
-                  <PanelResizeHandle className="drag-separator" />
-                  <Panel minSize={10}>
-                    <div className="p-2 bg-gradient-to-b from-[blue] to-cyan-400 text-white text-retro-shadow">
-                      <h2 className="text-lg">Assets</h2>
-                    </div>
-                    <div className="p-3 bg-slate-300 h-full">
-                      {/* Empty */}
-                    </div>
-                  </Panel>
-                </PanelGroup>
-              )}
-              else={() => (
-                /* Playing scene */
-                <>
-                  <Player cartridge={tempCartridge!} />
-                </>
-              )}
-            />
-          </>
+          /* Editing scene (not playing) */
+          <PanelGroup direction="vertical">
+            <Panel defaultSize={75} minSize={25}>
+              <Condition if={ComposerController.hasLoadedScene}
+                then={() => (
+                  /* Scene loaded */
+                  <SceneView scene={ComposerController.currentScene} />
+                )}
+                else={() => (
+                  /* No scene loaded */
+                  <div className="flex flex-col justify-center items-center h-full">
+                    <h1 className="text-h2">No scene loaded</h1>
+                    <p>Select a scene to load</p>
+                    <ul className="flex flex-col items-center">
+                      {ProjectController.currentProject.scenes.map((sceneManifest) => (
+                        <button
+                          key={sceneManifest.hash}
+                          onClick={() => loadScene(sceneManifest)}
+                          className="button"
+                        >{sceneManifest.path}</button>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              />
+            </Panel>
+            <PanelResizeHandle className="drag-separator" />
+            <Panel minSize={10}>
+              <div className="p-2 bg-gradient-to-b from-[blue] to-cyan-400 text-white text-retro-shadow">
+                <h2 className="text-lg">Assets</h2>
+              </div>
+              <div className="p-3 bg-slate-300 h-full">
+                {/* Empty */}
+              </div>
+            </Panel>
+          </PanelGroup>
         )}
         else={() => (
-          /* No project currently loaded */
-          <div className="flex flex-col justify-center items-center h-full">
-            <Condition if={ProjectController.isLoadingProject}
-              then={() => (
-                /* Project is loading... */
-                <>
-                  <Spinner message="Loading project..." />
-                </>
-              )}
-              else={() => (
-                /* Initial state */
-                <>
-                  {/* @TODO this should be done at an app level not inside the composer */}
-                  <h1 className="text-h2">No project currently loaded</h1>
-                  <button onClick={() => loadProject()} className="button">Load project</button>
-                </>
-              )}
-            />
-          </div>
+          /* Playing scene */
+          <>
+            <Player cartridge={tempCartridge!} />
+          </>
         )}
       />
     </>
