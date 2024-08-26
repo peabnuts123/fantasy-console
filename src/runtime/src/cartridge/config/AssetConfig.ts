@@ -55,4 +55,22 @@ export class AssetConfig {
   public get babylonFetchUrl(): string {
     return `${this.resolverProtocol}${this.path}`;
   }
+
+  /**
+   * The asset's virtual path as a list of string path segments,
+   * excluding the file's base name itself.
+   */
+  public get pathList(): string[] {
+    const pathSegments = this.path.split(/\/+/g);
+    // Drop the basename from the path
+    pathSegments.pop();
+    return pathSegments;
+  }
+
+  /**
+   * The filename of the asset. e.g. `sprite.png`
+   */
+  public get baseName(): string {
+    return this.path.split(/\/+/g).pop()!;
+  }
 }

@@ -10,8 +10,8 @@ import { useLibrary } from "@lib/index";
 import { SceneManifest } from "@lib/project/definition/scene";
 import SceneView from "@app/components/pages/composer/SceneView";
 import { Condition } from '@app/components/util/condition';
-import Spinner from "@app/components/spinner";
 import Player from "@app/components/player";
+import AssetList from "@app/components/pages/composer/AssetList";
 
 
 interface Props { }
@@ -109,12 +109,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
             </Panel>
             <PanelResizeHandle className="drag-separator" />
             <Panel minSize={10}>
-              <div className="p-2 bg-gradient-to-b from-[blue] to-cyan-400 text-white text-retro-shadow">
-                <h2 className="text-lg">Assets</h2>
-              </div>
-              <div className="p-3 bg-slate-300 h-full">
-                {/* Empty */}
-              </div>
+                <AssetList />
             </Panel>
           </PanelGroup>
         )}
