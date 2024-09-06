@@ -35,7 +35,7 @@ export class NewObjectMutation implements ISceneMutation {
     SceneView.createSceneObject(newGameObject);
 
     // 3. Modify JSONC
-    SceneView.sceneJson.mutate(['objects', SceneView.scene.objects.length], newObjectDefinition, { isArrayInsertion: true });
+    SceneView.sceneJson.mutate((scene) => scene.objects[SceneView.scene.objects.length], newObjectDefinition, { isArrayInsertion: true });
   }
 
   undo({ }: SceneMutationArguments): void {

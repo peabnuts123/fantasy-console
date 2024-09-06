@@ -34,7 +34,7 @@ import { SceneConfigComposer } from './config/SceneConfigComposer';
 
 export class SceneView {
   private readonly _scene: SceneConfigComposer;
-  private readonly _sceneJson: JsoncContainer;
+  private readonly _sceneJson: JsoncContainer<SceneDefinition>;
   private readonly projectController: ProjectController;
 
   private engine?: Engine = undefined;
@@ -44,7 +44,7 @@ export class SceneView {
   private babylonToWorldSelectionCache: ComposerSelectionCache;
   private selectedObject: GameObject | undefined = undefined;
 
-  public constructor(scene: SceneConfigComposer, sceneJson: JsoncContainer, projectController: ProjectController) {
+  public constructor(scene: SceneConfigComposer, sceneJson: JsoncContainer<SceneDefinition>, projectController: ProjectController) {
     this._scene = scene;
     this._sceneJson = sceneJson;
     this.projectController = projectController;
@@ -254,14 +254,14 @@ export class SceneView {
 
   public static async loadFromManifest(sceneManifest: SceneManifest, projectController: ProjectController): Promise<SceneView> {
     const [sceneDefinition, sceneJson] = await SceneView.loadSceneDefinition(sceneManifest, projectController.fileSystem);
-    return new SceneView(new SceneConfigComposer(sceneDefinition, projectController.assetDb), new JsoncContainer(sceneJson), projectController);
+    return new SceneView(new SceneConfigComposer(sceneDefinition, projectController.assetDb), new JsoncContainer<SceneDefinition>(sceneJson), projectController);
   }
 
   public get scene(): SceneConfigComposer {
     return this._scene;
   }
 
-  public get sceneJson(): JsoncContainer {
+  public get sceneJson(): JsoncContainer<SceneDefinition> {
     return this._sceneJson;
   }
 }
