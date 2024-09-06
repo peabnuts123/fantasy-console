@@ -11,29 +11,45 @@ import * as Jsonc from 'jsonc-parser';
 import "@babylonjs/loaders/OBJ/objFileLoader";
 import { AssetContainer } from '@babylonjs/core/assetContainer';
 import { PointLight } from '@babylonjs/core/Lights/pointLight';
+import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
+import '@babylonjs/core/Culling/ray'; // @NOTE needed for mesh picking - contains side effects
 
 import { TransformBabylon } from '@fantasy-console/runtime/src/world/TransformBabylon';
 import { GameObject } from '@fantasy-console/core/src/world';
 import { GameObjectBabylon } from '@fantasy-console/runtime/src/world/GameObjectBabylon';
-import { DirectionalLightComponentBabylon, MeshComponentBabylon, PointLightComponentBabylon } from '@fantasy-console/runtime/src/world/components';
-import { AssetConfig, AssetDb, DirectionalLightComponentConfig, GameObjectConfig, MeshComponentConfig, PointLightComponentConfig, SceneConfig, SceneDefinition, ScriptComponentConfig } from '@fantasy-console/runtime/src/cartridge';
+import { DirectionalLightComponentBabylon, PointLightComponentBabylon } from '@fantasy-console/runtime/src/world/components';
+import { AssetConfig, DirectionalLightComponentConfig, GameObjectConfig, PointLightComponentConfig, SceneDefinition, ScriptComponentConfig } from '@fantasy-console/runtime/src/cartridge';
 import { debug_modTextures } from '@fantasy-console/runtime';
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 
 import { SceneManifest } from '@lib/project/definition/scene';
+import { ISceneMutation } from '@lib/composer/mutation';
+import { NewObjectMutation } from '@lib/composer/mutation/scene';
+import { JsoncContainer } from '@lib/util/JsoncContainer';
+import { ProjectController } from '@lib/project/ProjectController';
+import { MeshComponentComposer } from './world/components/MeshComponentComposer';
+import { ComposerSelectionCache } from './world/components/ISelectableAsset';
+import { MeshComponentConfigComposer } from './config/components';
+import { SceneConfigComposer } from './config/SceneConfigComposer';
 
 export class SceneView {
-  private _scene: SceneConfig;
+  private readonly _scene: SceneConfigComposer;
+  private readonly _sceneJson: JsoncContainer;
+  private readonly projectController: ProjectController;
 
   private engine?: Engine = undefined;
   private babylonScene?: BabylonScene = undefined;
-  /** Counter for unique {@link GameObject} IDs */
-  private nextGameObjectId = 1000;
   private assetCache: Map<AssetConfig, AssetContainer>;
 
-  public constructor(scene: SceneConfig) {
+  private babylonToWorldSelectionCache: ComposerSelectionCache;
+  private selectedObject: GameObject | undefined = undefined;
+
+  public constructor(scene: SceneConfigComposer, sceneJson: JsoncContainer, projectController: ProjectController) {
     this._scene = scene;
+    this._sceneJson = sceneJson;
+    this.projectController = projectController;
     this.assetCache = new Map();
+    this.babylonToWorldSelectionCache = new Map();
     this.reset();
 
     // @NOTE Class properties MUST have a value explicitly assigned
@@ -44,14 +60,25 @@ export class SceneView {
   private reset() {
     this.engine = undefined;
     this.babylonScene = undefined;
-    this.nextGameObjectId = 1000;
     this.assetCache = new Map();
+  }
+
+  public debug_newObject(): void {
+    this.debug_applyMutation(new NewObjectMutation());
+  }
+
+  private debug_applyMutation(mutation: ISceneMutation) {
+    // @TODO @DEBUG store state in a stack and stuff
+    mutation.apply({
+      SceneView: this,
+      ProjectController: this.projectController,
+    });
   }
 
   public startBabylonView(canvas: HTMLCanvasElement) {
     /* Scene */
-    this.engine = new Engine(canvas, true, {}, true);
-    this.babylonScene = new BabylonScene(this.engine);
+    const engine = this.engine = new Engine(canvas, true, {}, true);
+    const scene = this.babylonScene = new BabylonScene(this.engine);
 
     /* Lifecycle */
     const resizeObserver = new ResizeObserver((entries) => {
@@ -78,21 +105,41 @@ export class SceneView {
 
       await this.createScene()
 
-      await this.babylonScene!.whenReadyAsync()
+      await scene.whenReadyAsync()
 
-      debug_modTextures(this.babylonScene!);
+      scene.onPointerObservable.add((pointerInfo) => {
+        if (pointerInfo.type === PointerEventTypes.POINTERTAP) {
+          if (!pointerInfo.pickInfo?.hit) {
+            console.log(`[Pick] Deselected.`);
+            this.selectedObject = undefined;
+          } else if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh !== null) {
+            // console.log(`[Pick] pickedMesh`, pointerInfo.pickInfo.pickedMesh);
+            let pickedGameObject = this.babylonToWorldSelectionCache.get(pointerInfo.pickInfo.pickedMesh);
 
-      this.engine!.runRenderLoop(() => {
-        this.babylonScene?.render();
+            if (pickedGameObject === undefined) {
+              console.error(`Picked mesh but found no corresponding GameObject in cache. Has it been populated or updated? Picked mesh:`, pointerInfo.pickInfo.pickedMesh);
+            } else {
+              console.log(`[Pick] gameObject: `, pickedGameObject);
+              this.selectedObject = pickedGameObject;
+            }
+          }
+        }
       });
-    })()
+
+      debug_modTextures(scene);
+
+      engine.runRenderLoop(() => {
+        scene.render();
+      });
+    })();
 
     /* Teardown - when scene view is unloaded */
     const onDestroyView = () => {
       console.log(`[SceneView] (onDestroyView) Goodbye!`);
       // @TODO destroy GameObjects once we sort out what the abstraction difference between this and Runtime is
-      this.babylonScene!.dispose();
-      this.engine!.dispose();
+      scene.dispose();
+      scene.onPointerObservable.clear();
+      engine.dispose();
       this.reset();
       resizeObserver.unobserve(canvas);
     }
@@ -111,15 +158,12 @@ export class SceneView {
     ambientLight.specular = Color3.Black();
 
     for (let sceneObject of this.scene.objects) {
-      // @TODO do something with this game object?
-      const _gameObject = await this.createSceneObject(sceneObject);
+      await this.createSceneObject(sceneObject);
     }
   }
 
-  // @TODO this is basically identical to @fantasy-console/runtime/src/Game.createGameObjectFromConfig()
-  //  We should just re-use this functionality
-  private async createSceneObject(sceneObject: GameObjectConfig, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObject> {
-    console.log(`Loading scene object: `, sceneObject.name);
+  public async createSceneObject(sceneObject: GameObjectConfig, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObject> {
+    console.log(`[SceneView] (createSceneObject) Loading scene object: `, sceneObject.name);
     // Construct game object transform for constructing scene's hierarchy
     const gameObjectTransform = new TransformBabylon(
       sceneObject.name,
@@ -135,7 +179,7 @@ export class SceneView {
 
     // Create blank object
     const gameObject: GameObject = new GameObjectBabylon(
-      this.nextGameObjectId++,
+      sceneObject.id,
       {
         name: sceneObject.name,
         transform: gameObjectTransform,
@@ -146,11 +190,13 @@ export class SceneView {
 
     // Load game object components
     for (let componentConfig of sceneObject.components) {
-      if (componentConfig instanceof MeshComponentConfig) {
+      if (componentConfig instanceof MeshComponentConfigComposer) {
         /* Mesh component */
-        // @TODO load through cache
         let meshAsset = await this.loadAssetCached(componentConfig.meshAsset);
-        gameObject.addComponent(new MeshComponentBabylon({ gameObject }, meshAsset));
+        const meshComponent = new MeshComponentComposer({ gameObject }, meshAsset);
+        meshComponent.addToSelectionCache(this.babylonToWorldSelectionCache);
+        componentConfig.componentInstance = meshComponent;
+        gameObject.addComponent(meshComponent);
       } else if (componentConfig instanceof ScriptComponentConfig) {
         /* @NOTE Script has no effect in the Composer */
       } else if (componentConfig instanceof DirectionalLightComponentConfig) {
@@ -197,20 +243,25 @@ export class SceneView {
     }
   }
 
-  public static async loadSceneDefinition(sceneManifest: SceneManifest, fileSystem: IFileSystem): Promise<SceneDefinition> {
+  public static async loadSceneDefinition(sceneManifest: SceneManifest, fileSystem: IFileSystem): Promise<[SceneDefinition, string]> {
     const sceneFile = await fileSystem.readFile(sceneManifest.path);
-    const sceneDefinition = Jsonc.parse(sceneFile.textContent) as SceneDefinition;
+    const sceneJson = sceneFile.textContent;
+    const sceneDefinition = Jsonc.parse(sceneJson) as SceneDefinition;
     // @NOTE path property comes from manifest in the composer
     sceneDefinition.path = sceneManifest.path;
-    return sceneDefinition;
+    return [sceneDefinition, sceneJson];
   }
 
-  public static async loadFromManifest(sceneManifest: SceneManifest, fileSystem: IFileSystem, assetDb: AssetDb): Promise<SceneView> {
-    const sceneDefinition = await SceneView.loadSceneDefinition(sceneManifest, fileSystem);
-    return new SceneView(new SceneConfig(sceneDefinition, assetDb));
+  public static async loadFromManifest(sceneManifest: SceneManifest, projectController: ProjectController): Promise<SceneView> {
+    const [sceneDefinition, sceneJson] = await SceneView.loadSceneDefinition(sceneManifest, projectController.fileSystem);
+    return new SceneView(new SceneConfigComposer(sceneDefinition, projectController.assetDb), new JsoncContainer(sceneJson), projectController);
   }
 
-  public get scene(): SceneConfig {
+  public get scene(): SceneConfigComposer {
     return this._scene;
+  }
+
+  public get sceneJson(): JsoncContainer {
+    return this._sceneJson;
   }
 }

@@ -50,7 +50,7 @@ export class ComposerController {
 
   public async loadScene(sceneManifest: SceneManifest) {
     // @TODO this abstract probably doesn't make sense any more
-    const scene = await SceneView.loadFromManifest(sceneManifest, this.projectController.fileSystem, this.projectController.assetDb);
+    const scene = await SceneView.loadFromManifest(sceneManifest, this.projectController);
     runInAction(() => {
       this._currentScene = scene;
     })
@@ -78,10 +78,11 @@ export class ComposerController {
 
     // Load scene definitions
     const scenes = await Promise.all(
-      this.projectController.currentProject.scenes.map(async (sceneManifest) =>
+      this.projectController.currentProject.scenes.map(async (sceneManifest) => {
         // @TODO can this be a method on ProjectController instead?
-        await SceneView.loadSceneDefinition(sceneManifest, this.projectController.fileSystem)
-      )
+        const [sceneDefinition] = await SceneView.loadSceneDefinition(sceneManifest, this.projectController.fileSystem);
+        return sceneDefinition;
+      })
     );
 
     // Build cartridge manifest

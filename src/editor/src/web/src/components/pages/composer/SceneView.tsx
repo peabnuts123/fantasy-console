@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import { FunctionComponent, useEffect, useRef, useState, MouseEvent } from "react";
 import { ChevronRightIcon, ChevronDownIcon, EqualsIcon, ArrowRightIcon, ArrowTurnDownRightIcon } from '@heroicons/react/24/solid'
 
 import { SceneView as SceneViewEngine } from "@lib/composer/SceneView";
@@ -26,11 +26,12 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ scene: SceneVie
   return (
     <PanelGroup direction="horizontal" className="h-full select-none">
       <Panel defaultSize={20} minSize={10}>
+        {/* Hierarchy */}
         <div className="p-2 bg-gradient-to-b from-[blue] to-teal-500 text-white text-retro-shadow">
           <h2 className="text-lg">{SceneView.scene.path}</h2>
-          {/* @TODO close scene or something (debug) */}
         </div>
         <div className="p-3 bg-slate-300 h-full">
+          <button className="button" onClick={() => SceneView.debug_newObject()}>[Debug] New Object</button>
           {SceneView.scene.objects.map((gameObject, index) => (
             <SceneHierarchyObject key={index} gameObject={gameObject} />
           ))}
@@ -38,13 +39,15 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ scene: SceneVie
       </Panel>
       <PanelResizeHandle className="drag-separator" />
       <Panel>
+        {/* Viewport */}
         <canvas
-          className="w-full h-full"
           ref={canvasRef}
+          className="w-full h-full"
         />
       </Panel>
       <PanelResizeHandle className="drag-separator" />
       <Panel defaultSize={20} minSize={10}>
+        {/* Inspector */}
         <div className="p-2 bg-gradient-to-b from-[blue] to-pink-500 text-white text-retro-shadow">
           <h2 className="text-lg">Inspector</h2>
           {/* @TODO close or something (debug) */}

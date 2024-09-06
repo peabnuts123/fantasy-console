@@ -12,12 +12,14 @@ export interface GameObjectTransformConfig {
  * but not yet loaded into the game.
  */
 export class GameObjectConfig {
+  public readonly id: string;
   public readonly name: string;
   public readonly transform: GameObjectTransformConfig;
   public readonly components: ComponentConfig[];
   public readonly children: GameObjectConfig[];
 
-  public constructor(name: string, transform: GameObjectTransformConfig, components: ComponentConfig[], children: GameObjectConfig[]) {
+  public constructor(id: string, name: string, transform: GameObjectTransformConfig, components: ComponentConfig[], children: GameObjectConfig[]) {
+    this.id = id;
     this.name = name;
     this.transform = transform;
     this.components = components;

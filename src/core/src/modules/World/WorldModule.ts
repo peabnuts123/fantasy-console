@@ -12,8 +12,6 @@ export type QueryFn<TQuery, TResult> = (query: TQuery) => IQueryResult<TResult>;
 export class WorldModule implements IModule {
   /** All {@link GameObject}s currently in the world. */
   public readonly gameObjects: GameObject[];
-  /** Counter for unique {@link GameObject} IDs */
-  private nextGameObjectId = 1000;
 
   public constructor() {
     this.gameObjects = [];
@@ -23,7 +21,6 @@ export class WorldModule implements IModule {
    * @internal
    */
   public onInit() {
-    this.nextGameObjectId = 1000;
   }
 
   /**
@@ -53,10 +50,6 @@ export class WorldModule implements IModule {
       gameObject.onDestroy();
       this.gameObjects.splice(index, 1);
     }
-  }
-
-  public getNextGameObjectId(): number {
-    return this.nextGameObjectId++;
   }
 
   public query<TResult>(queryFn: QueryFn<WorldQuery, TResult>): TResult;

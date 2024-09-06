@@ -143,7 +143,7 @@ export class Game {
 
     // Create blank object
     const gameObject: GameObject = new GameObjectBabylon(
-      World.getNextGameObjectId(),
+      gameObjectConfig.id,
       {
         name: gameObjectConfig.name,
         transform: gameObjectTransform,

@@ -10,7 +10,7 @@ export class GameObjectBabylon extends GameObject {
   // Override concrete type
   public readonly transform: TransformBabylon;
 
-  public constructor(id: number, data: GameObjectData) {
+  public constructor(id: string, data: GameObjectData) {
     super(id, data);
     this.transform = data.transform as TransformBabylon;
   }

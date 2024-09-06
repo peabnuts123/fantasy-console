@@ -33,8 +33,10 @@ export class ProjectController {
     // Bind file system to babylon resolver
     Resolver.registerFileSystem(this._fileSystem);
 
-    var projectFile = await this._fileSystem.readFile(projectFileName);
-    var project = Jsonc.parse(projectFile.textContent) as ProjectDefinition;
+    const projectFile = await this._fileSystem.readFile(projectFileName);
+    // @TODO JSONC Container
+    // @TODO also do we need some kind of ProjectConfig?
+    const project = Jsonc.parse(projectFile.textContent) as ProjectDefinition;
 
     // Asset database
     const assetDb = new AssetDb(

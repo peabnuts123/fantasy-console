@@ -14,7 +14,7 @@ export interface GameObjectData {
  */
 export abstract class GameObject {
   /** Unique identifier for this GameObject */
-  public readonly id: number;
+  public readonly id: string;
   /** Human-friendly name for this object */
   public readonly name: string;
   /** Components attached to this GameObject */
@@ -22,7 +22,7 @@ export abstract class GameObject {
   /** Position, rotation, scale, hierarchy data */
   public readonly transform: Transform;
 
-  public constructor(id: number, data: GameObjectData) {
+  public constructor(id: string, data: GameObjectData) {
     this.components = [];
     this.id = id;
     this.name = data.name;
