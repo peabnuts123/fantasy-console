@@ -6,23 +6,15 @@ import { MeshComponentComposer } from "@lib/composer/world/components/MeshCompon
 import { IComposerComponentConfig } from "./IComposerComponentConfig";
 
 export class MeshComponentConfigComposer extends MeshComponentConfig implements IComposerComponentConfig {
-  private _componentInstance: MeshComponentComposer | undefined = undefined;
+  public componentInstance: MeshComponentComposer | undefined = undefined;
 
   public constructor(meshAsset: AssetConfig) {
     super(meshAsset);
 
     makeObservable(this, {
       meshAsset: observable,
-      componentInstance: computed,
+      componentInstance: observable,
     });
-  }
-
-  public set componentInstance(instance: MeshComponentComposer | undefined) {
-    this._componentInstance = instance;
-  }
-
-  public get componentInstance(): MeshComponentComposer | undefined {
-    return this._componentInstance;
   }
 
   get componentName(): string {

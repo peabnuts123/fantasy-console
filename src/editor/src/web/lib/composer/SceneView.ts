@@ -32,15 +32,22 @@ import { SceneConfigComposer } from './config/SceneConfigComposer';
 import { MeshComponentComposer } from './world/components';
 import { GameObjectConfigComposer } from './config/GameObjectConfigComposer';
 import { ComposerSelectionCache } from './util/ComposerSelectionCache';
+import { UtilityLayerRenderer } from '@babylonjs/core/Rendering/utilityLayerRenderer';
+import { PositionGizmo } from '@babylonjs/core/Gizmos/positionGizmo';
+import { GizmoManager } from '@babylonjs/core/Gizmos/gizmoManager';
+import { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh';
+import { BoundingBoxGizmo } from '@babylonjs/core/Gizmos/boundingBoxGizmo';
 
 export class SceneView {
   private readonly _scene: SceneConfigComposer;
   private readonly _sceneJson: JsoncContainer<SceneDefinition>;
   private readonly projectController: ProjectController;
 
+  // @TODO different classes for the "states" of SceneView or something? So that not everything is nullable
   private engine?: Engine = undefined;
   private babylonScene?: BabylonScene = undefined;
   private assetCache: Map<AssetConfig, AssetContainer>;
+  private gizmoController?: GizmoController = undefined;
 
   private babylonToWorldSelectionCache: ComposerSelectionCache;
   private _selectedObject: GameObjectConfigComposer | undefined = undefined;
@@ -74,6 +81,16 @@ export class SceneView {
       SceneView: this,
       ProjectController: this.projectController,
     });
+  }
+
+  private onSelectionChange() {
+    if (this.selectedObject !== undefined) {
+      console.log(`[Pick] gameObject: `, this.selectedObject);
+      this.gizmoController?.setTarget(this.selectedObject.sceneInstance!);
+    } else {
+      console.log(`[Pick] Deselected.`);
+      this.gizmoController?.clearTarget();
+    }
   }
 
   public startBabylonView(canvas: HTMLCanvasElement) {
@@ -111,8 +128,8 @@ export class SceneView {
       scene.onPointerObservable.add((pointerInfo) => {
         if (pointerInfo.type === PointerEventTypes.POINTERTAP) {
           if (!pointerInfo.pickInfo?.hit) {
-            console.log(`[Pick] Deselected.`);
             this.selectedObject = undefined;
+            this.onSelectionChange();
           } else if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh !== null) {
             // console.log(`[Pick] pickedMesh`, pointerInfo.pickInfo.pickedMesh);
             let pickedGameObject = this.babylonToWorldSelectionCache.get(pointerInfo.pickInfo.pickedMesh);
@@ -120,12 +137,14 @@ export class SceneView {
             if (pickedGameObject === undefined) {
               console.error(`Picked mesh but found no corresponding GameObject in cache. Has it been populated or updated? Picked mesh:`, pointerInfo.pickInfo.pickedMesh);
             } else {
-              console.log(`[Pick] gameObject: `, pickedGameObject);
               this.selectedObject = pickedGameObject;
+              this.onSelectionChange();
             }
           }
         }
       });
+
+      this.gizmoController = new GizmoController(scene);
 
       debug_modTextures(scene);
 
@@ -164,42 +183,45 @@ export class SceneView {
   }
 
   // @TODO we probably should try to share this with the runtime in some kind of overridable fashion (?)
-  public async createSceneObject(sceneObject: GameObjectConfigComposer, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObjectBabylon> {
-    console.log(`[SceneView] (createSceneObject) Loading scene object: `, sceneObject.name);
+  public async createSceneObject(gameObjectConfig: GameObjectConfigComposer, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObjectBabylon> {
+    console.log(`[SceneView] (createSceneObject) Loading scene object: `, gameObjectConfig.name);
     // Construct game object transform for constructing scene's hierarchy
     const gameObjectTransform = new TransformBabylon(
-      sceneObject.name,
+      gameObjectConfig.name,
       this.babylonScene!,
       parentTransform,
       // @TODO probably can just take `sceneObject.transform`, huh?
-      sceneObject.transform.position
+      gameObjectConfig.transform.position
     );
 
     // Create all child objects first
     // @TODO children
-    await Promise.all(sceneObject.children.map((childSceneObject) => this.createSceneObject(childSceneObject, gameObjectTransform)));
+    await Promise.all(gameObjectConfig.children.map((childSceneObject) => this.createSceneObject(childSceneObject, gameObjectTransform)));
 
     // Create blank object
     const gameObject = new GameObjectBabylon(
-      sceneObject.id,
+      gameObjectConfig.id,
       {
-        name: sceneObject.name,
+        name: gameObjectConfig.name,
         transform: gameObjectTransform,
       }
     );
 
     gameObjectTransform.setGameObject(gameObject);
 
+    // Store reverse reference to new instance
+    gameObjectConfig.sceneInstance = gameObject;
+
     // Load game object components
-    for (let componentConfig of sceneObject.components) {
+    for (let componentConfig of gameObjectConfig.components) {
       if (componentConfig instanceof MeshComponentConfigComposer) {
         /* Mesh component */
         let meshAsset = await this.loadAssetCached(componentConfig.meshAsset);
         const meshComponent = new MeshComponentComposer({ gameObject }, meshAsset);
         // Mesh component is selectable so populate selection cache
         // @TODO remove from selection cache whenever this object is destroyed (e.g. autoload)
-        this.babylonToWorldSelectionCache.add(sceneObject, meshComponent.allSelectableMeshes);
-        // Store reverse reference to new instance for looking managing instance later (e.g. autoload)
+        this.babylonToWorldSelectionCache.add(gameObjectConfig, meshComponent.allSelectableMeshes);
+        // Store reverse reference to new instance for managing instance later (e.g. autoload)
         componentConfig.componentInstance = meshComponent;
         gameObject.addComponent(meshComponent);
       } else if (componentConfig instanceof ScriptComponentConfigComposer) {
@@ -277,5 +299,43 @@ export class SceneView {
   }
   private set selectedObject(value: GameObjectConfigComposer | undefined) {
     this._selectedObject = value;
+  }
+}
+
+
+class GizmoController {
+  private readonly gizmoManager: GizmoManager;
+  private readonly moveGizmo: PositionGizmo;
+  private readonly boundingBoxGizmo: BoundingBoxGizmo;
+
+  public constructor(scene: BabylonScene) {
+    const utilityLayer = new UtilityLayerRenderer(scene);
+    this.gizmoManager = new GizmoManager(scene, 2, utilityLayer);
+    this.gizmoManager.usePointerToAttachGizmos = false;
+
+    this.moveGizmo = new PositionGizmo(utilityLayer, 2, this.gizmoManager);
+    this.moveGizmo.planarGizmoEnabled = true;
+    this.moveGizmo.scaleRatio = 1;
+
+    // @TODO merge changes into my system, debounce, etc.
+    // this.moveGizmo.onDragObservable // etc.
+
+    this.boundingBoxGizmo = new BoundingBoxGizmo(Color3.Yellow(), utilityLayer);
+    this.boundingBoxGizmo.setEnabledScaling(false);
+    this.boundingBoxGizmo.setEnabledRotationAxis("");
+
+    this.clearTarget();
+  }
+
+  public setTarget(gameObject: GameObjectBabylon) {
+    const target = gameObject.transform.node;
+    this.moveGizmo.attachedNode = target;
+    // @NOTE Type laundering (huff my duff, Babylon))
+    this.boundingBoxGizmo.attachedMesh = target as AbstractMesh;
+  }
+
+  public clearTarget() {
+    this.moveGizmo.attachedNode = null;
+    this.boundingBoxGizmo.attachedNode = null;
   }
 }
