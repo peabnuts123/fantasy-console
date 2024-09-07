@@ -53,7 +53,22 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ scene: SceneVie
           {/* @TODO close or something (debug) */}
         </div>
         <div className="p-3 bg-slate-300 h-full">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem magnam optio corrupti quis, tempore quidem earum soluta facilis numquam nulla?
+          <Condition if={!!SceneView.selectedObject}
+            then={() => (
+              <>
+                <h3>{SceneView.selectedObject!.name}</h3>
+                {SceneView.selectedObject!.components.map((component, index) => (
+                  <div key={index} className="p-2 bg-slate-400">
+                    <h4>{component.componentName}</h4>
+                  </div>
+                ))}
+              </>
+            )}
+            else={() => (
+              <p>No object selected</p>
+            )}
+          />
+
         </div>
       </Panel>
     </PanelGroup>

@@ -5,7 +5,7 @@ import { AssetConfig, MeshComponentConfig } from "@fantasy-console/runtime/src/c
 import { MeshComponentComposer } from "@lib/composer/world/components/MeshComponentComposer";
 import { IComposerComponentConfig } from "./IComposerComponentConfig";
 
-export class MeshComponentConfigComposer extends MeshComponentConfig implements IComposerComponentConfig<MeshComponentComposer> {
+export class MeshComponentConfigComposer extends MeshComponentConfig implements IComposerComponentConfig {
   private _componentInstance: MeshComponentComposer | undefined = undefined;
 
   public constructor(meshAsset: AssetConfig) {
@@ -23,5 +23,9 @@ export class MeshComponentConfigComposer extends MeshComponentConfig implements 
 
   public get componentInstance(): MeshComponentComposer | undefined {
     return this._componentInstance;
+  }
+
+  get componentName(): string {
+    return `Mesh`;
   }
 }

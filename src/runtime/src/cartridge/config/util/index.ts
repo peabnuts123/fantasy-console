@@ -5,6 +5,7 @@ import { GameObjectConfig } from "../GameObjectConfig";
 import { CameraComponentConfig, ComponentConfig, DirectionalLightComponentConfig, MeshComponentConfig, PointLightComponentConfig, ScriptComponentConfig } from "../components";
 import { AssetDb } from "../AssetDb";
 import { AssetType } from "../AssetType";
+import { TransformConfig } from "../TransformConfig";
 
 
 export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, assetDb: AssetDb): GameObjectConfig {
@@ -55,10 +56,7 @@ export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, as
   return new GameObjectConfig(
     objectDefinition.id,
     objectDefinition.name,
-    {
-      position: toRuntimeVector3(objectDefinition.transform.position),
-      rotation: 0 /* @TODO */,
-    },
+    new TransformConfig(toRuntimeVector3(objectDefinition.transform.position), /* @TODO */ 0),
     components,
     children
   );

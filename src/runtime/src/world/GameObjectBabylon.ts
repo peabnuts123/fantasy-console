@@ -7,8 +7,8 @@ import { TransformBabylon } from './TransformBabylon';
  * Components are used to build up behaviours whereas a GameObject by itself does nothing.
  */
 export class GameObjectBabylon extends GameObject {
-  // Override concrete type
-  public readonly transform: TransformBabylon;
+  // @NOTE Override base type
+  declare public readonly transform: TransformBabylon;
 
   public constructor(id: string, data: GameObjectData) {
     super(id, data);

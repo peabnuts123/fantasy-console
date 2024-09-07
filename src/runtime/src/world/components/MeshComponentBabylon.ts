@@ -10,7 +10,7 @@ import { GameObjectBabylon } from "../GameObjectBabylon";
  */
 export class MeshComponentBabylon extends MeshComponent {
   /** Instances (clones) of model assets in the scene */
-  private readonly sceneInstances: InstantiatedEntries;
+  protected readonly sceneInstances: InstantiatedEntries;
 
   /**
    * @param data Data needed to construct a GameObjectComponent.

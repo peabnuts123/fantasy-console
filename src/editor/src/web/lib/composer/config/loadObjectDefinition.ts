@@ -1,16 +1,11 @@
 import { CameraComponentDefinition, ComponentDefinitionType, DirectionalLightComponentDefinition, MeshComponentDefinition, PointLightComponentDefinition, SceneObjectDefinition, ScriptComponentDefinition, toColor3, toRuntimeVector3 } from "@fantasy-console/runtime/src/cartridge/archive";
-import { AssetDb, AssetType, ComponentConfig, GameObjectConfig } from "@fantasy-console/runtime/src/cartridge/config";
-import {
-  ScriptComponentConfig,
-  CameraComponentConfig,
-  DirectionalLightComponentConfig,
-  PointLightComponentConfig,
-} from "@fantasy-console/runtime/src/cartridge/config";
-import { MeshComponentConfigComposer } from "./components";
+import { AssetDb, AssetType, TransformConfig } from "@fantasy-console/runtime/src/cartridge/config";
+import { CameraComponentConfigComposer, DirectionalLightComponentConfigComposer, IComposerComponentConfig, MeshComponentConfigComposer, PointLightComponentConfigComposer, ScriptComponentConfigComposer } from "./components";
+import { GameObjectConfigComposer } from "./GameObjectConfigComposer";
 
 
-export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, assetDb: AssetDb): GameObjectConfig {
-  let components: ComponentConfig[] = [];
+export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, assetDb: AssetDb): GameObjectConfigComposer {
+  let components: IComposerComponentConfig[] = [];
   for (let componentDefinition of objectDefinition.components) {
     switch (componentDefinition.type) {
       case ComponentDefinitionType.Mesh: {
@@ -22,28 +17,27 @@ export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, as
       case ComponentDefinitionType.Script: {
         const scriptComponentDefinition = componentDefinition as ScriptComponentDefinition;
         const scriptAsset = assetDb.getById(scriptComponentDefinition.scriptFileId, AssetType.Script);
-        // @TODO Composer version
-        components.push(new ScriptComponentConfig(scriptAsset));
+        components.push(new ScriptComponentConfigComposer(scriptAsset));
         break;
       }
       case ComponentDefinitionType.Camera: {
         const cameraComponentDefinition = componentDefinition as CameraComponentDefinition;
         // @TODO Composer version
-        components.push(new CameraComponentConfig());
+        components.push(new CameraComponentConfigComposer());
         break;
       }
       case ComponentDefinitionType.DirectionalLight: {
         const directionalLightComponentDefinition = componentDefinition as DirectionalLightComponentDefinition;
         const color = toColor3(directionalLightComponentDefinition.color);
         // @TODO Composer version
-        components.push(new DirectionalLightComponentConfig(directionalLightComponentDefinition.intensity, color));
+        components.push(new DirectionalLightComponentConfigComposer(directionalLightComponentDefinition.intensity, color));
         break;
       }
       case ComponentDefinitionType.PointLight: {
         const pointLightComponentDefinition = componentDefinition as PointLightComponentDefinition;
         const color = toColor3(pointLightComponentDefinition.color);
         // @TODO Composer version
-        components.push(new PointLightComponentConfig(pointLightComponentDefinition.intensity, color));
+        components.push(new PointLightComponentConfigComposer(pointLightComponentDefinition.intensity, color));
         break;
       }
       default: {
@@ -53,18 +47,15 @@ export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, as
   }
 
   // Load children (recursively)
-  let children: GameObjectConfig[] = [];
+  let children: GameObjectConfigComposer[] = [];
   if (objectDefinition.children !== undefined) {
     children = objectDefinition.children.map((childObjectDefinition) => loadObjectDefinition(childObjectDefinition, assetDb));
   }
 
-  return new GameObjectConfig(
+  return new GameObjectConfigComposer(
     objectDefinition.id,
     objectDefinition.name,
-    {
-      position: toRuntimeVector3(objectDefinition.transform.position),
-      rotation: 0 /* @TODO */,
-    },
+    new TransformConfig(toRuntimeVector3(objectDefinition.transform.position), /* @TODO */ 0),
     components,
     children
   );

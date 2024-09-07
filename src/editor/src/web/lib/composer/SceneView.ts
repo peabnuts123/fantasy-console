@@ -15,22 +15,23 @@ import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 import '@babylonjs/core/Culling/ray'; // @NOTE needed for mesh picking - contains side effects
 
 import { TransformBabylon } from '@fantasy-console/runtime/src/world/TransformBabylon';
-import { GameObject } from '@fantasy-console/core/src/world';
-import { GameObjectBabylon } from '@fantasy-console/runtime/src/world/GameObjectBabylon';
-import { DirectionalLightComponentBabylon, PointLightComponentBabylon } from '@fantasy-console/runtime/src/world/components';
-import { AssetConfig, DirectionalLightComponentConfig, GameObjectConfig, PointLightComponentConfig, SceneDefinition, ScriptComponentConfig } from '@fantasy-console/runtime/src/cartridge';
+import { AssetConfig } from '@fantasy-console/runtime/src/cartridge/config';
+import { SceneDefinition } from '@fantasy-console/runtime/src/cartridge/archive';
 import { debug_modTextures } from '@fantasy-console/runtime';
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
+import { DirectionalLightComponentBabylon, PointLightComponentBabylon } from '@fantasy-console/runtime/src/world/components';
+import { GameObjectBabylon } from '@fantasy-console/runtime/src/world/GameObjectBabylon';
 
 import { SceneManifest } from '@lib/project/definition/scene';
 import { ISceneMutation } from '@lib/composer/mutation';
 import { NewObjectMutation } from '@lib/composer/mutation/scene';
 import { JsoncContainer } from '@lib/util/JsoncContainer';
 import { ProjectController } from '@lib/project/ProjectController';
-import { MeshComponentComposer } from './world/components/MeshComponentComposer';
-import { ComposerSelectionCache } from './world/components/ISelectableAsset';
-import { MeshComponentConfigComposer } from './config/components';
+import { CameraComponentConfigComposer, DirectionalLightComponentConfigComposer, MeshComponentConfigComposer, PointLightComponentConfigComposer, ScriptComponentConfigComposer } from './config/components';
 import { SceneConfigComposer } from './config/SceneConfigComposer';
+import { MeshComponentComposer } from './world/components';
+import { GameObjectConfigComposer } from './config/GameObjectConfigComposer';
+import { ComposerSelectionCache } from './util/ComposerSelectionCache';
 
 export class SceneView {
   private readonly _scene: SceneConfigComposer;
@@ -42,14 +43,14 @@ export class SceneView {
   private assetCache: Map<AssetConfig, AssetContainer>;
 
   private babylonToWorldSelectionCache: ComposerSelectionCache;
-  private selectedObject: GameObject | undefined = undefined;
+  private _selectedObject: GameObjectConfigComposer | undefined = undefined;
 
   public constructor(scene: SceneConfigComposer, sceneJson: JsoncContainer<SceneDefinition>, projectController: ProjectController) {
     this._scene = scene;
     this._sceneJson = sceneJson;
     this.projectController = projectController;
     this.assetCache = new Map();
-    this.babylonToWorldSelectionCache = new Map();
+    this.babylonToWorldSelectionCache = new ComposerSelectionCache();
     this.reset();
 
     // @NOTE Class properties MUST have a value explicitly assigned
@@ -162,7 +163,8 @@ export class SceneView {
     }
   }
 
-  public async createSceneObject(sceneObject: GameObjectConfig, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObject> {
+  // @TODO we probably should try to share this with the runtime in some kind of overridable fashion (?)
+  public async createSceneObject(sceneObject: GameObjectConfigComposer, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObjectBabylon> {
     console.log(`[SceneView] (createSceneObject) Loading scene object: `, sceneObject.name);
     // Construct game object transform for constructing scene's hierarchy
     const gameObjectTransform = new TransformBabylon(
@@ -178,7 +180,7 @@ export class SceneView {
     await Promise.all(sceneObject.children.map((childSceneObject) => this.createSceneObject(childSceneObject, gameObjectTransform)));
 
     // Create blank object
-    const gameObject: GameObject = new GameObjectBabylon(
+    const gameObject = new GameObjectBabylon(
       sceneObject.id,
       {
         name: sceneObject.name,
@@ -194,19 +196,24 @@ export class SceneView {
         /* Mesh component */
         let meshAsset = await this.loadAssetCached(componentConfig.meshAsset);
         const meshComponent = new MeshComponentComposer({ gameObject }, meshAsset);
-        meshComponent.addToSelectionCache(this.babylonToWorldSelectionCache);
+        // Mesh component is selectable so populate selection cache
+        // @TODO remove from selection cache whenever this object is destroyed (e.g. autoload)
+        this.babylonToWorldSelectionCache.add(sceneObject, meshComponent.allSelectableMeshes);
+        // Store reverse reference to new instance for looking managing instance later (e.g. autoload)
         componentConfig.componentInstance = meshComponent;
         gameObject.addComponent(meshComponent);
-      } else if (componentConfig instanceof ScriptComponentConfig) {
+      } else if (componentConfig instanceof ScriptComponentConfigComposer) {
         /* @NOTE Script has no effect in the Composer */
-      } else if (componentConfig instanceof DirectionalLightComponentConfig) {
+      } else if (componentConfig instanceof CameraComponentConfigComposer) {
+        /* @NOTE Camera has no effect in the Composer */
+      } else if (componentConfig instanceof DirectionalLightComponentConfigComposer) {
         /* Directional Light component */
         const light = new DirectionalLight(`light_directional`, Vector3.Down(), this.babylonScene);
         light.specular = Color3.Black();
         light.intensity = componentConfig.intensity;
         light.diffuse = componentConfig.color;
         gameObject.addComponent(new DirectionalLightComponentBabylon({ gameObject }, light));
-      } else if (componentConfig instanceof PointLightComponentConfig) {
+      } else if (componentConfig instanceof PointLightComponentConfigComposer) {
         /* Point Light component */
         const light = new PointLight(`light_point`, Vector3.Zero(), this.babylonScene);
         light.specular = Color3.Black();
@@ -263,5 +270,12 @@ export class SceneView {
 
   public get sceneJson(): JsoncContainer<SceneDefinition> {
     return this._sceneJson;
+  }
+
+  public get selectedObject(): GameObjectConfigComposer | undefined {
+    return this._selectedObject;
+  }
+  private set selectedObject(value: GameObjectConfigComposer | undefined) {
+    this._selectedObject = value;
   }
 }
