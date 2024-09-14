@@ -1,12 +1,13 @@
+import { SceneViewController } from "@lib/composer/scene/SceneViewController";
 import { ProjectController } from "@lib/project/ProjectController";
-import { SceneView } from "../SceneView";
 
 export interface SceneMutationArguments {
-  SceneView: SceneView;
+  SceneViewController: SceneViewController;
   ProjectController: ProjectController;
 }
 
 export interface ISceneMutation {
+  get description(): string;
   apply(args: SceneMutationArguments): void;
   undo(args: SceneMutationArguments): void;
 }

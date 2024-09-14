@@ -87,7 +87,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
               <Condition if={ComposerController.hasLoadedScene}
                 then={() => (
                   /* Scene loaded */
-                  <SceneView scene={ComposerController.currentScene} />
+                  <SceneView controller={ComposerController.currentScene} />
                 )}
                 else={() => (
                   /* No scene loaded */

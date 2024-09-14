@@ -3,10 +3,10 @@ import { v4 as uuid } from 'uuid';
 import { ComponentDefinitionType, MeshComponentDefinition, SceneObjectDefinition } from "@fantasy-console/runtime/src/cartridge";
 
 import { loadObjectDefinition } from "@lib/composer/config/loadObjectDefinition";
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
+import { ISceneMutation, SceneMutationArguments } from '../ISceneMutation';
 
 export class NewObjectMutation implements ISceneMutation {
-  apply({ SceneView, ProjectController }: SceneMutationArguments): void {
+  apply({ SceneViewController, ProjectController }: SceneMutationArguments): void {
     // Create new object
     let newObjectDefinition: SceneObjectDefinition = {
       id: uuid(),
@@ -29,16 +29,20 @@ export class NewObjectMutation implements ISceneMutation {
     const newGameObject = loadObjectDefinition(newObjectDefinition, ProjectController.assetDb);
 
     // 1. Add to config state
-    SceneView.scene.objects.push(newGameObject);
+    SceneViewController.scene.objects.push(newGameObject);
 
     // 2. Add to babylon scene
-    SceneView.createSceneObject(newGameObject);
+    SceneViewController.createSceneObject(newGameObject);
 
     // 3. Modify JSONC
-    SceneView.sceneJson.mutate((scene) => scene.objects[SceneView.scene.objects.length], newObjectDefinition, { isArrayInsertion: true });
+    SceneViewController.sceneJson.mutate((scene) => scene.objects[SceneViewController.scene.objects.length], newObjectDefinition, { isArrayInsertion: true });
   }
 
   undo({ }: SceneMutationArguments): void {
     throw new Error("Method not implemented.");
+  }
+
+  get description(): string {
+    return `(Debug) Create object`
   }
 }

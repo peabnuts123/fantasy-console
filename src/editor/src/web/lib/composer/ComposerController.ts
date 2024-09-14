@@ -5,7 +5,7 @@ import { AssetType, CartridgeArchiveManifest } from '@fantasy-console/runtime/sr
 
 import { ProjectController } from '@lib/project/ProjectController';
 import { SceneManifest } from '@lib/project/definition';
-import { SceneView } from './SceneView';
+import { SceneViewController } from './scene/SceneViewController';
 
 export interface CreateCartridgeCmdArgs {
   manifestFileBytes: string;
@@ -16,7 +16,7 @@ export interface CreateCartridgeCmdArgs {
 
 
 export class ComposerController {
-  private _currentScene: SceneView | undefined = undefined; // @NOTE explicit `undefined` for mobx
+  private _currentScene: SceneViewController | undefined = undefined; // @NOTE explicit `undefined` for mobx
 
   private _stopWatchingFs?: Function = undefined;
 
@@ -50,7 +50,7 @@ export class ComposerController {
 
   public async loadScene(sceneManifest: SceneManifest) {
     // @TODO this abstract probably doesn't make sense any more
-    const scene = await SceneView.loadFromManifest(sceneManifest, this.projectController);
+    const scene = await SceneViewController.loadFromManifest(sceneManifest, this.projectController);
     runInAction(() => {
       this._currentScene = scene;
     })
@@ -60,7 +60,7 @@ export class ComposerController {
     return this._currentScene !== undefined;
   }
 
-  public get currentScene(): SceneView {
+  public get currentScene(): SceneViewController {
     if (this._currentScene === undefined) {
       throw new Error(`No scene is currently loaded`);
     }
@@ -80,7 +80,7 @@ export class ComposerController {
     const scenes = await Promise.all(
       this.projectController.currentProject.scenes.map(async (sceneManifest) => {
         // @TODO can this be a method on ProjectController instead?
-        const [sceneDefinition] = await SceneView.loadSceneDefinition(sceneManifest, this.projectController.fileSystem);
+        const [sceneDefinition] = await SceneViewController.loadSceneDefinition(sceneManifest, this.projectController.fileSystem);
         return sceneDefinition;
       })
     );

@@ -2,7 +2,7 @@ import { computed, makeObservable, observable } from "mobx";
 
 import { AssetConfig, MeshComponentConfig } from "@fantasy-console/runtime/src/cartridge/config";
 
-import { MeshComponentComposer } from "@lib/composer/world/components/MeshComponentComposer";
+import { MeshComponentComposer } from "@lib/composer/scene/components";
 import { IComposerComponentConfig } from "./IComposerComponentConfig";
 
 export class MeshComponentConfigComposer extends MeshComponentConfig implements IComposerComponentConfig {

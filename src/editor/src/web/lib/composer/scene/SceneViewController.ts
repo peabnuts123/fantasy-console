@@ -23,34 +23,30 @@ import { DirectionalLightComponentBabylon, PointLightComponentBabylon } from '@f
 import { GameObjectBabylon } from '@fantasy-console/runtime/src/world/GameObjectBabylon';
 
 import { SceneManifest } from '@lib/project/definition/scene';
-import { ISceneMutation } from '@lib/composer/mutation';
-import { NewObjectMutation } from '@lib/composer/mutation/scene';
 import { JsoncContainer } from '@lib/util/JsoncContainer';
 import { ProjectController } from '@lib/project/ProjectController';
-import { CameraComponentConfigComposer, DirectionalLightComponentConfigComposer, MeshComponentConfigComposer, PointLightComponentConfigComposer, ScriptComponentConfigComposer } from './config/components';
-import { SceneConfigComposer } from './config/SceneConfigComposer';
-import { MeshComponentComposer } from './world/components';
-import { GameObjectConfigComposer } from './config/GameObjectConfigComposer';
-import { ComposerSelectionCache } from './util/ComposerSelectionCache';
-import { UtilityLayerRenderer } from '@babylonjs/core/Rendering/utilityLayerRenderer';
-import { PositionGizmo } from '@babylonjs/core/Gizmos/positionGizmo';
-import { GizmoManager } from '@babylonjs/core/Gizmos/gizmoManager';
-import { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh';
-import { BoundingBoxGizmo } from '@babylonjs/core/Gizmos/boundingBoxGizmo';
+import { SceneViewMutator } from '@lib/mutation/scene/SceneViewMutator';
+import { ISceneMutation } from '@lib/mutation/scene/ISceneMutation';
+import { CameraComponentConfigComposer, DirectionalLightComponentConfigComposer, MeshComponentConfigComposer, PointLightComponentConfigComposer, ScriptComponentConfigComposer } from '../config/components';
+import { SceneConfigComposer } from '../config/SceneConfigComposer';
+import { GameObjectConfigComposer } from '../config/GameObjectConfigComposer';
+import { ComposerSelectionCache } from '../util/ComposerSelectionCache';
+import { MeshComponentComposer } from './components';
+import { CurrentSelectionTool, SelectionManager } from './SelectionManager';
 
-export class SceneView {
+export class SceneViewController {
   private readonly _scene: SceneConfigComposer;
   private readonly _sceneJson: JsoncContainer<SceneDefinition>;
   private readonly projectController: ProjectController;
+  private readonly mutator: SceneViewMutator;
 
-  // @TODO different classes for the "states" of SceneView or something? So that not everything is nullable
+  // @TODO different classes for the "states" of SceneViewController or something? So that not everything is nullable
   private engine?: Engine = undefined;
   private babylonScene?: BabylonScene = undefined;
   private assetCache: Map<AssetConfig, AssetContainer>;
-  private gizmoController?: GizmoController = undefined;
+  private selectionManager?: SelectionManager = undefined;
 
   private babylonToWorldSelectionCache: ComposerSelectionCache;
-  private _selectedObject: GameObjectConfigComposer | undefined = undefined;
 
   public constructor(scene: SceneConfigComposer, sceneJson: JsoncContainer<SceneDefinition>, projectController: ProjectController) {
     this._scene = scene;
@@ -58,6 +54,7 @@ export class SceneView {
     this.projectController = projectController;
     this.assetCache = new Map();
     this.babylonToWorldSelectionCache = new ComposerSelectionCache();
+    this.mutator = new SceneViewMutator(this, projectController);
     this.reset();
 
     // @NOTE Class properties MUST have a value explicitly assigned
@@ -71,32 +68,12 @@ export class SceneView {
     this.assetCache = new Map();
   }
 
-  public debug_newObject(): void {
-    this.debug_applyMutation(new NewObjectMutation());
-  }
-
-  private debug_applyMutation(mutation: ISceneMutation) {
-    // @TODO @DEBUG store state in a stack and stuff
-    mutation.apply({
-      SceneView: this,
-      ProjectController: this.projectController,
-    });
-  }
-
-  private onSelectionChange() {
-    if (this.selectedObject !== undefined) {
-      console.log(`[Pick] gameObject: `, this.selectedObject);
-      this.gizmoController?.setTarget(this.selectedObject.sceneInstance!);
-    } else {
-      console.log(`[Pick] Deselected.`);
-      this.gizmoController?.clearTarget();
-    }
-  }
-
   public startBabylonView(canvas: HTMLCanvasElement) {
     /* Scene */
     const engine = this.engine = new Engine(canvas, true, {}, true);
     const scene = this.babylonScene = new BabylonScene(this.engine);
+    const selectionManager = this.selectionManager = new SelectionManager(scene);
+
 
     /* Lifecycle */
     const resizeObserver = new ResizeObserver((entries) => {
@@ -108,7 +85,7 @@ export class SceneView {
     // Build scene (async)
     void (async () => {
       // @DEBUG Random camera constants
-      const camera = new FreeCamera("main", new Vector3(0, 5, -10), this.babylonScene);
+      const camera = new FreeCamera("main", new Vector3(6, 2, -1), this.babylonScene);
       camera.setTarget(Vector3.Zero());
       camera.attachControl(canvas, true);
       camera.speed = 0.3;
@@ -128,24 +105,21 @@ export class SceneView {
       scene.onPointerObservable.add((pointerInfo) => {
         if (pointerInfo.type === PointerEventTypes.POINTERTAP) {
           if (!pointerInfo.pickInfo?.hit) {
-            this.selectedObject = undefined;
-            this.onSelectionChange();
+            selectionManager.deselectAll();
           } else if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh !== null) {
-            // console.log(`[Pick] pickedMesh`, pointerInfo.pickInfo.pickedMesh);
+            // Resolve gameObjectConfig from reverse lookup cache
             let pickedGameObject = this.babylonToWorldSelectionCache.get(pointerInfo.pickInfo.pickedMesh);
 
             if (pickedGameObject === undefined) {
               console.error(`Picked mesh but found no corresponding GameObject in cache. Has it been populated or updated? Picked mesh:`, pointerInfo.pickInfo.pickedMesh);
             } else {
-              this.selectedObject = pickedGameObject;
-              this.onSelectionChange();
+              selectionManager.select(pickedGameObject);
             }
           }
         }
       });
 
-      this.gizmoController = new GizmoController(scene);
-
+      // @TODO mod textures on asset load instead of this
       debug_modTextures(scene);
 
       engine.runRenderLoop(() => {
@@ -155,7 +129,7 @@ export class SceneView {
 
     /* Teardown - when scene view is unloaded */
     const onDestroyView = () => {
-      console.log(`[SceneView] (onDestroyView) Goodbye!`);
+      console.log(`[SceneViewController] (onDestroyView) Goodbye!`);
       // @TODO destroy GameObjects once we sort out what the abstraction difference between this and Runtime is
       scene.dispose();
       scene.onPointerObservable.clear();
@@ -182,9 +156,21 @@ export class SceneView {
     }
   }
 
+  public applyMutation(mutation: ISceneMutation) {
+    this.mutator.apply(mutation);
+  }
+
+  public undoMutation(): void {
+    this.mutator.undo();
+  }
+
+  public setCurrentTool(tool: CurrentSelectionTool) {
+    this.selectionManager!.currentTool = tool;
+  }
+
   // @TODO we probably should try to share this with the runtime in some kind of overridable fashion (?)
   public async createSceneObject(gameObjectConfig: GameObjectConfigComposer, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObjectBabylon> {
-    console.log(`[SceneView] (createSceneObject) Loading scene object: `, gameObjectConfig.name);
+    console.log(`[SceneViewController] (createSceneObject) Loading scene object: `, gameObjectConfig.name);
     // Construct game object transform for constructing scene's hierarchy
     const gameObjectTransform = new TransformBabylon(
       gameObjectConfig.name,
@@ -243,7 +229,7 @@ export class SceneView {
         light.diffuse = componentConfig.color;
         gameObject.addComponent(new PointLightComponentBabylon({ gameObject }, light));
       } else {
-        console.error(`[SceneView] (loadSceneObject) Unrecognised component config: `, componentConfig);
+        console.error(`[SceneViewController] (loadSceneObject) Unrecognised component config: `, componentConfig);
       }
     }
 
@@ -281,9 +267,9 @@ export class SceneView {
     return [sceneDefinition, sceneJson];
   }
 
-  public static async loadFromManifest(sceneManifest: SceneManifest, projectController: ProjectController): Promise<SceneView> {
-    const [sceneDefinition, sceneJson] = await SceneView.loadSceneDefinition(sceneManifest, projectController.fileSystem);
-    return new SceneView(new SceneConfigComposer(sceneDefinition, projectController.assetDb), new JsoncContainer<SceneDefinition>(sceneJson), projectController);
+  public static async loadFromManifest(sceneManifest: SceneManifest, projectController: ProjectController): Promise<SceneViewController> {
+    const [sceneDefinition, sceneJson] = await SceneViewController.loadSceneDefinition(sceneManifest, projectController.fileSystem);
+    return new SceneViewController(new SceneConfigComposer(sceneDefinition, projectController.assetDb), new JsoncContainer<SceneDefinition>(sceneJson), projectController);
   }
 
   public get scene(): SceneConfigComposer {
@@ -295,47 +281,6 @@ export class SceneView {
   }
 
   public get selectedObject(): GameObjectConfigComposer | undefined {
-    return this._selectedObject;
-  }
-  private set selectedObject(value: GameObjectConfigComposer | undefined) {
-    this._selectedObject = value;
-  }
-}
-
-
-class GizmoController {
-  private readonly gizmoManager: GizmoManager;
-  private readonly moveGizmo: PositionGizmo;
-  private readonly boundingBoxGizmo: BoundingBoxGizmo;
-
-  public constructor(scene: BabylonScene) {
-    const utilityLayer = new UtilityLayerRenderer(scene);
-    this.gizmoManager = new GizmoManager(scene, 2, utilityLayer);
-    this.gizmoManager.usePointerToAttachGizmos = false;
-
-    this.moveGizmo = new PositionGizmo(utilityLayer, 2, this.gizmoManager);
-    this.moveGizmo.planarGizmoEnabled = true;
-    this.moveGizmo.scaleRatio = 1;
-
-    // @TODO merge changes into my system, debounce, etc.
-    // this.moveGizmo.onDragObservable // etc.
-
-    this.boundingBoxGizmo = new BoundingBoxGizmo(Color3.Yellow(), utilityLayer);
-    this.boundingBoxGizmo.setEnabledScaling(false);
-    this.boundingBoxGizmo.setEnabledRotationAxis("");
-
-    this.clearTarget();
-  }
-
-  public setTarget(gameObject: GameObjectBabylon) {
-    const target = gameObject.transform.node;
-    this.moveGizmo.attachedNode = target;
-    // @NOTE Type laundering (huff my duff, Babylon))
-    this.boundingBoxGizmo.attachedMesh = target as AbstractMesh;
-  }
-
-  public clearTarget() {
-    this.moveGizmo.attachedNode = null;
-    this.boundingBoxGizmo.attachedNode = null;
+    return this.selectionManager?.selectedObject;
   }
 }
