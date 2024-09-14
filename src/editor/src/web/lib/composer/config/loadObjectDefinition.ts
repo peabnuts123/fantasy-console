@@ -2,6 +2,7 @@ import { CameraComponentDefinition, ComponentDefinitionType, DirectionalLightCom
 import { AssetDb, AssetType, TransformConfig } from "@fantasy-console/runtime/src/cartridge/config";
 import { CameraComponentConfigComposer, DirectionalLightComponentConfigComposer, IComposerComponentConfig, MeshComponentConfigComposer, PointLightComponentConfigComposer, ScriptComponentConfigComposer } from "./components";
 import { GameObjectConfigComposer } from "./GameObjectConfigComposer";
+import { TransformConfigComposer } from "./TransformConfigComposer";
 
 
 export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, assetDb: AssetDb): GameObjectConfigComposer {
@@ -55,7 +56,7 @@ export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, as
   return new GameObjectConfigComposer(
     objectDefinition.id,
     objectDefinition.name,
-    new TransformConfig(toRuntimeVector3(objectDefinition.transform.position), /* @TODO */ 0),
+    new TransformConfigComposer(toRuntimeVector3(objectDefinition.transform.position), /* @TODO */ 0),
     components,
     children
   );

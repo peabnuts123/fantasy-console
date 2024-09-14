@@ -72,7 +72,7 @@ export class SceneViewController {
     /* Scene */
     const engine = this.engine = new Engine(canvas, true, {}, true);
     const scene = this.babylonScene = new BabylonScene(this.engine);
-    const selectionManager = this.selectionManager = new SelectionManager(scene);
+    const selectionManager = this.selectionManager = new SelectionManager(scene, this.mutator);
 
 
     /* Lifecycle */

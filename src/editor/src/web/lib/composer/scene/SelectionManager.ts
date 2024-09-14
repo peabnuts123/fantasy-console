@@ -5,13 +5,17 @@ import { BoundingBoxGizmo } from "@babylonjs/core/Gizmos/boundingBoxGizmo";
 import { UtilityLayerRenderer } from "@babylonjs/core/Rendering/utilityLayerRenderer";
 import { Scene as BabylonScene } from '@babylonjs/core/scene';
 import { Color3 } from "@babylonjs/core/Maths/math.color";
-
-import { GameObjectConfigComposer } from "../config";
 import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 import { RotationGizmo } from "@babylonjs/core/Gizmos/rotationGizmo";
 import { ScaleGizmo } from "@babylonjs/core/Gizmos/scaleGizmo";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import { Vector3 } from "@babylonjs/core";
+import { Vector3 as Vector3Babylon } from "@babylonjs/core";
+
+import { toRuntimeVector3 } from "@fantasy-console/runtime/src/cartridge/archive/util";
+
+import { SetGameObjectPositionMutation } from "@lib/mutation/scene/mutations";
+import { SceneViewMutator } from "@lib/mutation/scene/SceneViewMutator";
+import { GameObjectConfigComposer } from "../config";
 
 
 export enum CurrentSelectionTool {
@@ -31,7 +35,9 @@ export class SelectionManager {
   private _selectedObject: GameObjectConfigComposer | undefined = undefined;
   private fakeTransformTarget: TransformNode | undefined = undefined;
 
-  public constructor(scene: BabylonScene) {
+  private currentMoveMutation: SetGameObjectPositionMutation | undefined = undefined;
+
+  public constructor(scene: BabylonScene, mutator: SceneViewMutator) {
 
     const utilityLayer = new UtilityLayerRenderer(scene);
     this.gizmoManager = new GizmoManager(scene, 2, utilityLayer);
@@ -40,10 +46,20 @@ export class SelectionManager {
     // Move
     this.moveGizmo = new PositionGizmo(utilityLayer, 2, this.gizmoManager);
     this.moveGizmo.planarGizmoEnabled = true;
+    this.moveGizmo.onDragStartObservable.add(() => {
+      this.currentMoveMutation = new SetGameObjectPositionMutation(this.selectedObject!);
+      mutator.beginContinuous(this.currentMoveMutation);
+    });
     this.moveGizmo.onDragObservable.add((_eventData) => {
       if (this.selectedObject !== undefined) {
-        this.selectedObject.sceneInstance!.transform.node.position = this.fakeTransformTarget!.position;
+        mutator.updateContinuous(this.currentMoveMutation!, {
+          position: toRuntimeVector3(this.fakeTransformTarget!.position),
+        });
       }
+    });
+    this.moveGizmo.onDragEndObservable.add(() => {
+      mutator.apply(this.currentMoveMutation!);
+      this.currentMoveMutation = undefined;
     });
 
     // Rotate
@@ -59,6 +75,7 @@ export class SelectionManager {
         }
       }
     });
+    // @TODO mutate rotation
 
     // Scale
     this.scaleGizmo = new ScaleGizmo(utilityLayer, 2, this.gizmoManager);
@@ -67,14 +84,10 @@ export class SelectionManager {
         // Scaling is handled as a percentage to accommodate rotation
         this.selectedObject.sceneInstance!.transform.node.scaling = this.selectedObject.sceneInstance!.transform.node.scaling.multiply(this.fakeTransformTarget!.scaling);
         // @NOTE Reset scaling to uniform scale, because rotation doesn't work with non-uniform scaling
-        this.fakeTransformTarget!.scaling = Vector3.One();
+        this.fakeTransformTarget!.scaling = Vector3Babylon.One();
       }
     });
-
-
-    /*
-      @TODO mirror changes back into my systems
-     */
+    // @TODO mutate scale
 
     // Bounding box
     this.boundingBoxGizmo = new BoundingBoxGizmo(Color3.Yellow(), utilityLayer);
@@ -110,7 +123,7 @@ export class SelectionManager {
 
       // Reset scaling to uniform scale, because rotation doesn't work with non-uniform scaling
       // Scaling is done as a percentage to accommodate this
-      fakeTransformTarget.scaling = Vector3.One();
+      fakeTransformTarget.scaling = Vector3Babylon.One();
 
       // Enable bounding box
       // @NOTE Type laundering (huff my duff, Babylon))

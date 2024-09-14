@@ -28,8 +28,11 @@ export class JsoncContainer<TRawType extends object> {
 
     const path = resolvePath(pathSelector);
 
+    // console.log(`[JsoncContainer] (mutate) Before: `, this.text);
+
     let edits = modify(this.text, path, value, options);
     this.text = applyEdits(this.text, edits);
+    // console.log(`[JsoncContainer] (mutate) After: `, this.text);
   }
 
   public delete(path: JSONPath) {

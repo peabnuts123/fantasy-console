@@ -67,10 +67,10 @@ export class TransformBabylon extends Transform {
     this._gameObject = gameObject;
   }
 
-  public getPosition(): Vector3 {
+  protected getPosition(): Vector3 {
     return this._position;
   }
-  public setPosition(value: Vector3): void {
+  protected setPosition(value: Vector3): void {
     if (!this.__hasInitialised) return; // @NOTE workaround for calling setter in super constructor
     this._position.x = value.x;
     this._position.y = value.y;

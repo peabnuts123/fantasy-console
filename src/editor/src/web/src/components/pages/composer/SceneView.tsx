@@ -68,13 +68,56 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
         {/* Inspector */}
         <div className="p-2 bg-gradient-to-b from-[blue] to-pink-500 text-white text-retro-shadow">
           <h2 className="text-lg">Inspector</h2>
-          {/* @TODO close or something (debug) */}
+          {/*
+            @TODO close or something (debug)
+            - Can't remember what this comment was for (2024-09-14)
+          */}
         </div>
         <div className="p-3 bg-slate-300 h-full">
           <Condition if={!!controller.selectedObject}
             then={() => (
               <>
-                <h3>{controller.selectedObject!.name}</h3>
+                {/* Name */}
+                <input type="text" value={controller.selectedObject!.name} className="w-full" />
+
+                {/* Position */}
+                <label className="font-bold">Position</label>
+
+                <div className="">
+                  {/* X */}
+                  <div>
+                    <label className="font-bold mr-1" htmlFor="inspector-position-x">X</label>
+                    <input
+                      type="number"
+                      value={controller.selectedObject?.transform.position.x}
+                      className=""
+                      id="inspector-position-x"
+                    />
+                  </div>
+                  {/* Y */}
+                  <div>
+                    <label className="font-bold mr-1" htmlFor="inspector-position-y">Y</label>
+                    <input
+                      type="number"
+                      value={controller.selectedObject?.transform.position.y}
+                      className=""
+                      id="inspector-position-y"
+                    />
+                  </div>
+                  {/* Z */}
+                  <div>
+                    <label className="font-bold mr-1" htmlFor="inspector-position-z">Z</label>
+                    <input
+                      type="number"
+                      value={controller.selectedObject?.transform.position.z}
+                      className=""
+                      id="inspector-position-z"
+                    />
+                  </div>
+                </div>
+
+                {/* Components */}
+                <label className="font-bold">Components</label>
                 {controller.selectedObject!.components.map((component, index) => (
                   <div key={index} className="p-2 bg-slate-400">
                     <h4>{component.componentName}</h4>
