@@ -1,53 +1,54 @@
-import { Vector3 as Vector3Archive } from "@fantasy-console/runtime/src/cartridge/archive/util";
+import { Vector3 as ArchiveVector3 } from "@fantasy-console/runtime/src/cartridge/archive/util";
 import { Vector3 } from "@fantasy-console/core/src/util";
+import { Vector3 as Vector3Babylon } from '@babylonjs/core/Maths/math.vector';
 
 import { GameObjectConfigComposer } from "@lib/composer/config";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
 interface UpdateArgs {
-  position: Vector3;
+  rotation: Vector3;
 }
 
-export class SetGameObjectPositionMutation implements ISceneMutation, IContinuousSceneMutation<UpdateArgs> {
+export class SetGameObjectRotationMutation implements ISceneMutation, IContinuousSceneMutation<UpdateArgs> {
   // State
   // @TODO should we look you up by ID or something?
   private readonly gameObject: GameObjectConfigComposer;
-  private position: Vector3;
+  private rotation: Vector3;
 
   // Undo state
-  private configPosition: Vector3 | undefined = undefined;
-  private scenePosition: Vector3 | undefined = undefined;
+  private configRotation: Vector3 | undefined = undefined;
+  private sceneRotation: Vector3 | undefined = undefined;
 
 
   public constructor(gameObject: GameObjectConfigComposer) {
     this.gameObject = gameObject;
-    this.position = gameObject.transform.position;
+    this.rotation = gameObject.transform.rotation;
   }
 
   begin(_args: SceneMutationArguments): void {
     // - Store undo values
-    this.configPosition = this.gameObject.transform.position;
-    this.scenePosition = this.gameObject.sceneInstance!.transform.position;
+    this.configRotation = this.gameObject.transform.rotation;
+    this.sceneRotation = this.gameObject.sceneInstance!.transform.rotation;
   }
 
-  update(_args: SceneMutationArguments, { position }: UpdateArgs): void {
-    this.position = position
+  update(_args: SceneMutationArguments, { rotation }: UpdateArgs): void {
+    this.rotation = rotation
     // - 1. Config state
-    this.gameObject.transform.position = position;
+    this.gameObject.transform.rotation = rotation;
     // - 2. Babylon state
-    this.gameObject.sceneInstance!.transform.position = position;
+    this.gameObject.sceneInstance!.transform.rotation = rotation;
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {
     // - 3. JSONC
     const sceneIndex = SceneViewController.scene.objects.findIndex((object) => object.id === this.gameObject.id);
-    const updatedValue: Vector3Archive = {
-      x: this.position.x,
-      y: this.position.y,
-      z: this.position.z,
+    const updatedValue: ArchiveVector3 = {
+      x: this.rotation.x,
+      y: this.rotation.y,
+      z: this.rotation.z,
     };
-    SceneViewController.sceneJson.mutate((scene) => scene.objects[sceneIndex].transform.position, updatedValue);
+    SceneViewController.sceneJson.mutate((scene) => scene.objects[sceneIndex].transform.rotation, updatedValue);
   }
 
   undo(args: SceneMutationArguments): void {

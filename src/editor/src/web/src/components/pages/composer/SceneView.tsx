@@ -78,18 +78,17 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
             then={() => (
               <>
                 {/* Name */}
-                <input type="text" value={controller.selectedObject!.name} className="w-full" />
+                <input type="text" value={controller.selectedObject!.name} readOnly={true} className="w-full" />
 
                 {/* Position */}
                 <label className="font-bold">Position</label>
-
                 <div className="">
                   {/* X */}
                   <div>
                     <label className="font-bold mr-1" htmlFor="inspector-position-x">X</label>
                     <input
                       type="number"
-                      value={controller.selectedObject?.transform.position.x}
+                      value={controller.selectedObject?.transform.position.x} readOnly={true}
                       className=""
                       id="inspector-position-x"
                     />
@@ -99,7 +98,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
                     <label className="font-bold mr-1" htmlFor="inspector-position-y">Y</label>
                     <input
                       type="number"
-                      value={controller.selectedObject?.transform.position.y}
+                      value={controller.selectedObject?.transform.position.y} readOnly={true}
                       className=""
                       id="inspector-position-y"
                     />
@@ -109,9 +108,44 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
                     <label className="font-bold mr-1" htmlFor="inspector-position-z">Z</label>
                     <input
                       type="number"
-                      value={controller.selectedObject?.transform.position.z}
+                      value={controller.selectedObject?.transform.position.z} readOnly={true}
                       className=""
                       id="inspector-position-z"
+                    />
+                  </div>
+                </div>
+
+                {/* Position */}
+                <label className="font-bold">Rotation</label>
+                <div className="">
+                  {/* X */}
+                  <div>
+                    <label className="font-bold mr-1" htmlFor="inspector-rotation-x">X</label>
+                    <input
+                      type="number"
+                      value={controller.selectedObject?.transform.rotation.x} readOnly={true}
+                      className=""
+                      id="inspector-rotation-x"
+                    />
+                  </div>
+                  {/* Y */}
+                  <div>
+                    <label className="font-bold mr-1" htmlFor="inspector-rotation-y">Y</label>
+                    <input
+                      type="number"
+                      value={controller.selectedObject?.transform.rotation.y} readOnly={true}
+                      className=""
+                      id="inspector-rotation-y"
+                    />
+                  </div>
+                  {/* Z */}
+                  <div>
+                    <label className="font-bold mr-1" htmlFor="inspector-rotation-z">Z</label>
+                    <input
+                      type="number"
+                      value={controller.selectedObject?.transform.rotation.z} readOnly={true}
+                      className=""
+                      id="inspector-rotation-z"
                     />
                   </div>
                 </div>

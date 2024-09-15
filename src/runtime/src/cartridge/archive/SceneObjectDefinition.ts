@@ -13,7 +13,8 @@ export interface SceneObjectDefinition {
   name: string;
   transform: {
     position: Vector3;
-    // rotation: number; // @TODO
+    rotation: Vector3;
+    scale: Vector3;
   }
   components: ComponentDefinition[];
   children: SceneObjectDefinition[] | undefined;

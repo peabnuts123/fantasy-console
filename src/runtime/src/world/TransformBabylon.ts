@@ -5,34 +5,40 @@ import { Scene as BabylonScene } from '@babylonjs/core/scene';
 import { Vector3 } from '@fantasy-console/core/src/util/Vector3';
 import { GameObject } from '@fantasy-console/core/src/world/GameObject';
 import { Transform } from '@fantasy-console/core/src/world/Transform';
+import { TransformConfig } from '../cartridge';
+import { toBabylonVector3 } from '../util';
 
 /**
  * A Vector3 that is implemented around wrapping a Babylon Vector3 internally.
  */
 export class WrappedBabylonVector3 extends Vector3 {
-  private readonly vec: Vector3Babylon;
+  /**
+   * A function that can access the vector that is being wrapped.
+   */
+  private readonly getVector: () => Vector3Babylon;
 
-  public constructor(position: Vector3Babylon) {
-    super(position.x, position.y, position.z);
-    this.vec = position;
+  public constructor(getVector: () => Vector3Babylon) {
+    const vector = getVector();
+    super(vector.x, vector.y, vector.z);
+    this.getVector = getVector;
   }
 
-  public override get x(): number { return this.vec.x; }
+  public override get x(): number { return this.getVector().x; }
   public override set x(value: number) {
     super.x = value;
-    this.vec.x = value;
+    this.getVector().x = value;
   }
 
-  public override get y(): number { return this.vec.y; }
+  public override get y(): number { return this.getVector().y; }
   public override set y(value: number) {
     super.y = value;
-    this.vec.y = value;
+    this.getVector().y = value;
   }
 
-  public override get z(): number { return this.vec.z; }
+  public override get z(): number { return this.getVector().z; }
   public override set z(value: number) {
     super.z = value;
-    this.vec.z = value;
+    this.getVector().z = value;
   }
 }
 
@@ -40,6 +46,8 @@ export class TransformBabylon extends Transform {
   public readonly node: TransformNode;
   private _parent: TransformBabylon | undefined;
   private readonly _position: WrappedBabylonVector3;
+  private readonly _rotation: WrappedBabylonVector3;
+  private readonly _scale: WrappedBabylonVector3;
 
   /**
    * @HACKS
@@ -48,19 +56,23 @@ export class TransformBabylon extends Transform {
    */
   private readonly __hasInitialised: true;
 
-  public constructor(name: string, scene: BabylonScene, parent: TransformBabylon | undefined, position: Vector3) {
-    super(parent, position); // @NOTE setters will be ignored
+  public constructor(name: string, scene: BabylonScene, parent: TransformBabylon | undefined, transform: TransformConfig) {
+    super(parent, transform.position, transform.rotation, transform.scale); // @NOTE setters will be ignored
 
     // Initialise internal values
     /* Construct new babylon transform (which this type wraps) */
     this.node = new TransformNode(name, scene);
     /* Create new "wrapped babylon vector3" position */
-    this._position = new WrappedBabylonVector3(this.node.position)
+    this._position = new WrappedBabylonVector3(() => this.node.position);
+    this._rotation = new WrappedBabylonVector3(() => this.node.rotation);
+    this._scale = new WrappedBabylonVector3(() => this.node.scaling);
     this.__hasInitialised = true;
 
     // Call setters for real this time
     this.parent = parent;
-    this.position = position;
+    this.position = transform.position;
+    this.rotation = transform.rotation;
+    this.scale = transform.scale;
   }
 
   public setGameObject(gameObject: GameObject): void {
@@ -72,9 +84,23 @@ export class TransformBabylon extends Transform {
   }
   protected setPosition(value: Vector3): void {
     if (!this.__hasInitialised) return; // @NOTE workaround for calling setter in super constructor
-    this._position.x = value.x;
-    this._position.y = value.y;
-    this._position.z = value.z;
+    this.node.position = toBabylonVector3(value);
+  }
+
+  protected getRotation(): Vector3 {
+    return this._rotation;
+  }
+  protected setRotation(value: Vector3): void {
+    if (!this.__hasInitialised) return; // @NOTE workaround for calling setter in super constructor
+    this.node.rotation = toBabylonVector3(value);
+  }
+
+  protected getScale(): Vector3 {
+    return this._scale;
+  }
+  protected setScale(value: Vector3): void {
+    if (!this.__hasInitialised) return; // @NOTE workaround for calling setter in super constructor
+    this.node.scaling = toBabylonVector3(value);
   }
 
   protected getParent(): Transform | undefined {

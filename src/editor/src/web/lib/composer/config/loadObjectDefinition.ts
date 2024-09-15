@@ -1,5 +1,6 @@
-import { CameraComponentDefinition, ComponentDefinitionType, DirectionalLightComponentDefinition, MeshComponentDefinition, PointLightComponentDefinition, SceneObjectDefinition, ScriptComponentDefinition, toColor3, toRuntimeVector3 } from "@fantasy-console/runtime/src/cartridge/archive";
-import { AssetDb, AssetType, TransformConfig } from "@fantasy-console/runtime/src/cartridge/config";
+import { CameraComponentDefinition, ComponentDefinitionType, DirectionalLightComponentDefinition, MeshComponentDefinition, PointLightComponentDefinition, SceneObjectDefinition, ScriptComponentDefinition } from "@fantasy-console/runtime/src/cartridge/archive";
+import { AssetDb, AssetType } from "@fantasy-console/runtime/src/cartridge/config";
+import { toColor3Babylon, toCoreVector3 } from "@fantasy-console/runtime/src/util";
 import { CameraComponentConfigComposer, DirectionalLightComponentConfigComposer, IComposerComponentConfig, MeshComponentConfigComposer, PointLightComponentConfigComposer, ScriptComponentConfigComposer } from "./components";
 import { GameObjectConfigComposer } from "./GameObjectConfigComposer";
 import { TransformConfigComposer } from "./TransformConfigComposer";
@@ -29,14 +30,14 @@ export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, as
       }
       case ComponentDefinitionType.DirectionalLight: {
         const directionalLightComponentDefinition = componentDefinition as DirectionalLightComponentDefinition;
-        const color = toColor3(directionalLightComponentDefinition.color);
+        const color = toColor3Babylon(directionalLightComponentDefinition.color);
         // @TODO Composer version
         components.push(new DirectionalLightComponentConfigComposer(directionalLightComponentDefinition.intensity, color));
         break;
       }
       case ComponentDefinitionType.PointLight: {
         const pointLightComponentDefinition = componentDefinition as PointLightComponentDefinition;
-        const color = toColor3(pointLightComponentDefinition.color);
+        const color = toColor3Babylon(pointLightComponentDefinition.color);
         // @TODO Composer version
         components.push(new PointLightComponentConfigComposer(pointLightComponentDefinition.intensity, color));
         break;
@@ -56,7 +57,11 @@ export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, as
   return new GameObjectConfigComposer(
     objectDefinition.id,
     objectDefinition.name,
-    new TransformConfigComposer(toRuntimeVector3(objectDefinition.transform.position), /* @TODO */ 0),
+    new TransformConfigComposer(
+      toCoreVector3(objectDefinition.transform.position),
+      toCoreVector3(objectDefinition.transform.rotation),
+      toCoreVector3(objectDefinition.transform.scale),
+    ),
     components,
     children
   );

@@ -1,5 +1,5 @@
+import { toCoreVector3, toColor3Babylon } from '@fantasy-console/runtime/src/util';
 import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition, SceneObjectDefinition } from "../../archive";
-import { toColor3, toRuntimeVector3 } from "../../archive/util";
 
 import { GameObjectConfig } from "../GameObjectConfig";
 import { CameraComponentConfig, ComponentConfig, DirectionalLightComponentConfig, MeshComponentConfig, PointLightComponentConfig, ScriptComponentConfig } from "../components";
@@ -31,13 +31,13 @@ export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, as
       }
       case ComponentDefinitionType.DirectionalLight: {
         const directionalLightComponentDefinition = componentDefinition as DirectionalLightComponentDefinition;
-        const color = toColor3(directionalLightComponentDefinition.color);
+        const color = toColor3Babylon(directionalLightComponentDefinition.color);
         components.push(new DirectionalLightComponentConfig(directionalLightComponentDefinition.intensity, color));
         break;
       }
       case ComponentDefinitionType.PointLight: {
         const pointLightComponentDefinition = componentDefinition as PointLightComponentDefinition;
-        const color = toColor3(pointLightComponentDefinition.color);
+        const color = toColor3Babylon(pointLightComponentDefinition.color);
         components.push(new PointLightComponentConfig(pointLightComponentDefinition.intensity, color));
         break;
       }
@@ -56,7 +56,11 @@ export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, as
   return new GameObjectConfig(
     objectDefinition.id,
     objectDefinition.name,
-    new TransformConfig(toRuntimeVector3(objectDefinition.transform.position), /* @TODO */ 0),
+    new TransformConfig(
+      toCoreVector3(objectDefinition.transform.position),
+      toCoreVector3(objectDefinition.transform.rotation),
+      toCoreVector3(objectDefinition.transform.scale),
+    ),
     components,
     children
   );

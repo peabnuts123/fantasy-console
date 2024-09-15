@@ -1,6 +1,6 @@
 import { Runtime } from '@fantasy-console/runtime';
 
-const CARTRIDGE_URL = `/sample.pzcart`;
+const CARTRIDGE_URL = `/sample-cartridge.pzcart`;
 
 async function main() {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;

@@ -176,8 +176,7 @@ export class SceneViewController {
       gameObjectConfig.name,
       this.babylonScene!,
       parentTransform,
-      // @TODO probably can just take `sceneObject.transform`, huh?
-      gameObjectConfig.transform.position
+      gameObjectConfig.transform
     );
 
     // Create all child objects first

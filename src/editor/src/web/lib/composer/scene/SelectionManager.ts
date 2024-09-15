@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { GizmoManager } from "@babylonjs/core/Gizmos/gizmoManager";
 import { PositionGizmo } from "@babylonjs/core/Gizmos/positionGizmo";
 import { BoundingBoxGizmo } from "@babylonjs/core/Gizmos/boundingBoxGizmo";
@@ -11,9 +11,9 @@ import { ScaleGizmo } from "@babylonjs/core/Gizmos/scaleGizmo";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import { Vector3 as Vector3Babylon } from "@babylonjs/core";
 
-import { toRuntimeVector3 } from "@fantasy-console/runtime/src/cartridge/archive/util";
+import { toCoreVector3 } from "@fantasy-console/runtime/src/util";
 
-import { SetGameObjectPositionMutation } from "@lib/mutation/scene/mutations";
+import { SetGameObjectPositionMutation, SetGameObjectRotationMutation } from "@lib/mutation/scene/mutations";
 import { SceneViewMutator } from "@lib/mutation/scene/SceneViewMutator";
 import { GameObjectConfigComposer } from "../config";
 
@@ -36,6 +36,7 @@ export class SelectionManager {
   private fakeTransformTarget: TransformNode | undefined = undefined;
 
   private currentMoveMutation: SetGameObjectPositionMutation | undefined = undefined;
+  private currentRotateMutation: SetGameObjectRotationMutation | undefined = undefined;
 
   public constructor(scene: BabylonScene, mutator: SceneViewMutator) {
 
@@ -47,35 +48,61 @@ export class SelectionManager {
     this.moveGizmo = new PositionGizmo(utilityLayer, 2, this.gizmoManager);
     this.moveGizmo.planarGizmoEnabled = true;
     this.moveGizmo.onDragStartObservable.add(() => {
-      this.currentMoveMutation = new SetGameObjectPositionMutation(this.selectedObject!);
-      mutator.beginContinuous(this.currentMoveMutation);
+      runInAction(() => {
+        this.currentMoveMutation = new SetGameObjectPositionMutation(this.selectedObject!);
+        mutator.beginContinuous(this.currentMoveMutation);
+      });
     });
     this.moveGizmo.onDragObservable.add((_eventData) => {
       if (this.selectedObject !== undefined) {
-        mutator.updateContinuous(this.currentMoveMutation!, {
-          position: toRuntimeVector3(this.fakeTransformTarget!.position),
+        runInAction(() => {
+          mutator.updateContinuous(this.currentMoveMutation!, {
+            position: toCoreVector3(this.fakeTransformTarget!.position),
+          });
         });
       }
     });
     this.moveGizmo.onDragEndObservable.add(() => {
-      mutator.apply(this.currentMoveMutation!);
-      this.currentMoveMutation = undefined;
+      runInAction(() => {
+        mutator.apply(this.currentMoveMutation!);
+        this.currentMoveMutation = undefined;
+      });
     });
 
     // Rotate
-    this.rotateGizmo = new RotationGizmo(utilityLayer, 32, false, 2, this.gizmoManager);
+    this.rotateGizmo = new RotationGizmo(utilityLayer, 32, true, 6, this.gizmoManager);
+    this.rotateGizmo.onDragStartObservable.add(() => {
+      runInAction(() => {
+        this.currentRotateMutation = new SetGameObjectRotationMutation(this.selectedObject!);
+        mutator.beginContinuous(this.currentRotateMutation);
+      });
+    });
     this.rotateGizmo.onDragObservable.add((_eventData) => {
       if (this.selectedObject !== undefined) {
         // Sometimes the rotation comes down as a quaternion, and sometimes not.
         // At this stage, I don't really know why ¯\_(ツ)_/¯
+        let rotation: Vector3Babylon;
         if (this.fakeTransformTarget!.rotationQuaternion !== null) {
-          this.selectedObject.sceneInstance!.transform.node.rotationQuaternion = this.fakeTransformTarget!.rotationQuaternion;
+          // console.log(`[SelectionManager] (rotateGizmo.onDragObservable) Using quaternion rotation. Euler: `,);
+          rotation = this.fakeTransformTarget!.rotationQuaternion.toEulerAngles();
         } else {
-          this.selectedObject.sceneInstance!.transform.node.rotation = this.fakeTransformTarget!.rotation;
+          // console.log(`[SelectionManager] (rotateGizmo.onDragObservable) Using euler rotation.`);
+          rotation = this.fakeTransformTarget!.rotation;
         }
+
+        runInAction(() => {
+          mutator.updateContinuous(this.currentRotateMutation!, {
+            rotation: toCoreVector3(rotation),
+          });
+        });
       }
     });
-    // @TODO mutate rotation
+    this.rotateGizmo.onDragEndObservable.add((_eventData) => {
+      runInAction(() => {
+        mutator.apply(this.currentRotateMutation!);
+        this.currentRotateMutation = undefined;
+      });
+    })
 
     // Scale
     this.scaleGizmo = new ScaleGizmo(utilityLayer, 2, this.gizmoManager);
