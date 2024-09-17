@@ -5,11 +5,11 @@ import { GameObjectConfigComposer } from "@lib/composer/config";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
-interface UpdateArgs {
+export interface SetGameObjectPositionMutationUpdateArgs {
   position: Vector3;
 }
 
-export class SetGameObjectPositionMutation implements ISceneMutation, IContinuousSceneMutation<UpdateArgs> {
+export class SetGameObjectPositionMutation implements ISceneMutation, IContinuousSceneMutation<SetGameObjectPositionMutationUpdateArgs> {
   // State
   // @TODO should we look you up by ID or something?
   private readonly gameObject: GameObjectConfigComposer;
@@ -31,7 +31,7 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     this.scenePosition = this.gameObject.sceneInstance!.transform.position;
   }
 
-  update(_args: SceneMutationArguments, { position }: UpdateArgs): void {
+  update(_args: SceneMutationArguments, { position }: SetGameObjectPositionMutationUpdateArgs): void {
     this.position = position
     // - 1. Config state
     this.gameObject.transform.position = position;

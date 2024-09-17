@@ -15,7 +15,7 @@ export class SceneViewMutator {
   }
 
   public beginContinuous<TMutation extends IContinuousSceneMutation<any>>(continuousMutation: TMutation): void {
-    // @TODO if latestMutation is not applied - error
+    // @TODO if latestMutation has not been applied - throw error
     this.mutationStack.push(continuousMutation);
     continuousMutation.begin(this.getMutationArgs());
   }
@@ -28,12 +28,22 @@ export class SceneViewMutator {
   }
 
   public apply(mutation: ISceneMutation): void {
-    // Push on to undo stack before applying
-    //  so as to avoid losing applied mutations
-    this.mutationStack.push(mutation);
+    // Ensure mutation is on the undo stack before applying
+    //  so as to avoid losing applied mutations if something goes wrong
+    const isContinuousMutation = 'begin' in mutation;
+    if (!isContinuousMutation) {
+      // Instantaneous mutations get pushed on stack now
+      this.mutationStack.push(mutation);
+    } else if (mutation !== this.latestMutation) {
+      // mutation is continuous but is not the latest mutation
+      throw new Error(`Cannot apply continuous mutation - it is not the latest mutation. Did you call 'beginContinuous()'?`);
+    } // else mutation is continuous. Continuous mutations have already been pushed when they called `beginContinuous()`
 
     // Apply mutation
     mutation.apply(this.getMutationArgs());
+
+    // @TODO @DEBUG REMOVE
+    console.log(`Mutation stack: `, this.mutationStack.map((mutation) => mutation.description));
   }
 
   public undo(): void {

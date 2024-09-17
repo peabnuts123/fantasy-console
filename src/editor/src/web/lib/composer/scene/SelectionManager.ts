@@ -13,7 +13,7 @@ import { Vector3 as Vector3Babylon } from "@babylonjs/core";
 
 import { toCoreVector3 } from "@fantasy-console/runtime/src/util";
 
-import { SetGameObjectPositionMutation, SetGameObjectRotationMutation } from "@lib/mutation/scene/mutations";
+import { SetGameObjectPositionMutation, SetGameObjectRotationMutation, SetGameObjectScaleMutation } from "@lib/mutation/scene/mutations";
 import { SceneViewMutator } from "@lib/mutation/scene/SceneViewMutator";
 import { GameObjectConfigComposer } from "../config";
 
@@ -37,6 +37,7 @@ export class SelectionManager {
 
   private currentMoveMutation: SetGameObjectPositionMutation | undefined = undefined;
   private currentRotateMutation: SetGameObjectRotationMutation | undefined = undefined;
+  private currentScaleMutation: SetGameObjectScaleMutation | undefined = undefined;
 
   public constructor(scene: BabylonScene, mutator: SceneViewMutator) {
 
@@ -106,15 +107,30 @@ export class SelectionManager {
 
     // Scale
     this.scaleGizmo = new ScaleGizmo(utilityLayer, 2, this.gizmoManager);
+    this.scaleGizmo.onDragStartObservable.add(() => {
+      runInAction(() => {
+        this.currentScaleMutation = new SetGameObjectScaleMutation(this.selectedObject!);
+        mutator.beginContinuous(this.currentScaleMutation);
+      });
+    });
     this.scaleGizmo.onDragObservable.add((_eventData) => {
       if (this.selectedObject !== undefined) {
         // Scaling is handled as a percentage to accommodate rotation
-        this.selectedObject.sceneInstance!.transform.node.scaling = this.selectedObject.sceneInstance!.transform.node.scaling.multiply(this.fakeTransformTarget!.scaling);
+        runInAction(() => {
+          mutator.updateContinuous(this.currentScaleMutation!, {
+            scaleDelta: toCoreVector3(this.fakeTransformTarget!.scaling),
+          });
+        });
         // @NOTE Reset scaling to uniform scale, because rotation doesn't work with non-uniform scaling
         this.fakeTransformTarget!.scaling = Vector3Babylon.One();
       }
     });
-    // @TODO mutate scale
+    this.scaleGizmo.onDragEndObservable.add(() => {
+      runInAction(() => {
+        mutator.apply(this.currentScaleMutation!);
+        this.currentScaleMutation = undefined;
+      });
+    });
 
     // Bounding box
     this.boundingBoxGizmo = new BoundingBoxGizmo(Color3.Yellow(), utilityLayer);

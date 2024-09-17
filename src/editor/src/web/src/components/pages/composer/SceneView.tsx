@@ -115,7 +115,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
                   </div>
                 </div>
 
-                {/* Position */}
+                {/* Rotation */}
                 <label className="font-bold">Rotation</label>
                 <div className="">
                   {/* X */}
@@ -146,6 +146,41 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
                       value={controller.selectedObject?.transform.rotation.z} readOnly={true}
                       className=""
                       id="inspector-rotation-z"
+                    />
+                  </div>
+                </div>
+
+                {/* Scale */}
+                <label className="font-bold">Scale</label>
+                <div className="">
+                  {/* X */}
+                  <div>
+                    <label className="font-bold mr-1" htmlFor="inspector-scale-x">X</label>
+                    <input
+                      type="number"
+                      value={controller.selectedObject?.transform.scale.x} readOnly={true}
+                      className=""
+                      id="inspector-scale-x"
+                    />
+                  </div>
+                  {/* Y */}
+                  <div>
+                    <label className="font-bold mr-1" htmlFor="inspector-scale-y">Y</label>
+                    <input
+                      type="number"
+                      value={controller.selectedObject?.transform.scale.y} readOnly={true}
+                      className=""
+                      id="inspector-scale-y"
+                    />
+                  </div>
+                  {/* Z */}
+                  <div>
+                    <label className="font-bold mr-1" htmlFor="inspector-scale-z">Z</label>
+                    <input
+                      type="number"
+                      value={controller.selectedObject?.transform.scale.z} readOnly={true}
+                      className=""
+                      id="inspector-scale-z"
                     />
                   </div>
                 </div>

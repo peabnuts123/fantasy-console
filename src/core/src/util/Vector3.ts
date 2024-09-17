@@ -51,18 +51,37 @@ export class Vector3 {
     )
   }
 
-  public multiplySelf(factor: number): Vector3 {
-    this.x *= factor;
-    this.y *= factor;
-    this.z *= factor;
+  public multiplySelf(factor: number): Vector3;
+  public multiplySelf(other: Vector3): Vector3;
+  public multiplySelf(operand: number | Vector3): Vector3 {
+    if (operand instanceof Vector3) {
+      this.x *= operand.x;
+      this.y *= operand.y;
+      this.z *= operand.z;
+    } else {
+
+      this.x *= operand;
+      this.y *= operand;
+      this.z *= operand;
+    }
     return this;
   }
-  public multiply(factor: number): Vector3 {
-    return new Vector3(
-      this.x * factor,
-      this.y * factor,
-      this.z * factor,
-    )
+  public multiply(factor: number): Vector3;
+  public multiply(other: Vector3): Vector3;
+  public multiply(operand: number | Vector3): Vector3 {
+    if (operand instanceof Vector3) {
+      return new Vector3(
+        this.x * operand.x,
+        this.y * operand.y,
+        this.z * operand.z,
+      )
+    } else {
+      return new Vector3(
+        this.x * operand,
+        this.y * operand,
+        this.z * operand,
+      )
+    }
   }
 
   public divideSelf(factor: number): Vector3 {
@@ -113,5 +132,8 @@ export class Vector3 {
 
   public static zero(): Vector3 {
     return new Vector3(0, 0, 0);
+  }
+  public static one(): Vector3 {
+    return new Vector3(1, 1, 1);
   }
 }

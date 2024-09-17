@@ -5,49 +5,49 @@ import { GameObjectConfigComposer } from "@lib/composer/config";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
-export interface SetGameObjectRotationMutationUpdateArgs {
-  rotation: Vector3;
+export interface SetGameObjectScaleMutationUpdateArgs {
+  scaleDelta: Vector3;
 }
 
-export class SetGameObjectRotationMutation implements ISceneMutation, IContinuousSceneMutation<SetGameObjectRotationMutationUpdateArgs> {
+export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSceneMutation<SetGameObjectScaleMutationUpdateArgs> {
   // State
   // @TODO should we look you up by ID or something?
   private readonly gameObject: GameObjectConfigComposer;
-  private rotation: Vector3;
+  private scale: Vector3;
 
   // Undo state
-  private configRotation: Vector3 | undefined = undefined;
-  private sceneRotation: Vector3 | undefined = undefined;
+  private configScale: Vector3 | undefined = undefined;
+  private sceneScale: Vector3 | undefined = undefined;
 
 
   public constructor(gameObject: GameObjectConfigComposer) {
     this.gameObject = gameObject;
-    this.rotation = gameObject.transform.rotation;
+    this.scale = gameObject.transform.scale;
   }
 
   begin(_args: SceneMutationArguments): void {
     // - Store undo values
-    this.configRotation = this.gameObject.transform.rotation;
-    this.sceneRotation = this.gameObject.sceneInstance!.transform.rotation;
+    this.configScale = this.gameObject.transform.scale;
+    this.sceneScale = this.gameObject.sceneInstance!.transform.scale;
   }
 
-  update(_args: SceneMutationArguments, { rotation }: SetGameObjectRotationMutationUpdateArgs): void {
-    this.rotation = rotation
+  update(_args: SceneMutationArguments, { scaleDelta }: SetGameObjectScaleMutationUpdateArgs): void {
+    this.scale.multiplySelf(scaleDelta);
     // - 1. Config state
-    this.gameObject.transform.rotation = rotation;
+    this.gameObject.transform.scale.multiplySelf(scaleDelta);
     // - 2. Babylon state
-    this.gameObject.sceneInstance!.transform.rotation = rotation;
+    this.gameObject.sceneInstance!.transform.scale.multiplySelf(scaleDelta);
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {
     // - 3. JSONC
     const sceneIndex = SceneViewController.scene.objects.findIndex((object) => object.id === this.gameObject.id);
     const updatedValue: ArchiveVector3 = {
-      x: this.rotation.x,
-      y: this.rotation.y,
-      z: this.rotation.z,
+      x: this.scale.x,
+      y: this.scale.y,
+      z: this.scale.z,
     };
-    SceneViewController.sceneJson.mutate((scene) => scene.objects[sceneIndex].transform.rotation, updatedValue);
+    SceneViewController.sceneJson.mutate((scene) => scene.objects[sceneIndex].transform.scale, updatedValue);
   }
 
   undo(args: SceneMutationArguments): void {
@@ -57,6 +57,6 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
   }
 
   get description(): string {
-    return `Rotate '${this.gameObject.name}'`;
+    return `Scale '${this.gameObject.name}'`;
   }
 }
