@@ -16,7 +16,7 @@ const AssetList: FunctionComponent<Props> = ({ }) => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-2 bg-gradient-to-b from-[blue] to-cyan-400 text-white text-retro-shadow">
+      <div className="p-2 bg-gradient-to-b from-[blue] to-cyan-400 text-white text-retro-shadow shrink-0">
         <h2 className="text-lg">Assets</h2>
       </div>
       <div className="relative px-2 h-full overflow-y-scroll grow">

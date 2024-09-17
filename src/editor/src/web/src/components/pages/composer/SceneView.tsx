@@ -66,16 +66,16 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
         </div>
       </Panel>
       <PanelResizeHandle className="drag-separator" />
-      <Panel defaultSize={20} minSize={10}>
+      <Panel defaultSize={20} minSize={10} className="flex flex-col">
         {/* Inspector */}
-        <div className="p-2 bg-gradient-to-b from-[blue] to-pink-500 text-white text-retro-shadow">
+        <div className="p-2 bg-gradient-to-b from-[blue] to-pink-500 text-white text-retro-shadow shrink-0">
           <h2 className="text-lg">Inspector</h2>
           {/*
             @TODO close or something (debug)
             - Can't remember what this comment was for (2024-09-14)
           */}
         </div>
-        <div className="bg-slate-300 h-full overflow-y-scroll">
+        <div className="bg-slate-300 h-full overflow-y-scroll grow">
           <Condition if={!!controller.selectedObject}
             then={() => (
               <>

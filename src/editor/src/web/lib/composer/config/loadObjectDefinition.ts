@@ -24,21 +24,18 @@ export function loadObjectDefinition(objectDefinition: SceneObjectDefinition, as
       }
       case ComponentDefinitionType.Camera: {
         const cameraComponentDefinition = componentDefinition as CameraComponentDefinition;
-        // @TODO Composer version
         components.push(new CameraComponentConfigComposer());
         break;
       }
       case ComponentDefinitionType.DirectionalLight: {
         const directionalLightComponentDefinition = componentDefinition as DirectionalLightComponentDefinition;
         const color = toColor3Babylon(directionalLightComponentDefinition.color);
-        // @TODO Composer version
         components.push(new DirectionalLightComponentConfigComposer(directionalLightComponentDefinition.intensity, color));
         break;
       }
       case ComponentDefinitionType.PointLight: {
         const pointLightComponentDefinition = componentDefinition as PointLightComponentDefinition;
         const color = toColor3Babylon(pointLightComponentDefinition.color);
-        // @TODO Composer version
         components.push(new PointLightComponentConfigComposer(pointLightComponentDefinition.intensity, color));
         break;
       }
