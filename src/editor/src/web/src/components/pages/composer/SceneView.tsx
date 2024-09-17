@@ -10,6 +10,8 @@ import { NewObjectMutation } from "@lib/mutation/scene/mutations/NewObjectMutati
 import { CurrentSelectionTool } from "@lib/composer/scene/SelectionManager";
 
 import Condition from "@app/components/util/condition";
+import { getInspectorFor } from "./GameObjectComponents";
+import { VectorInput } from "./inspector/VectorInput";
 
 
 interface Props {
@@ -73,129 +75,39 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
             - Can't remember what this comment was for (2024-09-14)
           */}
         </div>
-        <div className="p-3 bg-slate-300 h-full">
+        <div className="bg-slate-300 h-full overflow-y-scroll">
           <Condition if={!!controller.selectedObject}
             then={() => (
               <>
-                {/* Name */}
-                <input type="text" value={controller.selectedObject!.name} readOnly={true} className="w-full" />
+                <div className="p-2">
+                  {/* Name */}
+                  <label>
+                    <span className="font-bold">Name</span>
+                    <input type="text" value={controller.selectedObject!.name} readOnly={true} className="w-full p-1" />
+                  </label>
 
-                {/* Position */}
-                <label className="font-bold">Position</label>
-                <div className="">
-                  {/* X */}
-                  <div>
-                    <label className="font-bold mr-1" htmlFor="inspector-position-x">X</label>
-                    <input
-                      type="number"
-                      value={controller.selectedObject?.transform.position.x} readOnly={true}
-                      className=""
-                      id="inspector-position-x"
-                    />
-                  </div>
-                  {/* Y */}
-                  <div>
-                    <label className="font-bold mr-1" htmlFor="inspector-position-y">Y</label>
-                    <input
-                      type="number"
-                      value={controller.selectedObject?.transform.position.y} readOnly={true}
-                      className=""
-                      id="inspector-position-y"
-                    />
-                  </div>
-                  {/* Z */}
-                  <div>
-                    <label className="font-bold mr-1" htmlFor="inspector-position-z">Z</label>
-                    <input
-                      type="number"
-                      value={controller.selectedObject?.transform.position.z} readOnly={true}
-                      className=""
-                      id="inspector-position-z"
-                    />
-                  </div>
-                </div>
+                  {/* Position */}
+                  <VectorInput label="Position" vector={controller.selectedObject!.transform.position} />
 
-                {/* Rotation */}
-                <label className="font-bold">Rotation</label>
-                <div className="">
-                  {/* X */}
-                  <div>
-                    <label className="font-bold mr-1" htmlFor="inspector-rotation-x">X</label>
-                    <input
-                      type="number"
-                      value={controller.selectedObject?.transform.rotation.x} readOnly={true}
-                      className=""
-                      id="inspector-rotation-x"
-                    />
-                  </div>
-                  {/* Y */}
-                  <div>
-                    <label className="font-bold mr-1" htmlFor="inspector-rotation-y">Y</label>
-                    <input
-                      type="number"
-                      value={controller.selectedObject?.transform.rotation.y} readOnly={true}
-                      className=""
-                      id="inspector-rotation-y"
-                    />
-                  </div>
-                  {/* Z */}
-                  <div>
-                    <label className="font-bold mr-1" htmlFor="inspector-rotation-z">Z</label>
-                    <input
-                      type="number"
-                      value={controller.selectedObject?.transform.rotation.z} readOnly={true}
-                      className=""
-                      id="inspector-rotation-z"
-                    />
-                  </div>
-                </div>
+                  {/* Rotation */}
+                  <VectorInput label="Rotation" vector={controller.selectedObject!.transform.rotation} />
 
-                {/* Scale */}
-                <label className="font-bold">Scale</label>
-                <div className="">
-                  {/* X */}
-                  <div>
-                    <label className="font-bold mr-1" htmlFor="inspector-scale-x">X</label>
-                    <input
-                      type="number"
-                      value={controller.selectedObject?.transform.scale.x} readOnly={true}
-                      className=""
-                      id="inspector-scale-x"
-                    />
-                  </div>
-                  {/* Y */}
-                  <div>
-                    <label className="font-bold mr-1" htmlFor="inspector-scale-y">Y</label>
-                    <input
-                      type="number"
-                      value={controller.selectedObject?.transform.scale.y} readOnly={true}
-                      className=""
-                      id="inspector-scale-y"
-                    />
-                  </div>
-                  {/* Z */}
-                  <div>
-                    <label className="font-bold mr-1" htmlFor="inspector-scale-z">Z</label>
-                    <input
-                      type="number"
-                      value={controller.selectedObject?.transform.scale.z} readOnly={true}
-                      className=""
-                      id="inspector-scale-z"
-                    />
-                  </div>
+                  {/* Scale */}
+                  <VectorInput label="Scale" vector={controller.selectedObject!.transform.scale} />
                 </div>
 
                 {/* Components */}
-                <label className="font-bold">Components</label>
-                {controller.selectedObject!.components.map((component, index) => (
-                  <div key={index} className="p-2 bg-slate-400">
-                    <h4>{component.componentName}</h4>
-                  </div>
-                ))}
+                {controller.selectedObject!.components.map((component, index) => {
+                  // Look up inspector UI for component
+                  const InspectorComponent = getInspectorFor(component);
+                  return <InspectorComponent key={index} component={component} />;
+                })}
               </>
             )}
             else={() => (
-              <p>No object selected</p>
+              <div className="p-2">
+                <p className="italic">No object selected</p>
+              </div>
             )}
           />
 
