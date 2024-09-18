@@ -2,6 +2,7 @@ import { FunctionComponent, useEffect, useRef, useState } from "react";
 import { ChevronRightIcon, ChevronDownIcon, ArrowTurnDownRightIcon, ArrowsPointingOutIcon, ArrowPathIcon, ArrowsPointingInIcon } from '@heroicons/react/24/solid'
 import { observer } from "mobx-react-lite";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import cn from 'classnames';
 
 import { GameObjectConfig } from "@fantasy-console/runtime/src/cartridge";
 
@@ -12,6 +13,7 @@ import { CurrentSelectionTool } from "@lib/composer/scene/SelectionManager";
 import Condition from "@app/components/util/condition";
 import { getInspectorFor } from "./GameObjectComponents";
 import { VectorInput } from "./inspector/VectorInput";
+import { GameObjectConfigComposer } from "@lib/composer/config";
 
 
 interface Props {
@@ -39,7 +41,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
         <div className="p-3 bg-slate-300 h-full">
           <button className="button" onClick={() => controller.applyMutation(new NewObjectMutation())}>[Debug] New Object</button>
           {controller.scene.objects.map((gameObject, index) => (
-            <SceneHierarchyObject key={index} gameObject={gameObject} />
+            <SceneHierarchyObject key={index} gameObject={gameObject} controller={controller} />
           ))}
         </div>
       </Panel>
@@ -70,10 +72,6 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
         {/* Inspector */}
         <div className="p-2 bg-gradient-to-b from-[blue] to-pink-500 text-white text-retro-shadow shrink-0">
           <h2 className="text-lg">Inspector</h2>
-          {/*
-            @TODO close or something (debug)
-            - Can't remember what this comment was for (2024-09-14)
-          */}
         </div>
         <div className="bg-slate-300 h-full overflow-y-scroll grow">
           <Condition if={!!controller.selectedObject}
@@ -118,10 +116,11 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
 });
 
 interface SceneHierarchyObjectProps {
-  gameObject: GameObjectConfig;
+  controller: SceneViewController;
+  gameObject: GameObjectConfigComposer;
   indentLevel?: number;
 }
-const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = ({ gameObject, indentLevel }) => {
+const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = ({ gameObject, indentLevel, controller }) => {
   // Default `indentLevel` to 0 if not provided
   indentLevel ??= 0;
 
@@ -130,20 +129,23 @@ const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = ({ ga
 
   // Computed state
   const hasChildren = gameObject.children.length > 0;
+  const isSelected = controller.selectedObject === gameObject;
 
   return (
     <>
       <div
         style={{ paddingLeft: `${indentLevel * 10}px` }}
-        className="cursor-pointer hover:bg-blue-300"
-        onClick={() => setIsCollapsed(!isCollapsed)}
+        className={cn("cursor-pointer hover:bg-slate-400", { '!bg-blue-400': isSelected })}
+        onClick={() => controller.selectionManager.select(gameObject)}
       >
         <Condition if={hasChildren}
           then={() =>
-            <Condition if={!isCollapsed}
-              then={() => <ChevronDownIcon />}
-              else={() => <ChevronRightIcon />}
-            />
+            <span onClick={() => setIsCollapsed(!isCollapsed)}>
+              <Condition if={!isCollapsed}
+                then={() => <ChevronDownIcon />}
+                else={() => <ChevronRightIcon />}
+              />
+            </span>
           }
           else={() => <ArrowTurnDownRightIcon className="opacity-20" />}
         />
@@ -152,7 +154,7 @@ const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = ({ ga
       <Condition if={hasChildren && !isCollapsed}
         then={() =>
           gameObject.children.map((gameObject, index) => (
-            <SceneHierarchyObject key={index} gameObject={gameObject} indentLevel={indentLevel + 1} />
+            <SceneHierarchyObject key={index} gameObject={gameObject} indentLevel={indentLevel + 1} controller={controller} />
           ))
         }
       />

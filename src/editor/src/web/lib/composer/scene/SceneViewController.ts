@@ -44,7 +44,7 @@ export class SceneViewController {
   private engine?: Engine = undefined;
   private babylonScene?: BabylonScene = undefined;
   private assetCache: Map<AssetConfig, AssetContainer>;
-  private selectionManager?: SelectionManager = undefined;
+  private _selectionManager?: SelectionManager = undefined;
 
   private babylonToWorldSelectionCache: ComposerSelectionCache;
 
@@ -72,7 +72,7 @@ export class SceneViewController {
     /* Scene */
     const engine = this.engine = new Engine(canvas, true, {}, true);
     const scene = this.babylonScene = new BabylonScene(this.engine);
-    const selectionManager = this.selectionManager = new SelectionManager(scene, this.mutator);
+    const selectionManager = this._selectionManager = new SelectionManager(scene, this.mutator);
 
 
     /* Lifecycle */
@@ -281,5 +281,9 @@ export class SceneViewController {
 
   public get selectedObject(): GameObjectConfigComposer | undefined {
     return this.selectionManager?.selectedObject;
+  }
+
+  public get selectionManager(): SelectionManager {
+    return this._selectionManager!;
   }
 }
