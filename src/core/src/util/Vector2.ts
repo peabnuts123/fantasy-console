@@ -34,16 +34,32 @@ export class Vector2 {
     )
   }
 
-  public multiplySelf(factor: number): Vector2 {
-    this.x *= factor;
-    this.y *= factor;
+  public multiplySelf(factor: number): Vector2;
+  public multiplySelf(other: Vector2): Vector2;
+  public multiplySelf(operand: number | Vector2): Vector2 {
+    if (operand instanceof Vector2) {
+      this.x *= operand.x;
+      this.y *= operand.y;
+    } else {
+      this.x *= operand;
+      this.y *= operand;
+    }
     return this;
   }
-  public multiply(factor: number): Vector2 {
-    return new Vector2(
-      this.x * factor,
-      this.y * factor,
-    )
+  public multiply(factor: number): Vector2;
+  public multiply(other: Vector2): Vector2;
+  public multiply(operand: number | Vector2): Vector2 {
+    if (operand instanceof Vector2) {
+      return new Vector2(
+        this.x * operand.x,
+        this.y * operand.y,
+      )
+    } else {
+      return new Vector2(
+        this.x * operand,
+        this.y * operand,
+      )
+    }
   }
 
   public divideSelf(factor: number): Vector2 {
@@ -82,6 +98,13 @@ export class Vector2 {
     return this.divide(length);
   }
 
+  public withX(value: number): Vector2 {
+    return new Vector2(value, this.y);
+  }
+
+  public withY(value: number): Vector2 {
+    return new Vector2(this.x, value);
+  }
   public get x(): number { return this._x; }
   public set x(value: number) { this._x = value; }
 
@@ -90,6 +113,9 @@ export class Vector2 {
 
   public static zero(): Vector2 {
     return new Vector2(0, 0);
+  }
+  public static one(): Vector2 {
+    return new Vector2(1, 1);
   }
 
   public toVector3(): Vector3 {

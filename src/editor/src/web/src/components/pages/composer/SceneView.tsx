@@ -87,7 +87,12 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
                   <VectorInput
                     label="Position"
                     vector={controller.selectedObject!.transform.position}
-                    onChange={(newValue) => controller.mutator.applyInstantly(new SetGameObjectPositionMutation(controller.selectedObject!), { position: newValue })}
+                    onChange={(newValue) => controller.mutator.debounceContinuous(
+                      SetGameObjectPositionMutation,
+                      controller.selectedObject!,
+                      () => new SetGameObjectPositionMutation(controller.selectedObject!),
+                      () => ({ position: newValue })
+                    )}
                   />
 
                   {/* Rotation */}

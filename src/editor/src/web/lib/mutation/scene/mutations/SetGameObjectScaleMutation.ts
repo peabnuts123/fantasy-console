@@ -14,7 +14,7 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
   // @TODO should we look you up by ID or something?
   private readonly gameObject: GameObjectConfigComposer;
   private scale: Vector3;
-
+  private _hasBeenApplied: boolean = false;
   // Undo state
   private configScale: Vector3 | undefined = undefined;
   private sceneScale: Vector3 | undefined = undefined;
@@ -59,4 +59,7 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
   get description(): string {
     return `Scale '${this.gameObject.name}'`;
   }
+
+  public get hasBeenApplied() { return this._hasBeenApplied; }
+  public set hasBeenApplied(value: boolean) { this._hasBeenApplied = value; }
 }

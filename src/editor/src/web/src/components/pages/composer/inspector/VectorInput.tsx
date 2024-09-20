@@ -1,6 +1,7 @@
+import { Vector2 } from "@fantasy-console/core/src/util";
 import { Vector3 } from "@fantasy-console/core/src/util/Vector3";
 import { observer } from "mobx-react-lite";
-import { ChangeEvent, FunctionComponent } from "react";
+import { ChangeEventHandler, FunctionComponent, MouseEventHandler, useEffect, useState } from "react";
 
 interface Props {
   label: string;
@@ -34,7 +35,48 @@ interface VectorInputComponentProps {
 }
 
 const VectorInputComponent: FunctionComponent<VectorInputComponentProps> = ({ label, value, onChange }) => {
-  const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  // Constants
+  const DragSensitivity = 1;
+
+  // State
+  const [dragStartPosition, setDragStartPosition] = useState<Vector2>();
+  const [originalPreDragValue, setOriginalPreDragValue] = useState<number>();
+
+  // Computed state
+  const isDragging = dragStartPosition !== undefined;
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (isDragging && originalPreDragValue !== undefined) {
+        const mousePosition = new Vector2(e.clientX, e.clientY);
+        const delta = mousePosition.subtract(dragStartPosition).multiplySelf(DragSensitivity / 100);
+
+
+        // @TODO can we build a UX that lets you drag up OR right?
+        const size = delta.x;
+
+        console.log(`Dragging. Delta: `, delta, size);
+        onChange(originalPreDragValue + size);
+      }
+    }
+    const onMouseUp = () => {
+      setDragStartPosition(undefined);
+      setOriginalPreDragValue(undefined);
+    };
+
+    if (isDragging) {
+      window.addEventListener('mousemove', onMouseMove)
+    }
+    window.addEventListener('mouseup', onMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [isDragging]);
+
+  // Functions
+  const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const newValue = Number(e.target.value);
     if (!isNaN(newValue)) {
       onChange(newValue);
@@ -43,10 +85,15 @@ const VectorInputComponent: FunctionComponent<VectorInputComponentProps> = ({ la
     }
   };
 
+  const onStartDrag: MouseEventHandler<HTMLSpanElement> = (e) => {
+    setOriginalPreDragValue(value);
+    setDragStartPosition(new Vector2(e.clientX, e.clientY));
+  }
+
   return (
     <div className="pl-3 mb-1">
       <label className="block relative pl-5">
-        <span className="absolute left-0 py-1">{label}</span>
+        <span className="absolute left-0 py-1 cursor-col-resize" onMouseDown={onStartDrag}>{label}</span>
         <input
           type="number"
           className="w-full p-1"

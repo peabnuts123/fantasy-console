@@ -14,6 +14,7 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
   // @TODO should we look you up by ID or something?
   private readonly gameObject: GameObjectConfigComposer;
   private position: Vector3;
+  private _hasBeenApplied: boolean = false;
 
   // Undo state
   private configPosition: Vector3 | undefined = undefined;
@@ -25,13 +26,13 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     this.position = gameObject.transform.position;
   }
 
-  begin(_args: SceneMutationArguments): void {
+  public begin(_args: SceneMutationArguments): void {
     // - Store undo values
     this.configPosition = this.gameObject.transform.position;
     this.scenePosition = this.gameObject.sceneInstance!.transform.position;
   }
 
-  update({ SceneViewController }: SceneMutationArguments, { position }: SetGameObjectPositionMutationUpdateArgs): void {
+  public update({ SceneViewController }: SceneMutationArguments, { position }: SetGameObjectPositionMutationUpdateArgs): void {
     this.position = position
     // - 1. Config state
     this.gameObject.transform.position = position;
@@ -40,7 +41,7 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     SceneViewController.selectionManager.updateGizmos();
   }
 
-  apply({ SceneViewController }: SceneMutationArguments): void {
+  public apply({ SceneViewController }: SceneMutationArguments): void {
     // - 3. JSONC
     const sceneIndex = SceneViewController.scene.objects.findIndex((object) => object.id === this.gameObject.id);
     const updatedValue: Vector3Archive = {
@@ -51,13 +52,16 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     SceneViewController.sceneJson.mutate((scene) => scene.objects[sceneIndex].transform.position, updatedValue);
   }
 
-  undo(args: SceneMutationArguments): void {
+  public undo(args: SceneMutationArguments): void {
     // @TODO
     // - Apply undo values
     throw new Error("Method not implemented.");
   }
 
-  get description(): string {
+  public get description(): string {
     return `Move '${this.gameObject.name}'`;
   }
+
+  public get hasBeenApplied() { return this._hasBeenApplied; }
+  public set hasBeenApplied(value: boolean) { this._hasBeenApplied = value; }
 }

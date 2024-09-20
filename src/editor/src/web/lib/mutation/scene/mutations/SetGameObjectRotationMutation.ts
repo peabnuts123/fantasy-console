@@ -14,6 +14,7 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
   // @TODO should we look you up by ID or something?
   private readonly gameObject: GameObjectConfigComposer;
   private rotation: Vector3;
+  private _hasBeenApplied: boolean = false;
 
   // Undo state
   private configRotation: Vector3 | undefined = undefined;
@@ -59,4 +60,7 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
   get description(): string {
     return `Rotate '${this.gameObject.name}'`;
   }
+
+  public get hasBeenApplied() { return this._hasBeenApplied; }
+  public set hasBeenApplied(value: boolean) { this._hasBeenApplied = value; }
 }
