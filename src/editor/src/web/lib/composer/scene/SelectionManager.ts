@@ -9,7 +9,7 @@ import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 import { RotationGizmo } from "@babylonjs/core/Gizmos/rotationGizmo";
 import { ScaleGizmo } from "@babylonjs/core/Gizmos/scaleGizmo";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import { Vector3 as Vector3Babylon } from "@babylonjs/core";
+import { Vector3 as Vector3Babylon } from "@babylonjs/core/Maths/math.vector";
 
 import { toCoreVector3 } from "@fantasy-console/runtime/src/util";
 
@@ -49,34 +49,26 @@ export class SelectionManager {
     this.moveGizmo = new PositionGizmo(utilityLayer, 2, this.gizmoManager);
     this.moveGizmo.planarGizmoEnabled = true;
     this.moveGizmo.onDragStartObservable.add(() => {
-      runInAction(() => {
-        this.currentMoveMutation = new SetGameObjectPositionMutation(this.selectedObject!);
-        mutator.beginContinuous(this.currentMoveMutation);
-      });
+      this.currentMoveMutation = new SetGameObjectPositionMutation(this.selectedObject!);
+      mutator.beginContinuous(this.currentMoveMutation);
     });
     this.moveGizmo.onDragObservable.add((_eventData) => {
       if (this.selectedObject !== undefined) {
-        runInAction(() => {
-          mutator.updateContinuous(this.currentMoveMutation!, {
+        mutator.updateContinuous(this.currentMoveMutation!, {
             position: toCoreVector3(this.fakeTransformTarget!.position),
-          });
         });
       }
     });
     this.moveGizmo.onDragEndObservable.add(() => {
-      runInAction(() => {
-        mutator.apply(this.currentMoveMutation!);
-        this.currentMoveMutation = undefined;
-      });
+      mutator.apply(this.currentMoveMutation!);
+      this.currentMoveMutation = undefined;
     });
 
     // Rotate
     this.rotateGizmo = new RotationGizmo(utilityLayer, 32, true, 6, this.gizmoManager);
     this.rotateGizmo.onDragStartObservable.add(() => {
-      runInAction(() => {
-        this.currentRotateMutation = new SetGameObjectRotationMutation(this.selectedObject!);
-        mutator.beginContinuous(this.currentRotateMutation);
-      });
+      this.currentRotateMutation = new SetGameObjectRotationMutation(this.selectedObject!);
+      mutator.beginContinuous(this.currentRotateMutation);
     });
     this.rotateGizmo.onDragObservable.add((_eventData) => {
       if (this.selectedObject !== undefined) {
@@ -91,45 +83,35 @@ export class SelectionManager {
           rotation = this.fakeTransformTarget!.rotation;
         }
 
-        runInAction(() => {
-          mutator.updateContinuous(this.currentRotateMutation!, {
-            rotation: toCoreVector3(rotation),
-          });
+        mutator.updateContinuous(this.currentRotateMutation!, {
+          rotation: toCoreVector3(rotation),
         });
       }
     });
     this.rotateGizmo.onDragEndObservable.add((_eventData) => {
-      runInAction(() => {
-        mutator.apply(this.currentRotateMutation!);
-        this.currentRotateMutation = undefined;
-      });
+      mutator.apply(this.currentRotateMutation!);
+      this.currentRotateMutation = undefined;
     })
 
     // Scale
     this.scaleGizmo = new ScaleGizmo(utilityLayer, 2, this.gizmoManager);
     this.scaleGizmo.onDragStartObservable.add(() => {
-      runInAction(() => {
-        this.currentScaleMutation = new SetGameObjectScaleMutation(this.selectedObject!);
-        mutator.beginContinuous(this.currentScaleMutation);
-      });
+      this.currentScaleMutation = new SetGameObjectScaleMutation(this.selectedObject!);
+      mutator.beginContinuous(this.currentScaleMutation);
     });
     this.scaleGizmo.onDragObservable.add((_eventData) => {
       if (this.selectedObject !== undefined) {
         // Scaling is handled as a percentage to accommodate rotation
-        runInAction(() => {
-          mutator.updateContinuous(this.currentScaleMutation!, {
-            scaleDelta: toCoreVector3(this.fakeTransformTarget!.scaling),
-          });
+        mutator.updateContinuous(this.currentScaleMutation!, {
+          scaleDelta: toCoreVector3(this.fakeTransformTarget!.scaling),
         });
         // @NOTE Reset scaling to uniform scale, because rotation doesn't work with non-uniform scaling
         this.fakeTransformTarget!.scaling = Vector3Babylon.One();
       }
     });
     this.scaleGizmo.onDragEndObservable.add(() => {
-      runInAction(() => {
-        mutator.apply(this.currentScaleMutation!);
-        this.currentScaleMutation = undefined;
-      });
+      mutator.apply(this.currentScaleMutation!);
+      this.currentScaleMutation = undefined;
     });
 
     // Bounding box
@@ -152,12 +134,13 @@ export class SelectionManager {
     this.selectedObject = undefined;
   }
 
-  private updateGizmos() {
+  public updateGizmos() {
     // Clear all gizmos
     this.moveGizmo.attachedNode = null;
     this.rotateGizmo.attachedNode = null;
     this.scaleGizmo.attachedNode = null;
     this.boundingBoxGizmo.attachedMesh = null;
+    this.fakeTransformTarget?.dispose();
 
 
     if (this.selectedObject !== undefined) {

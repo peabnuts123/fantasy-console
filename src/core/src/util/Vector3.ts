@@ -121,6 +121,18 @@ export class Vector3 {
     return this.divide(length);
   }
 
+  public withX(value: number): Vector3 {
+    return new Vector3(value, this.y, this.z);
+  }
+
+  public withY(value: number): Vector3 {
+    return new Vector3(this.x, value, this.z);
+  }
+
+  public withZ(value: number): Vector3 {
+    return new Vector3(this.x, this.y, value);
+  }
+
   public get x(): number { return this._x; }
   public set x(value: number) { this._x = value; }
 

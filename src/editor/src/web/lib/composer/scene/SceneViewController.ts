@@ -26,7 +26,6 @@ import { SceneManifest } from '@lib/project/definition/scene';
 import { JsoncContainer } from '@lib/util/JsoncContainer';
 import { ProjectController } from '@lib/project/ProjectController';
 import { SceneViewMutator } from '@lib/mutation/scene/SceneViewMutator';
-import { ISceneMutation } from '@lib/mutation/scene/ISceneMutation';
 import { CameraComponentConfigComposer, DirectionalLightComponentConfigComposer, MeshComponentConfigComposer, PointLightComponentConfigComposer, ScriptComponentConfigComposer } from '../config/components';
 import { SceneConfigComposer } from '../config/SceneConfigComposer';
 import { GameObjectConfigComposer } from '../config/GameObjectConfigComposer';
@@ -38,7 +37,7 @@ export class SceneViewController {
   private readonly _scene: SceneConfigComposer;
   private readonly _sceneJson: JsoncContainer<SceneDefinition>;
   private readonly projectController: ProjectController;
-  private readonly mutator: SceneViewMutator;
+  private readonly _mutator: SceneViewMutator;
 
   // @TODO different classes for the "states" of SceneViewController or something? So that not everything is nullable
   private engine?: Engine = undefined;
@@ -54,7 +53,7 @@ export class SceneViewController {
     this.projectController = projectController;
     this.assetCache = new Map();
     this.babylonToWorldSelectionCache = new ComposerSelectionCache();
-    this.mutator = new SceneViewMutator(this, projectController);
+    this._mutator = new SceneViewMutator(this, projectController);
     this.reset();
 
     // @NOTE Class properties MUST have a value explicitly assigned
@@ -154,14 +153,6 @@ export class SceneViewController {
     for (let sceneObject of this.scene.objects) {
       await this.createSceneObject(sceneObject);
     }
-  }
-
-  public applyMutation(mutation: ISceneMutation) {
-    this.mutator.apply(mutation);
-  }
-
-  public undoMutation(): void {
-    this.mutator.undo();
   }
 
   public setCurrentTool(tool: CurrentSelectionTool) {
@@ -277,6 +268,10 @@ export class SceneViewController {
 
   public get sceneJson(): JsoncContainer<SceneDefinition> {
     return this._sceneJson;
+  }
+
+  public get mutator(): SceneViewMutator {
+    return this._mutator;
   }
 
   public get selectedObject(): GameObjectConfigComposer | undefined {

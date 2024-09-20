@@ -2,6 +2,7 @@ import { ProjectController } from "@lib/project/ProjectController";
 import { SceneViewController } from "@lib/composer/scene";
 import { ISceneMutation } from "./ISceneMutation";
 import { IContinuousSceneMutation } from "./IContinuousSceneMutation";
+import { runInAction } from "mobx";
 
 export class SceneViewMutator {
   private readonly sceneView: SceneViewController;
@@ -17,14 +18,27 @@ export class SceneViewMutator {
   public beginContinuous<TMutation extends IContinuousSceneMutation<any>>(continuousMutation: TMutation): void {
     // @TODO if latestMutation has not been applied - throw error
     this.mutationStack.push(continuousMutation);
-    continuousMutation.begin(this.getMutationArgs());
+    runInAction(() => {
+      continuousMutation.begin(this.getMutationArgs());
+    });
   }
 
   public updateContinuous<TMutation extends IContinuousSceneMutation<any>>(continuousMutation: TMutation, updateArgs: TMutation extends IContinuousSceneMutation<infer TUpdateArgs> ? TUpdateArgs : never): void {
     if (this.latestMutation !== continuousMutation) {
       throw new Error(`Cannot update continuous mutation - provided instance is not the latest mutation`);
     }
-    continuousMutation.update(this.getMutationArgs(), updateArgs);
+    runInAction(() => {
+      continuousMutation.update(this.getMutationArgs(), updateArgs);
+    });
+  }
+
+  /**
+   * Apply a continuous mutation instantly. Equivalent to calling `beginContinuous()` followed by `updateContinuous` and then `apply()`
+   */
+  public applyInstantly<TMutation extends IContinuousSceneMutation<any>>(continuousMutation: TMutation, updateArgs: TMutation extends IContinuousSceneMutation<infer TUpdateArgs> ? TUpdateArgs : never): void {
+    this.beginContinuous(continuousMutation);
+    this.updateContinuous(continuousMutation, updateArgs);
+    this.apply(continuousMutation);
   }
 
   public apply(mutation: ISceneMutation): void {
@@ -40,7 +54,9 @@ export class SceneViewMutator {
     } // else mutation is continuous. Continuous mutations have already been pushed when they called `beginContinuous()`
 
     // Apply mutation
-    mutation.apply(this.getMutationArgs());
+    runInAction(() => {
+      mutation.apply(this.getMutationArgs());
+    });
 
     // @TODO @DEBUG REMOVE
     console.log(`Mutation stack: `, this.mutationStack.map((mutation) => mutation.description));

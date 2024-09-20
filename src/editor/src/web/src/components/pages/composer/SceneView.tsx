@@ -4,16 +4,15 @@ import { observer } from "mobx-react-lite";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import cn from 'classnames';
 
-import { GameObjectConfig } from "@fantasy-console/runtime/src/cartridge";
-
 import { SceneViewController } from "@lib/composer/scene";
 import { NewObjectMutation } from "@lib/mutation/scene/mutations/NewObjectMutation";
 import { CurrentSelectionTool } from "@lib/composer/scene/SelectionManager";
+import { GameObjectConfigComposer } from "@lib/composer/config";
+import { SetGameObjectPositionMutation } from "@lib/mutation/scene/mutations";
 
 import Condition from "@app/components/util/condition";
 import { getInspectorFor } from "./GameObjectComponents";
 import { VectorInput } from "./inspector/VectorInput";
-import { GameObjectConfigComposer } from "@lib/composer/config";
 
 
 interface Props {
@@ -39,7 +38,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
           <h2 className="text-lg">{controller.scene.path}</h2>
         </div>
         <div className="p-3 bg-slate-300 h-full">
-          <button className="button" onClick={() => controller.applyMutation(new NewObjectMutation())}>[Debug] New Object</button>
+          <button className="button" onClick={() => controller.mutator.apply(new NewObjectMutation())}>[Debug] New Object</button>
           {controller.scene.objects.map((gameObject, index) => (
             <SceneHierarchyObject key={index} gameObject={gameObject} controller={controller} />
           ))}
@@ -85,7 +84,11 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
                   </label>
 
                   {/* Position */}
-                  <VectorInput label="Position" vector={controller.selectedObject!.transform.position} />
+                  <VectorInput
+                    label="Position"
+                    vector={controller.selectedObject!.transform.position}
+                    onChange={(newValue) => controller.mutator.applyInstantly(new SetGameObjectPositionMutation(controller.selectedObject!), { position: newValue })}
+                  />
 
                   {/* Rotation */}
                   <VectorInput label="Rotation" vector={controller.selectedObject!.transform.rotation} />

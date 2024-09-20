@@ -32,7 +32,7 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
   }
 
   update(_args: SceneMutationArguments, { rotation }: SetGameObjectRotationMutationUpdateArgs): void {
-    this.rotation = rotation
+    this.rotation = rotation;
     // - 1. Config state
     this.gameObject.transform.rotation = rotation;
     // - 2. Babylon state

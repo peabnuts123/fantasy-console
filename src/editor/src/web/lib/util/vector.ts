@@ -1,4 +1,4 @@
-import { Vector3 } from "@fantasy-console/core/src/util";
+import { AnyVector, Vector3 } from "@fantasy-console/core/src/util";
 import { makeObservable, observable } from "mobx";
 
 /**
@@ -13,5 +13,50 @@ export class ObservableVector3 extends Vector3 {
       _y: observable,
       _z: observable,
     } as any);
+  }
+
+  public override add(value: AnyVector): ObservableVector3 {
+    return new ObservableVector3(super.add(value));
+  }
+
+  public override subtract(value: AnyVector): ObservableVector3 {
+    return new ObservableVector3(super.subtract(value));
+  }
+
+  public multiply(factor: number): Vector3;
+  public multiply(other: Vector3): Vector3;
+  public override multiply(operand: number | Vector3): ObservableVector3 {
+    if (operand instanceof Vector3) {
+      return new ObservableVector3(super.multiply(operand));
+    } else {
+      return new ObservableVector3(super.multiply(operand));
+    }
+  }
+
+  public divide(factor: number): ObservableVector3 {
+    return new ObservableVector3(super.divide(factor));
+  }
+
+  public normalize(): ObservableVector3 {
+    return new ObservableVector3(super.normalize());
+  }
+
+  public withX(x: number): ObservableVector3 {
+    return new ObservableVector3(super.withX(x));
+  }
+
+  public withY(y: number): ObservableVector3 {
+    return new ObservableVector3(super.withY(y));
+  }
+
+  public withZ(z: number): ObservableVector3 {
+    return new ObservableVector3(super.withZ(z));
+  }
+
+  public static zero(): ObservableVector3 {
+    return new ObservableVector3(Vector3.zero());
+  }
+  public static one(): ObservableVector3 {
+    return new ObservableVector3(Vector3.one());
   }
 }

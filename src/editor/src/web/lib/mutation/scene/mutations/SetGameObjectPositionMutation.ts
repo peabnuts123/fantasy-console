@@ -31,12 +31,13 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     this.scenePosition = this.gameObject.sceneInstance!.transform.position;
   }
 
-  update(_args: SceneMutationArguments, { position }: SetGameObjectPositionMutationUpdateArgs): void {
+  update({ SceneViewController }: SceneMutationArguments, { position }: SetGameObjectPositionMutationUpdateArgs): void {
     this.position = position
     // - 1. Config state
     this.gameObject.transform.position = position;
     // - 2. Babylon state
     this.gameObject.sceneInstance!.transform.position = position;
+    SceneViewController.selectionManager.updateGizmos();
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {
