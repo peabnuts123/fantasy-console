@@ -1,4 +1,7 @@
 import { mockIPC } from "@tauri-apps/api/mocks";
+import { unzip, zip } from 'fflate';
+const unzipAsync = promisify(unzip);
+const zipAsync = promisify(zip);
 
 import type * as TauriDialog from '@tauri-apps/api/dialog';
 import type * as TauriPath from '@tauri-apps/api/path';
@@ -55,11 +58,24 @@ export class BrowserMock {
     throw throwUnhandled(`[BrowserMock] (mockTauri) Unimplemented 'tauri' command: `, args);
   }
 
-  private async mockCreateCartridge(_args: CreateCartridgeCmdArgs): Promise<Uint8Array> {
+  /**
+   * @NOTE
+   * Building a cartridge depends on Rust backend to fully function.
+   * This mock requires a sample cartridge (built by the full app) to exist somewhere (specified by `Paths.MockCartridgeFile`).
+   * This function reads that existing cartridge, replaces its manifest, and then
+   * serves that result. This means you can make changes in the Composer and see them
+   * reflected when playtesting, but changes to assets will not work.
+   * If you add or remove an asset the game likely won't even run. You will have to rebuild
+   * the mock cartridge using the full app first.
+   */
+  private async mockCreateCartridge({ manifestFileBytes }: CreateCartridgeCmdArgs): Promise<Uint8Array> {
     const result = await fetch(Paths.MockCartridgeFile);
     if (result.ok) {
-      const buffer = await result.arrayBuffer();
-      return new Uint8Array(buffer);
+      const cartridgeBytes = await result.arrayBuffer();
+      const cartridgeData = await unzipAsync(new Uint8Array(cartridgeBytes));
+      cartridgeData['manifest.json'] = new TextEncoder().encode(manifestFileBytes);
+      const resultBytes = await zipAsync(cartridgeData);
+      return resultBytes;
     } else {
       throw throwUnhandled(`[BrowserMock] (mockCreateCartridge) Failed fetching mock cartridge: `, result);
     }
@@ -98,6 +114,29 @@ export function mockTauri() {
 function throwUnhandled(details: string, ...detailsArgs: any[]): void {
   console.error(details, ...detailsArgs);
   throw new Error(`Attempted to call unmocked Tauri API. See error log for request details.`);
+}
+
+type AsyncCallbackFn<TAsyncError, TAsyncResult> = (err: TAsyncError, result: TAsyncResult) => void;
+/**
+ * Convert a callback-style async function into a promise-based async function.
+ * @param asyncFunction The function to convert.
+ * @example
+ * ```typescript
+ * import { unzip } from 'fflate';
+ * const unzipAsync = promisify(unzip);
+ * // ...
+ * const zipData = await unzipAsync(zipFileBytes);
+ * ```
+ */
+function promisify<TArgument, TAsyncError, TAsyncResult>(asyncFunction: (arg: TArgument, callback: AsyncCallbackFn<TAsyncError, TAsyncResult>) => any): (arg: TArgument) => Promise<TAsyncResult> {
+  return (arg: TArgument) => {
+    return new Promise((resolve, reject) => {
+      asyncFunction(arg, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+  };
 }
 
 /*
@@ -183,7 +222,7 @@ const TauriMock: ITauriMock = {
   Event: {
     listen(args) {
       console.log(`[TauriMock] (listen) got args: `, args);
-      return () => {};
+      return () => { };
     },
   }
 }
