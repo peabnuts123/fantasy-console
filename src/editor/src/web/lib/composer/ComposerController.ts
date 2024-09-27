@@ -50,6 +50,7 @@ export class ComposerController {
 
   public async loadScene(sceneManifest: SceneManifest) {
     // @TODO this abstract probably doesn't make sense any more
+    //  - @TODO What about it ^?
     const scene = await SceneViewController.loadFromManifest(sceneManifest, this.projectController);
     runInAction(() => {
       this._currentScene = scene;
@@ -69,7 +70,6 @@ export class ComposerController {
   }
 
   public async debug_buildCartridge(): Promise<Uint8Array> {
-
     /*
       @TODO
       Is there a way we can do this from Rust, so that we
@@ -79,9 +79,15 @@ export class ComposerController {
     // Load scene definitions
     const scenes = await Promise.all(
       this.projectController.currentProject.scenes.map(async (sceneManifest) => {
-        // @TODO can this be a method on ProjectController instead?
-        const [sceneDefinition] = await SceneViewController.loadSceneDefinition(sceneManifest, this.projectController.fileSystem);
-        return sceneDefinition;
+        if (this._currentScene !== undefined && sceneManifest.path === this._currentScene.scene.path) {
+          // Load current scene from memory
+          // @NOTE This is kind of @DEBUG because we are suppose to have multiple scenes open
+          return this._currentScene.sceneJson.parse();
+        } else {
+          // @TODO can this be a method on ProjectController instead?
+          const [sceneDefinition] = await SceneViewController.loadSceneDefinition(sceneManifest, this.projectController.fileSystem);
+          return sceneDefinition;
+        }
       })
     );
 

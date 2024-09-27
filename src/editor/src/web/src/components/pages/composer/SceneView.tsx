@@ -100,6 +100,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
                     label="Rotation"
                     vector={controller.selectedObject!.transform.rotation}
                     incrementInterval={Math.PI / 8}
+                    // @TODO Parse value and limit to rotational values
                     onChange={(newValue) => controller.mutator.debounceContinuous(
                       SetGameObjectRotationMutation,
                       controller.selectedObject!,
