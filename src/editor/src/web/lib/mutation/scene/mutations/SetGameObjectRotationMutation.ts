@@ -2,9 +2,9 @@ import { Vector3 as ArchiveVector3 } from "@fantasy-console/runtime/src/cartridg
 import { Vector3 } from "@fantasy-console/core/src/util";
 
 import { GameObjectConfigComposer } from "@lib/composer/config";
+import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
-import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 
 export interface SetGameObjectRotationMutationUpdateArgs {
   rotation: Vector3;

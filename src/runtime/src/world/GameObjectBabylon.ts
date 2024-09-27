@@ -8,6 +8,7 @@ import { TransformBabylon } from './TransformBabylon';
  */
 export class GameObjectBabylon extends GameObject {
   // @NOTE Override base type
+  declare public name: string;
   declare public readonly transform: TransformBabylon;
 
   public constructor(id: string, data: GameObjectData) {

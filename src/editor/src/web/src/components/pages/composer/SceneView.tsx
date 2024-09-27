@@ -8,11 +8,12 @@ import { SceneViewController } from "@lib/composer/scene";
 import { NewObjectMutation } from "@lib/mutation/scene/mutations/NewObjectMutation";
 import { CurrentSelectionTool } from "@lib/composer/scene/SelectionManager";
 import { GameObjectConfigComposer } from "@lib/composer/config";
-import { SetGameObjectPositionMutation, SetGameObjectRotationMutation, SetGameObjectScaleMutation } from "@lib/mutation/scene/mutations";
+import { SetGameObjectPositionMutation, SetGameObjectRotationMutation, SetGameObjectScaleMutation, SetGameObjectNameMutation } from "@lib/mutation/scene/mutations";
 
 import Condition from "@app/components/util/condition";
 import { getInspectorFor } from "./GameObjectComponents";
 import { VectorInput } from "./inspector/VectorInput";
+import { TextInput } from "./inspector/TextInput";
 
 
 interface Props {
@@ -78,10 +79,20 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
               <>
                 <div className="p-2">
                   {/* Name */}
-                  <label>
-                    <span className="font-bold">Name</span>
-                    <input type="text" value={controller.selectedObject!.name} readOnly={true} className="w-full p-1" />
-                  </label>
+                  <TextInput
+                    label="Name"
+                    value={controller.selectedObject!.name}
+                    onChange={(newName) => {
+                      if (newName && newName.trim()) {
+                        controller.mutator.debounceContinuous(
+                          SetGameObjectNameMutation,
+                          controller.selectedObject!,
+                          () => new SetGameObjectNameMutation(controller.selectedObject!),
+                          () => ({ name: newName })
+                        )
+                      }
+                    }}
+                  />
 
                   {/* Position */}
                   <VectorInput
@@ -149,7 +160,7 @@ interface SceneHierarchyObjectProps {
   gameObject: GameObjectConfigComposer;
   indentLevel?: number;
 }
-const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = ({ gameObject, indentLevel, controller }) => {
+const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = observer(({ gameObject, indentLevel, controller }) => {
   // Default `indentLevel` to 0 if not provided
   indentLevel ??= 0;
 
@@ -189,6 +200,6 @@ const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = ({ ga
       />
     </>
   )
-}
+});
 
 export default SceneViewComponent;
