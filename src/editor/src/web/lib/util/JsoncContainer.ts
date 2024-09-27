@@ -1,4 +1,4 @@
-import { modify, JSONPath, ModificationOptions, applyEdits } from 'jsonc-parser';
+import { modify, JSONPath, ModificationOptions, applyEdits, parse } from 'jsonc-parser';
 
 const DefaultOptions: ModificationOptions = {
   formattingOptions: {},
@@ -14,7 +14,9 @@ export class JsoncContainer<TRawType extends object> {
     this.text = jsonc;
   }
 
-  public mutate<TValue>(pathSelector: ResolvePathSelector<TRawType>, value: TValue extends undefined ? never : TValue, options?: ModificationOptions) {
+  public mutate<TValue>(pathSelector: ResolvePathSelector<TRawType>, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void;
+  public mutate<TValue>(path: MutationPath, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void;
+  public mutate<TValue>(pathOrSelector: ResolvePathSelector<TRawType> | MutationPath, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void {
     // Validate for sanity (typechecking should disallow, but...)
     if (value === undefined) throw new Error('Cannot set JSON value to `undefined`. Use `delete()` to remove a value, or `null` to set it to null.');
 
@@ -26,7 +28,14 @@ export class JsoncContainer<TRawType extends object> {
         ...options,
       };
 
-    const path = resolvePath(pathSelector);
+    let path: MutationPath;
+    if (Array.isArray(pathOrSelector)) {
+      // Path
+      path = pathOrSelector;
+    } else {
+      // Selector
+      path = resolvePath(pathOrSelector);
+    }
 
     // console.log(`[JsoncContainer] (mutate) Before: `, this.text);
 
@@ -43,6 +52,10 @@ export class JsoncContainer<TRawType extends object> {
   public toString(): string {
     return this.text;
   }
+
+  public parse(): TRawType {
+    return parse(this.text) as TRawType;
+  }
 }
 
 /* ====================
@@ -57,7 +70,10 @@ interface ITerminatableProxy {
 }
 
 /** A selector function that takes an object and returns some sub-property */
-type ResolvePathSelector<TTarget extends object> = (target: TTarget) => any;
+export type ResolvePathSelector<TTarget extends object> = (target: TTarget) => any;
+
+/** An array of path segments. Strings are properties, and numbers are array indices. */
+export type MutationPath = (string | number)[];
 
 /**
  * Use an arrow function to select a path within a given target object type
@@ -66,7 +82,7 @@ type ResolvePathSelector<TTarget extends object> = (target: TTarget) => any;
  * @returns An array of path segments, for interacting with JSON. Numeric path segments will be converted to numbers.
  * @example resolvePath<MyObject>((myObject) => myObject.people[0].name) // Returns ['people', 0, 'name']
  */
-export function resolvePath<TTarget extends object>(selector: ResolvePathSelector<TTarget>): (string | number)[] {
+export function resolvePath<TTarget extends object>(selector: ResolvePathSelector<TTarget>): MutationPath {
   // Create a proxy for the type
   const proxy = createPathProxy<TTarget>();
   // Look up a path within the type (using a lambda function)
@@ -82,7 +98,7 @@ export function resolvePath<TTarget extends object>(selector: ResolvePathSelecto
  * Indexing a path proxy with `ResolvePathTerminatingSymbol` will return the path value.
  * @param path Persistent state passed down through recursive calls
  */
-function createPathProxy<TTarget extends object>(path: (string | number)[] = []) {
+function createPathProxy<TTarget extends object>(path: MutationPath = []) {
   /* @NOTE Capture `path` in a closure */
   return new Proxy<TTarget>({} as TTarget, {
     get(_, prop) {

@@ -4,6 +4,7 @@ import { Vector3 } from "@fantasy-console/core/src/util";
 import { GameObjectConfigComposer } from "@lib/composer/config";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
+import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 
 export interface SetGameObjectPositionMutationUpdateArgs {
   position: Vector3;
@@ -43,13 +44,13 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
 
   public apply({ SceneViewController }: SceneMutationArguments): void {
     // - 3. JSONC
-    const sceneIndex = SceneViewController.scene.objects.findIndex((object) => object.id === this.gameObject.id);
     const updatedValue: Vector3Archive = {
       x: this.position.x,
       y: this.position.y,
       z: this.position.z,
     };
-    SceneViewController.sceneJson.mutate((scene) => scene.objects[sceneIndex].transform.position, updatedValue);
+    const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.scene, (gameObject) => gameObject.transform.position);
+    SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
   public undo(args: SceneMutationArguments): void {

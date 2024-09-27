@@ -4,6 +4,7 @@ import { Vector3 } from "@fantasy-console/core/src/util";
 import { GameObjectConfigComposer } from "@lib/composer/config";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
+import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 
 interface SetGameObjectScaleMutationDeltaUpdateArgs {
   scaleDelta: Vector3;
@@ -57,13 +58,13 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
 
   apply({ SceneViewController }: SceneMutationArguments): void {
     // - 3. JSONC
-    const sceneIndex = SceneViewController.scene.objects.findIndex((object) => object.id === this.gameObject.id);
     const updatedValue: ArchiveVector3 = {
       x: this.scale.x,
       y: this.scale.y,
       z: this.scale.z,
     };
-    SceneViewController.sceneJson.mutate((scene) => scene.objects[sceneIndex].transform.scale, updatedValue);
+    const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.scene, (gameObject) => gameObject.transform.scale);
+    SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
   undo(args: SceneMutationArguments): void {
