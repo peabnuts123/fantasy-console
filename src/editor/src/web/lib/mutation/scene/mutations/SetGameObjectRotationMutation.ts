@@ -32,12 +32,13 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
     this.sceneRotation = this.gameObject.sceneInstance!.transform.rotation;
   }
 
-  update(_args: SceneMutationArguments, { rotation }: SetGameObjectRotationMutationUpdateArgs): void {
+  update({ SceneViewController }: SceneMutationArguments, { rotation }: SetGameObjectRotationMutationUpdateArgs): void {
     this.rotation = rotation;
     // - 1. Config state
     this.gameObject.transform.rotation = rotation;
     // - 2. Babylon state
     this.gameObject.sceneInstance!.transform.rotation = rotation;
+    SceneViewController.selectionManager.updateGizmos();
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {

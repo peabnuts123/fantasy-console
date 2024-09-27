@@ -84,18 +84,48 @@ export class Vector3 {
     }
   }
 
-  public divideSelf(factor: number): Vector3 {
-    if (factor === 0) {
-      throw new Error(`Cannot divide Vector3 by 0`);
+  public divideSelf(factor: number): Vector3;
+  public divideSelf(other: Vector3): Vector3;
+  public divideSelf(operand: number | Vector3): Vector3 {
+    if (operand instanceof Vector3) {
+      if (operand.x === 0 || operand.y === 0 || operand.z === 0) {
+        throw new Error(`Cannot divide Vector3 by 0: ${operand}`);
+      }
+      this.x /= operand.x;
+      this.y /= operand.y;
+      this.z /= operand.z;
+    } else {
+      if (operand === 0) {
+        throw new Error(`Cannot divide Vector3 by 0`);
+      }
+      this.x /= operand;
+      this.y /= operand;
+      this.z /= operand;
     }
-    this.multiplySelf(1 / factor);
     return this;
   }
-  public divide(factor: number): Vector3 {
-    if (factor === 0) {
-      throw new Error(`Cannot divide Vector3 by 0`);
+  public divide(factor: number): Vector3;
+  public divide(other: Vector3): Vector3;
+  public divide(operand: number | Vector3): Vector3 {
+    if (operand instanceof Vector3) {
+      if (operand.x === 0 || operand.y === 0 || operand.z === 0) {
+        throw new Error(`Cannot divide Vector3 by 0: ${operand}`);
+      }
+      return new Vector3(
+        this.x / operand.x,
+        this.y / operand.y,
+        this.z / operand.z,
+      )
+    } else {
+      if (operand === 0) {
+        throw new Error(`Cannot divide Vector3 by 0`);
+      }
+      return new Vector3(
+        this.x / operand,
+        this.y / operand,
+        this.z / operand,
+      )
     }
-    return this.multiply(1 / factor);
   }
 
   public length(): number {
@@ -131,6 +161,10 @@ export class Vector3 {
 
   public withZ(value: number): Vector3 {
     return new Vector3(this.x, this.y, value);
+  }
+
+  public toString(): string {
+    return `(${this.x}, ${this.y}, ${this.z})`;
   }
 
   public get x(): number { return this._x; }

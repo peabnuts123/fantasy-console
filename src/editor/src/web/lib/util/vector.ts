@@ -5,8 +5,15 @@ import { makeObservable, observable } from "mobx";
  * Thin wrapper for Vector3 that marks its properties as observable properties for mobx
  */
 export class ObservableVector3 extends Vector3 {
-  constructor(source: Vector3) {
-    super(source.x, source.y, source.z);
+  constructor(x: number, y: number, z: number);
+  constructor(source: Vector3);
+  constructor(sourceOrX: Vector3 | number, y?: number, z?: number) {
+    if (sourceOrX instanceof Vector3) {
+      super(sourceOrX.x, sourceOrX.y, sourceOrX.z);
+    } else {
+      super(sourceOrX, y!, z!);
+    }
+
     makeObservable(this, {
       // @NOTE type laundering because we need to observe private field
       _x: observable,
@@ -23,8 +30,8 @@ export class ObservableVector3 extends Vector3 {
     return new ObservableVector3(super.subtract(value));
   }
 
-  public multiply(factor: number): Vector3;
-  public multiply(other: Vector3): Vector3;
+  public multiply(factor: number): ObservableVector3;
+  public multiply(other: Vector3): ObservableVector3;
   public override multiply(operand: number | Vector3): ObservableVector3 {
     if (operand instanceof Vector3) {
       return new ObservableVector3(super.multiply(operand));
@@ -33,8 +40,14 @@ export class ObservableVector3 extends Vector3 {
     }
   }
 
-  public divide(factor: number): ObservableVector3 {
-    return new ObservableVector3(super.divide(factor));
+  public divide(factor: number): ObservableVector3;
+  public divide(other: Vector3): ObservableVector3;
+  public divide(operand: number | Vector3): ObservableVector3 {
+    if (operand instanceof Vector3) {
+      return new ObservableVector3(super.divide(operand));
+    } else {
+      return new ObservableVector3(super.divide(operand));
+    }
   }
 
   public normalize(): ObservableVector3 {

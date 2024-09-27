@@ -110,7 +110,6 @@ const VectorInputComponent: FunctionComponent<VectorInputComponentProps> = ({ la
   const onBlurInputElement = (e: FocusEvent<Element, Element>) => {
     const newActiveElement = e.relatedTarget;
     const newIsFocused = isElementFocused(newActiveElement);
-    console.log(`[VectorInputComponent] (updateFocusedState) Is focused: ${newIsFocused ? "yeh" : "nah"}`, e.relatedTarget);
     if (newIsFocused !== isFocused) {
       setTimeout(() =>
         setIsFocused(newIsFocused)
@@ -132,6 +131,7 @@ const VectorInputComponent: FunctionComponent<VectorInputComponentProps> = ({ la
     setDragStartPosition(new Vector2(e.clientX, e.clientY));
   };
 
+  // @TODO Hold shift or something to do bigger increments
   const incrementValue = () => {
     const newValue = value + incrementInterval;
     onChange(newValue);

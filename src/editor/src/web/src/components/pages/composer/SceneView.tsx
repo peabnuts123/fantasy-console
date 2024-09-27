@@ -8,7 +8,7 @@ import { SceneViewController } from "@lib/composer/scene";
 import { NewObjectMutation } from "@lib/mutation/scene/mutations/NewObjectMutation";
 import { CurrentSelectionTool } from "@lib/composer/scene/SelectionManager";
 import { GameObjectConfigComposer } from "@lib/composer/config";
-import { SetGameObjectPositionMutation } from "@lib/mutation/scene/mutations";
+import { SetGameObjectPositionMutation, SetGameObjectRotationMutation, SetGameObjectScaleMutation } from "@lib/mutation/scene/mutations";
 
 import Condition from "@app/components/util/condition";
 import { getInspectorFor } from "./GameObjectComponents";
@@ -96,10 +96,30 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
                   />
 
                   {/* Rotation */}
-                  <VectorInput label="Rotation" vector={controller.selectedObject!.transform.rotation} />
+                  <VectorInput
+                    label="Rotation"
+                    vector={controller.selectedObject!.transform.rotation}
+                    incrementInterval={Math.PI / 8}
+                    onChange={(newValue) => controller.mutator.debounceContinuous(
+                      SetGameObjectRotationMutation,
+                      controller.selectedObject!,
+                      () => new SetGameObjectRotationMutation(controller.selectedObject!),
+                      () => ({ rotation: newValue })
+                    )}
+                  />
 
                   {/* Scale */}
-                  <VectorInput label="Scale" vector={controller.selectedObject!.transform.scale} />
+                  <VectorInput
+                    label="Scale"
+                    vector={controller.selectedObject!.transform.scale}
+                    incrementInterval={0.25}
+                    onChange={(newValue) => controller.mutator.debounceContinuous(
+                      SetGameObjectScaleMutation,
+                      controller.selectedObject!,
+                      () => new SetGameObjectScaleMutation(controller.selectedObject!),
+                      () => ({ scale: newValue })
+                    )}
+                  />
                 </div>
 
                 {/* Components */}

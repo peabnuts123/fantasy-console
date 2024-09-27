@@ -5,9 +5,14 @@ import { GameObjectConfigComposer } from "@lib/composer/config";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
-export interface SetGameObjectScaleMutationUpdateArgs {
+interface SetGameObjectScaleMutationDeltaUpdateArgs {
   scaleDelta: Vector3;
 }
+interface SetGameObjectScaleMutationAbsoluteUpdateArgs {
+  scale: Vector3;
+}
+
+export type SetGameObjectScaleMutationUpdateArgs = SetGameObjectScaleMutationDeltaUpdateArgs | SetGameObjectScaleMutationAbsoluteUpdateArgs;
 
 export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSceneMutation<SetGameObjectScaleMutationUpdateArgs> {
   // State
@@ -31,12 +36,23 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
     this.sceneScale = this.gameObject.sceneInstance!.transform.scale;
   }
 
-  update(_args: SceneMutationArguments, { scaleDelta }: SetGameObjectScaleMutationUpdateArgs): void {
-    this.scale.multiplySelf(scaleDelta);
-    // - 1. Config state
-    this.gameObject.transform.scale.multiplySelf(scaleDelta);
-    // - 2. Babylon state
-    this.gameObject.sceneInstance!.transform.scale.multiplySelf(scaleDelta);
+  update({ SceneViewController }: SceneMutationArguments, updateArgs: SetGameObjectScaleMutationUpdateArgs): void {
+    if ('scaleDelta' in updateArgs) {
+      const { scaleDelta } = updateArgs;
+      this.scale.multiplySelf(scaleDelta);
+      // - 1. Config state
+      this.gameObject.transform.scale.multiplySelf(scaleDelta);
+      // - 2. Babylon state
+      this.gameObject.sceneInstance!.transform.scale.multiplySelf(scaleDelta);
+    } else {
+      const { scale } = updateArgs;
+      this.scale = scale;
+      // - 1. Config state
+      this.gameObject.transform.scale = scale;
+      // - 2. Babylon state
+      this.gameObject.sceneInstance!.transform.scale = scale;
+    }
+    SceneViewController.selectionManager.updateGizmos();
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {
