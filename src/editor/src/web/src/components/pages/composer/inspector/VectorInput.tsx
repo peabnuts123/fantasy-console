@@ -1,28 +1,34 @@
+import { observer } from "mobx-react-lite";
+import { ChangeEventHandler, FunctionComponent, MouseEventHandler, useEffect, useRef, useState, FocusEvent, KeyboardEvent } from "react";
+import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
+import cn from 'classnames';
+
 import { Vector2 } from "@fantasy-console/core/src/util";
 import { Vector3 } from "@fantasy-console/core/src/util/Vector3";
-import { observer } from "mobx-react-lite";
-import { ChangeEventHandler, FunctionComponent, MouseEventHandler, useEffect, useState } from "react";
+
 
 interface Props {
   label: string;
   vector: Vector3;
+  incrementInterval?: number;
   onChange?: (newValue: Vector3) => void;
 }
 
-export const VectorInput: FunctionComponent<Props> = observer(({ label, vector, onChange }) => {
-  // Default onChange to a no-op function
+export const VectorInput: FunctionComponent<Props> = observer(({ label, vector, incrementInterval, onChange }) => {
+  // Parameter defaults
   onChange ??= () => { };
+  incrementInterval ??= 1;
 
   return (
     <div className="mt-2">
       <label className="font-bold">{label}</label>
       <div className="">
         {/* X */}
-        <VectorInputComponent label="X" value={vector.x} onChange={(newX) => onChange(vector.withX(newX))} />
+        <VectorInputComponent label="X" value={vector.x} onChange={(newX) => onChange(vector.withX(newX))} incrementInterval={incrementInterval} />
         {/* Y */}
-        <VectorInputComponent label="Y" value={vector.y} onChange={(newY) => onChange(vector.withY(newY))} />
+        <VectorInputComponent label="Y" value={vector.y} onChange={(newY) => onChange(vector.withY(newY))} incrementInterval={incrementInterval} />
         {/* Z */}
-        <VectorInputComponent label="Z" value={vector.z} onChange={(newZ) => onChange(vector.withZ(newZ))} />
+        <VectorInputComponent label="Z" value={vector.z} onChange={(newZ) => onChange(vector.withZ(newZ))} incrementInterval={incrementInterval} />
       </div>
     </div>
   );
@@ -31,31 +37,37 @@ export const VectorInput: FunctionComponent<Props> = observer(({ label, vector, 
 interface VectorInputComponentProps {
   label: string;
   value: number;
+  incrementInterval: number;
   onChange: (newValue: number) => void;
 }
 
-const VectorInputComponent: FunctionComponent<VectorInputComponentProps> = ({ label, value, onChange }) => {
+const VectorInputComponent: FunctionComponent<VectorInputComponentProps> = ({ label, value, incrementInterval, onChange }) => {
   // Constants
   const DragSensitivity = 1;
 
   // State
   const [dragStartPosition, setDragStartPosition] = useState<Vector2>();
   const [originalPreDragValue, setOriginalPreDragValue] = useState<number>();
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [isTextInputFocused, setIsTextInputFocused] = useState<boolean>(false);
+  const [inputText, setInputText] = useState<string>(`${value}`);
 
   // Computed state
   const isDragging = dragStartPosition !== undefined;
+  const displayValue = isTextInputFocused ? inputText : `${value}`;
+
+  // Refs
+  const inputRef = useRef<HTMLInputElement>(null);
+  const buttonUpRef = useRef<HTMLButtonElement>(null);
+  const buttonDownRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
       if (isDragging && originalPreDragValue !== undefined) {
         const mousePosition = new Vector2(e.clientX, e.clientY);
         const delta = mousePosition.subtract(dragStartPosition).multiplySelf(DragSensitivity / 100);
-
-
         // @TODO can we build a UX that lets you drag up OR right?
         const size = delta.x;
-
-        console.log(`Dragging. Delta: `, delta, size);
         onChange(originalPreDragValue + size);
       }
     }
@@ -77,7 +89,10 @@ const VectorInputComponent: FunctionComponent<VectorInputComponentProps> = ({ la
 
   // Functions
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    const newValue = Number(e.target.value);
+    const inputText = e.target.value;
+    setInputText(inputText);
+    // @TODO parse simple expressions like 1+1 or whatever.
+    const newValue = Number(inputText);
     if (!isNaN(newValue)) {
       onChange(newValue);
     } else {
@@ -85,21 +100,95 @@ const VectorInputComponent: FunctionComponent<VectorInputComponentProps> = ({ la
     }
   };
 
+  const isElementFocused = (element: Element | null) => (
+    element !== null && (
+      element === inputRef.current ||
+      element === buttonUpRef.current ||
+      element === buttonDownRef.current
+    ));
+
+  const onBlurInputElement = (e: FocusEvent<Element, Element>) => {
+    const newActiveElement = e.relatedTarget;
+    const newIsFocused = isElementFocused(newActiveElement);
+    console.log(`[VectorInputComponent] (updateFocusedState) Is focused: ${newIsFocused ? "yeh" : "nah"}`, e.relatedTarget);
+    if (newIsFocused !== isFocused) {
+      setTimeout(() =>
+        setIsFocused(newIsFocused)
+      );
+    }
+  };
+
+  const onFocusTextInput = () => {
+    setInputText(`${value}`);
+    setIsTextInputFocused(true);
+  };
+
+  const onBlurTextInput = () => {
+    setIsTextInputFocused(false);
+  };
+
   const onStartDrag: MouseEventHandler<HTMLSpanElement> = (e) => {
     setOriginalPreDragValue(value);
     setDragStartPosition(new Vector2(e.clientX, e.clientY));
-  }
+  };
+
+  const incrementValue = () => {
+    const newValue = value + incrementInterval;
+    onChange(newValue);
+    setInputText(`${newValue}`);
+  };
+
+  const decrementValue = () => {
+    const newValue = value - incrementInterval;
+    onChange(newValue);
+    setInputText(`${newValue}`);
+  };
+
+  const onKeyPressInput = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      incrementValue();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      decrementValue();
+    }
+  };
 
   return (
-    <div className="pl-3 mb-1">
-      <label className="block relative pl-5">
-        <span className="absolute left-0 py-1 cursor-col-resize" onMouseDown={onStartDrag}>{label}</span>
+    <div className="mb-1">
+      <label className="flex flex-row items-center">
+        <div className="block shrink-0 w-8 py-1 cursor-col-resize text-center" onMouseDown={onStartDrag}>{label}</div>
         <input
-          type="number"
-          className="w-full p-1"
-          value={value}
+          ref={inputRef}
+          className="w-full px-1 h-[48px] grow"
+          value={displayValue}
           onChange={onInputChange}
+          onFocus={() => { onFocusTextInput(); setIsFocused(true) }}
+          onBlur={(e) => { onBlurTextInput(); onBlurInputElement(e); }}
+          onKeyDown={onKeyPressInput}
         />
+        <div className={cn("flex-col shrink-0", { 'hidden': !isFocused, 'flex': isFocused })}>
+          <button
+            tabIndex={-1}
+            ref={buttonUpRef}
+            className="flex flex-col justify-center items-center bg-white p-1 grow active:bg-blue-500 hover:bg-blue-300"
+            onFocus={() => setIsFocused(true)}
+            onBlur={onBlurInputElement}
+            onClick={incrementValue}
+          >
+            <ArrowUpIcon className="!w-4" />
+          </button>
+          <button
+            tabIndex={-1}
+            ref={buttonDownRef}
+            className="flex flex-col justify-center items-center bg-white p-1 grow active:bg-blue-500 hover:bg-blue-300"
+            onFocus={() => setIsFocused(true)}
+            onBlur={onBlurInputElement}
+            onClick={decrementValue}
+          >
+            <ArrowDownIcon className="!w-4" />
+          </button>
+        </div>
       </label>
     </div>
   );
