@@ -1,6 +1,7 @@
 import type { AssetContainer, InstantiatedEntries } from "@babylonjs/core/assetContainer";
 
 import { MeshComponent as MeshComponentCore } from "@fantasy-console/core/src/world/components";
+import { debug_modTexture } from "@fantasy-console/runtime/src";
 
 import { GameObject } from "../GameObject";
 
@@ -22,6 +23,11 @@ export class MeshComponent extends MeshComponentCore {
     super();
     this.id = id;
     this.gameObject = gameObject;
+
+    // @TODO Implement a proper shader
+    for (const texture of asset.textures) {
+      debug_modTexture(texture);
+    }
 
     this.sceneInstances = asset.instantiateModelsToScene();
     this.sceneInstances.rootNodes.forEach((node) => {

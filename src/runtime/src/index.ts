@@ -1,6 +1,7 @@
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { Engine } from "@babylonjs/core/Engines/engine";
 import { Scene } from "@babylonjs/core/scene";
+import { BaseTexture } from "@babylonjs/core/Materials/Textures/baseTexture";
 import "@babylonjs/loaders/OBJ/objFileLoader";
 
 import { Input } from '@fantasy-console/core/src/modules/Input';
@@ -100,9 +101,6 @@ export class Runtime {
     // Wait for scene
     await this.scene.whenReadyAsync();
 
-    // @DEBUG hack the textures to look a bit cooler
-    debug_modTextures(this.scene);
-
     this.engine.runRenderLoop(() => {
       const deltaTime = this.engine!.getDeltaTime() / 1000;
       this.scene!.render();
@@ -127,15 +125,21 @@ export class Runtime {
 
     this.onDisposeCallbacks.forEach((callback) => callback());
   }
-
 }
 
-export function debug_modTextures(scene: Scene): void {
-  // Graphics overrides
+export function debug_modTexture(texture: BaseTexture) {
   // @TODO remove specular, add gouraud shading, flat shading, etc.
   // @TODO I guess write a big shader that I can use to do all the things I want
-  scene.textures.forEach((texture) => {
+  if (texture.isReady()) {
     texture.updateSamplingMode(Texture.NEAREST_SAMPLINGMODE)
     texture.anisotropicFilteringLevel = 0;
-  });
+  } else {
+    if (texture instanceof Texture) {
+      texture.onLoadObservable.addOnce(() => {
+        debug_modTexture(texture);
+      })
+    } else {
+      throw new Error(`Tried to wait for texture to load but texture is not of type 'Texture' - This is not implemented`);
+    }
+  }
 }

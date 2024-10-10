@@ -23,7 +23,6 @@ import {
 } from '@fantasy-console/runtime/src/world';
 import { AssetData } from '@fantasy-console/runtime/src/cartridge';
 import { SceneDefinition } from '@fantasy-console/runtime/src/cartridge/archive';
-import { debug_modTextures } from '@fantasy-console/runtime';
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 
 import { SceneManifest } from '@lib/project/definition/scene';
@@ -121,9 +120,6 @@ export class SceneViewController {
           }
         }
       });
-
-      // @TODO mod textures on asset load instead of this
-      debug_modTextures(scene);
 
       engine.runRenderLoop(() => {
         scene.render();
