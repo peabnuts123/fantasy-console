@@ -1,10 +1,12 @@
-import Player from "@app/components/player";
-import Condition from "@app/components/util/condition";
-import { FunctionComponent, useState } from "react";
+import type { FunctionComponent } from "react";
+import { useState } from "react";
 import { open } from '@tauri-apps/api/dialog';
 import { readBinaryFile } from '@tauri-apps/api/fs';
 import Link from "next/link";
 import { ArrowLeftEndOnRectangleIcon, FolderIcon } from '@heroicons/react/24/solid'
+
+import Player from "@app/components/player";
+import Condition from "@app/components/util/condition";
 
 interface Props { }
 

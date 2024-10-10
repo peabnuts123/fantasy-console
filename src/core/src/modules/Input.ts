@@ -94,6 +94,7 @@ class InputModule implements IModule {
   /**
    * @internal
    */
+  // @TODO this has `init()` and also `onInit()` 🤔
   public init(manager: NativeInputManager) {
     this.manager = manager;
   }

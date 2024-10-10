@@ -7,10 +7,10 @@
   "module": "src/index.ts",
   "scripts": {
     "prestart": "npm run build",
-    "start": "nodemon --watch src --ext 'ts' --exec npm run type-check",
-    "build": "npm run build:core.g; npm run type-check",
+    "start": "nodemon --watch src --ext 'ts' --exec npm run typecheck",
+    "build": "npm run build:core.g; npm run typecheck",
     "build:core.g": "node scripts/generate-core.js",
-    "type-check": "tsc"
+    "typecheck": "tsc"
   },
   "devDependencies": {
     "nodemon": "^3.1.0",

@@ -1,5 +1,5 @@
-import { AnyVector, Vector3 } from "@fantasy-console/core/src/util";
 import { makeObservable, observable } from "mobx";
+import { AnyVector, Vector3 } from "@fantasy-console/core/src/util";
 
 /**
  * Thin wrapper for Vector3 that marks its properties as observable properties for mobx
@@ -52,6 +52,10 @@ export class ObservableVector3 extends Vector3 {
 
   public normalize(): ObservableVector3 {
     return new ObservableVector3(super.normalize());
+  }
+
+  public clone(): ObservableVector3 {
+    return new ObservableVector3(super.clone());
   }
 
   public withX(x: number): ObservableVector3 {

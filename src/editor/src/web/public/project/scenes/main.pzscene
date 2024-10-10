@@ -1,4 +1,5 @@
 {
+  "id": "f2215ac1-2fbe-4d6d-a8fc-d63c88ecbf51",
   "config": {
     "clearColor": {
       "r": 1,
@@ -39,6 +40,7 @@
       },
       "components": [
         {
+          "id": "aa7bdcf4-9ac1-4876-916f-30edca293c92",
           "type": "mesh",
           "meshFileId": "6e77e14a-0d3c-4472-a9b1-71a13a888b9b"
         }
@@ -66,14 +68,17 @@
       },
       "components": [
         {
+          "id": "9ae0aa1d-14ac-4d99-87e2-8804ca2bb75b",
           "type": "mesh",
           "meshFileId": "59e2bfad-f6f0-471a-a0a4-7b25b76152dc"
         },
         {
+          "id": "21c414bb-bde8-4c25-bbcd-ac2e1b911db6",
           "type": "script",
           "scriptFileId": "58189dec-56a3-44db-b7a5-c8171abfb3aa"
         },
         {
+          "id": "319956a3-2153-4272-9bbb-d7c89e7ec84c",
           "type": "light_point",
           "intensity": 1,
           "color": {
@@ -106,6 +111,7 @@
           },
           "components": [
             {
+              "id": "a6463e06-aeb6-4d52-b447-46dd55584b2c",
               "type": "mesh",
               "meshFileId": "a0bfe951-b0e3-449c-a9ef-37734a81a6e6"
             }
@@ -135,6 +141,7 @@
       },
       "components": [
         {
+          "id": "48b2e633-b94d-4d18-855c-1f43f366e912",
           "type": "camera"
         }
       ]
@@ -161,6 +168,7 @@
       },
       "components": [
         {
+          "id": "ff36e1f8-1261-4065-b52e-9823ca491612",
           "type": "light_directional",
           "intensity": 0.2,
           "color": {

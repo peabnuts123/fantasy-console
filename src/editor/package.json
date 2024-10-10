@@ -6,7 +6,7 @@
   "scripts": {
     "start": "tauri dev",
     "start:web": "cd src/web && next dev",
-    "type-check": "cd src/web && tsc",
+    "typecheck": "cd src/web && tsc",
     "build": "tauri build",
     "build:web": "cd src/web && next build",
     "tauri": "tauri"
@@ -23,6 +23,8 @@
     "mobx-react-lite": "^4.0.7",
     "next": "14.2.5",
     "react": "^18",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18",
     "react-resizable-panels": "^2.1.0",
     "tauri-plugin-fs-watch-api": "github:tauri-apps/tauri-plugin-fs-watch#v1",

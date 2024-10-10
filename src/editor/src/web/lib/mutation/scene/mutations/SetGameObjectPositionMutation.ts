@@ -1,19 +1,20 @@
-import { Vector3 as Vector3Archive } from "@fantasy-console/runtime/src/cartridge/archive/util";
+import { Vector3Definition as Vector3Archive } from "@fantasy-console/runtime/src/cartridge/archive/util";
 import { Vector3 } from "@fantasy-console/core/src/util";
 
-import { GameObjectConfigComposer } from "@lib/composer/config";
+import { GameObjectData } from "@lib/composer/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
 export interface SetGameObjectPositionMutationUpdateArgs {
   position: Vector3;
+  resetGizmo?: boolean;
 }
 
 export class SetGameObjectPositionMutation implements ISceneMutation, IContinuousSceneMutation<SetGameObjectPositionMutationUpdateArgs> {
   // State
   // @TODO should we look you up by ID or something?
-  private readonly gameObject: GameObjectConfigComposer;
+  private readonly gameObject: GameObjectData;
   private position: Vector3;
   private _hasBeenApplied: boolean = false;
 
@@ -22,7 +23,7 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
   private scenePosition: Vector3 | undefined = undefined;
 
 
-  public constructor(gameObject: GameObjectConfigComposer) {
+  public constructor(gameObject: GameObjectData) {
     this.gameObject = gameObject;
     this.position = gameObject.transform.position;
   }
@@ -33,13 +34,15 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     this.scenePosition = this.gameObject.sceneInstance!.transform.position;
   }
 
-  public update({ SceneViewController }: SceneMutationArguments, { position }: SetGameObjectPositionMutationUpdateArgs): void {
-    this.position = position
+  public update({ SceneViewController }: SceneMutationArguments, { position, resetGizmo }: SetGameObjectPositionMutationUpdateArgs): void {
+    this.position = position;
     // - 1. Config state
     this.gameObject.transform.position = position;
     // - 2. Babylon state
     this.gameObject.sceneInstance!.transform.position = position;
-    SceneViewController.selectionManager.updateGizmos();
+    if (resetGizmo) {
+      SceneViewController.selectionManager.updateGizmos();
+    }
   }
 
   public apply({ SceneViewController }: SceneMutationArguments): void {
@@ -49,7 +52,7 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
       y: this.position.y,
       z: this.position.z,
     };
-    const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.scene, (gameObject) => gameObject.transform.position);
+    const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.sceneDefinition, (gameObject) => gameObject.transform.position);
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 

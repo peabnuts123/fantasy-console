@@ -1,2 +1,2 @@
-export * from './ISelectableAsset';
-export * from './MeshComponentComposer';
+export * from './ISelectableObject';
+export * from './MeshComponent';

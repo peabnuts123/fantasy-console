@@ -1,9 +1,9 @@
 import { Vector3 as Vector3Babylon } from '@babylonjs/core/Maths/math.vector'
 import { IVector3Like } from '@babylonjs/core/Maths/math.like';
 import { Vector3 as Vector3Core } from '@fantasy-console/core/src/util';
-import { Vector3 as Vector3Archive } from '../cartridge/archive/util/Vector3';
+import { Vector3Definition } from '../cartridge/archive/util/vector';
 
-export function toCoreVector3(vector: IVector3Like): Vector3Core {
+export function toVector3Core(vector: IVector3Like): Vector3Core {
   return new Vector3Core(
     vector.x,
     vector.y,
@@ -11,7 +11,7 @@ export function toCoreVector3(vector: IVector3Like): Vector3Core {
   );
 }
 
-export function toBabylonVector3(vector: IVector3Like): Vector3Babylon {
+export function toVector3Babylon(vector: IVector3Like): Vector3Babylon {
   return new Vector3Babylon(
     vector.x,
     vector.y,
@@ -19,10 +19,10 @@ export function toBabylonVector3(vector: IVector3Like): Vector3Babylon {
   );
 }
 
-export function toArchiveVector3(vector: IVector3Like): Vector3Archive {
+export function toVector3Definition(vector: IVector3Like): Vector3Definition {
   return {
     x: vector.x,
     y: vector.y,
     z: vector.z,
-  } satisfies Vector3Archive;
+  } satisfies Vector3Definition;
 }

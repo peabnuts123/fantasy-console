@@ -1,4 +1,4 @@
-import { GameObjectConfigComposer } from "@lib/composer/config";
+import { GameObjectData } from "@lib/composer/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
@@ -10,7 +10,7 @@ export interface SetGameObjectNameMutationUpdateArgs {
 export class SetGameObjectNameMutation implements ISceneMutation, IContinuousSceneMutation<SetGameObjectNameMutationUpdateArgs> {
   // State
   // @TODO should we look you up by ID or something?
-  private readonly gameObject: GameObjectConfigComposer;
+  private readonly gameObject: GameObjectData;
   private name: string;
   private _hasBeenApplied: boolean = false;
 
@@ -19,7 +19,7 @@ export class SetGameObjectNameMutation implements ISceneMutation, IContinuousSce
   private sceneName: string | undefined = undefined;
 
 
-  public constructor(gameObject: GameObjectConfigComposer) {
+  public constructor(gameObject: GameObjectData) {
     this.gameObject = gameObject;
     this.name = gameObject.name;
   }
@@ -30,7 +30,7 @@ export class SetGameObjectNameMutation implements ISceneMutation, IContinuousSce
     this.sceneName = this.gameObject.sceneInstance!.name;
   }
 
-  public update({ SceneViewController }: SceneMutationArguments, { name }: SetGameObjectNameMutationUpdateArgs): void {
+  public update({ }: SceneMutationArguments, { name }: SetGameObjectNameMutationUpdateArgs): void {
     this.name = name;
     // - 1. Config state
     this.gameObject.name = name;
@@ -41,7 +41,7 @@ export class SetGameObjectNameMutation implements ISceneMutation, IContinuousSce
   public apply({ SceneViewController }: SceneMutationArguments): void {
     // - 3. JSONC
     const updatedValue = this.name;
-    const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.scene, (gameObject) => gameObject.name);
+    const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.sceneDefinition, (gameObject) => gameObject.name);
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 

@@ -16,6 +16,7 @@ import * as WorldComponentsCameraComponent from '@fantasy-console/core/src/world
 import * as WorldComponentsDirectionalLightComponent from '@fantasy-console/core/src/world/components/DirectionalLightComponent';
 import * as WorldComponentsMeshComponent from '@fantasy-console/core/src/world/components/MeshComponent';
 import * as WorldComponentsPointLightComponent from '@fantasy-console/core/src/world/components/PointLightComponent';
+import * as WorldComponentsScriptComponent from '@fantasy-console/core/src/world/components/ScriptComponent';
 import * as WorldComponents from '@fantasy-console/core/src/world/components';
 import * as UtilVector2 from '@fantasy-console/core/src/util/Vector2';
 import * as UtilVector3 from '@fantasy-console/core/src/util/Vector3';
@@ -70,6 +71,10 @@ export const CoreModules: CoreModuleDefinition[] = [
   {
     name: '@fantasy-console/core/world/components/PointLightComponent',
     module: WorldComponentsPointLightComponent,
+  },
+  {
+    name: '@fantasy-console/core/world/components/ScriptComponent',
+    module: WorldComponentsScriptComponent,
   },
   {
     name: '@fantasy-console/core/world/components',

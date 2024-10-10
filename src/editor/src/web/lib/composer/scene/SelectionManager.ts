@@ -11,11 +11,11 @@ import { ScaleGizmo } from "@babylonjs/core/Gizmos/scaleGizmo";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import { Vector3 as Vector3Babylon } from "@babylonjs/core/Maths/math.vector";
 
-import { toCoreVector3 } from "@fantasy-console/runtime/src/util";
+import { toVector3Core } from "@fantasy-console/runtime/src/util";
 
 import { SetGameObjectPositionMutation, SetGameObjectRotationMutation, SetGameObjectScaleMutation } from "@lib/mutation/scene/mutations";
 import { SceneViewMutator } from "@lib/mutation/scene/SceneViewMutator";
-import { GameObjectConfigComposer } from "../config";
+import { GameObjectData } from "@lib/composer/data";
 
 
 export enum CurrentSelectionTool {
@@ -32,7 +32,7 @@ export class SelectionManager {
   private readonly boundingBoxGizmo: BoundingBoxGizmo;
 
   private _currentTool: CurrentSelectionTool = CurrentSelectionTool.Rotate;
-  private _selectedObject: GameObjectConfigComposer | undefined = undefined;
+  private _selectedObject: GameObjectData | undefined = undefined;
   private fakeTransformTarget: TransformNode | undefined = undefined;
 
   private currentMoveMutation: SetGameObjectPositionMutation | undefined = undefined;
@@ -55,7 +55,7 @@ export class SelectionManager {
     this.moveGizmo.onDragObservable.add((_eventData) => {
       if (this.selectedObject !== undefined) {
         mutator.updateContinuous(this.currentMoveMutation!, {
-            position: toCoreVector3(this.fakeTransformTarget!.position),
+          position: toVector3Core(this.fakeTransformTarget!.position),
         });
       }
     });
@@ -76,7 +76,7 @@ export class SelectionManager {
         // At this stage, I don't really know why ¯\_(ツ)_/¯
         let rotation: Vector3Babylon;
         if (this.fakeTransformTarget!.rotationQuaternion !== null) {
-          // console.log(`[SelectionManager] (rotateGizmo.onDragObservable) Using quaternion rotation. Euler: `,);
+          // console.log(`[SelectionManager] (rotateGizmo.onDragObservable) Using quaternion rotation.`);
           rotation = this.fakeTransformTarget!.rotationQuaternion.toEulerAngles();
         } else {
           // console.log(`[SelectionManager] (rotateGizmo.onDragObservable) Using euler rotation.`);
@@ -84,7 +84,7 @@ export class SelectionManager {
         }
 
         mutator.updateContinuous(this.currentRotateMutation!, {
-          rotation: toCoreVector3(rotation),
+          rotation: toVector3Core(rotation),
         });
       }
     });
@@ -103,7 +103,7 @@ export class SelectionManager {
       if (this.selectedObject !== undefined) {
         // Scaling is handled as a percentage to accommodate rotation
         mutator.updateContinuous(this.currentScaleMutation!, {
-          scaleDelta: toCoreVector3(this.fakeTransformTarget!.scaling),
+          scaleDelta: toVector3Core(this.fakeTransformTarget!.scaling),
         });
         // @NOTE Reset scaling to uniform scale, because rotation doesn't work with non-uniform scaling
         this.fakeTransformTarget!.scaling = Vector3Babylon.One();
@@ -124,7 +124,7 @@ export class SelectionManager {
     makeAutoObservable(this);
   }
 
-  public select(gameObject: GameObjectConfigComposer): void {
+  public select(gameObject: GameObjectData): void {
     console.log(`[SelectionManager] (select) gameObject: `, gameObject);
     this.selectedObject = gameObject;
   }
@@ -140,16 +140,21 @@ export class SelectionManager {
     this.rotateGizmo.attachedNode = null;
     this.scaleGizmo.attachedNode = null;
     this.boundingBoxGizmo.attachedMesh = null;
-    this.fakeTransformTarget?.dispose();
-
 
     if (this.selectedObject !== undefined) {
       const realTransformTarget = this.selectedObject.sceneInstance!.transform.node;
-      const fakeTransformTarget = this.fakeTransformTarget = realTransformTarget.clone("SelectionManager_fakeTransformTarget", null, true) as TransformNode;
 
+      // Construct a new dummy transform target if we need one and it doesn't exist
+      if (this.fakeTransformTarget === undefined) {
+        this.fakeTransformTarget = new TransformNode("SelectionManager_fakeTransformTarget");
+      }
+
+      // Position dummy transform target on the selection target
+      this.fakeTransformTarget.position = realTransformTarget.absolutePosition.clone();
+      this.fakeTransformTarget.rotationQuaternion = realTransformTarget.absoluteRotationQuaternion.clone();
       // Reset scaling to uniform scale, because rotation doesn't work with non-uniform scaling
       // Scaling is done as a percentage to accommodate this
-      fakeTransformTarget.scaling = Vector3Babylon.One();
+      this.fakeTransformTarget.scaling = Vector3Babylon.One();
 
       // Enable bounding box
       // @NOTE Type laundering (huff my duff, Babylon))
@@ -158,25 +163,29 @@ export class SelectionManager {
       // Enable only the current tool
       switch (this.currentTool) {
         case CurrentSelectionTool.Move:
-          this.moveGizmo.attachedNode = fakeTransformTarget;
+          this.moveGizmo.attachedNode = this.fakeTransformTarget;
           break;
         case CurrentSelectionTool.Rotate:
-          this.rotateGizmo.attachedNode = fakeTransformTarget;
+          this.rotateGizmo.attachedNode = this.fakeTransformTarget;
           break;
         case CurrentSelectionTool.Scale:
-          this.scaleGizmo.attachedNode = fakeTransformTarget
+          this.scaleGizmo.attachedNode = this.fakeTransformTarget
           break;
         default:
           console.error(`[SelectionManager] (updateGizmos) Unimplemented tool type: ${this.currentTool}`);
       }
+    } else {
+      // Destroy dummy transform target if we've deselected
+      this.fakeTransformTarget?.dispose();
+      this.fakeTransformTarget = undefined;
     }
   }
 
   // Selected object
-  public get selectedObject(): GameObjectConfigComposer | undefined {
+  public get selectedObject(): GameObjectData | undefined {
     return this._selectedObject;
   }
-  private set selectedObject(value: GameObjectConfigComposer | undefined) {
+  private set selectedObject(value: GameObjectData | undefined) {
     this._selectedObject = value;
     this.updateGizmos();
   }

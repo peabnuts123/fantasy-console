@@ -151,6 +151,10 @@ export class Vector3 {
     return this.divide(length);
   }
 
+  public clone(): Vector3 {
+    return new Vector3(this.x, this.y, this.z);
+  }
+
   public withX(value: number): Vector3 {
     return new Vector3(value, this.y, this.z);
   }

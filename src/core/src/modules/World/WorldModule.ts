@@ -1,7 +1,7 @@
 import { IModule } from '../IModule';
 import { GameObject } from "../../world/GameObject";
-
 import { WorldQuery, IQueryResult, GameObjectQuery } from './WorldQuery';
+
 
 export type QueryFn<TQuery, TResult> = (query: TQuery) => IQueryResult<TResult>;
 
@@ -45,7 +45,7 @@ export class WorldModule implements IModule {
   public destroyObject(gameObject: GameObject) {
     const index = this.gameObjects.indexOf(gameObject);
     if (index === -1) {
-      console.error(`[World] (destroyObject) Attempted to destroy object that does not exist in the world: ${gameObject}`);
+      console.error(`[World] (destroyObject) Attempted to destroy object that does not exist in the world: ${gameObject.name}`);
     } else {
       gameObject.onDestroy();
       this.gameObjects.splice(index, 1);

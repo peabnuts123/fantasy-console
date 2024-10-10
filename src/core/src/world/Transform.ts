@@ -1,48 +1,31 @@
-import { Vector3 } from "../util/Vector3";
-import { GameObject } from "./GameObject";
+import type { Vector3 } from "../util/Vector3";
+import type { GameObject } from "./GameObject";
 
 export abstract class Transform {
-  private _children: Transform[];
-  protected _gameObject!: GameObject;
-
-  public constructor(parent: Transform | undefined, position: Vector3, rotation: Vector3, scale: Vector3) {
-    this.parent = parent;
-    this.position = position;
-    this.rotation = rotation;
-    this.scale = scale;
-    this._children = [];
-  }
-
-  // @NOTE stupid inability for TypeScript to call abstract setters/getters in constructors??
   /* Position */
-  public get position(): Vector3 { return this.getPosition(); }
-  protected abstract getPosition(): Vector3;
-  public set position(value: Vector3) { this.setPosition(value); }
-  protected abstract setPosition(value: Vector3): void;
+  public abstract get position(): Vector3;
+  public abstract set position(value: Vector3);
+  public abstract get localPosition(): Vector3;
+  public abstract set localPosition(value: Vector3);
 
   /* Rotation */
-  public get rotation(): Vector3 { return this.getRotation(); }
-  protected abstract getRotation(): Vector3;
-  public set rotation(value: Vector3) { this.setRotation(value); }
-  protected abstract setRotation(value: Vector3): void;
+  public abstract get rotation(): Vector3;
+  public abstract set rotation(value: Vector3);
+  public abstract get localRotation(): Vector3;
+  public abstract set localRotation(value: Vector3);
 
   /* Scale */
-  public get scale(): Vector3 { return this.getScale(); }
-  protected abstract getScale(): Vector3;
-  public set scale(value: Vector3) { this.setScale(value); }
-  protected abstract setScale(value: Vector3): void;
+  public abstract get scale(): Vector3;
+  public abstract set scale(value: Vector3);
+  public abstract get localScale(): Vector3;
+  public abstract set localScale(value: Vector3);
 
   /* Parent */
-  public get parent(): Transform | undefined { return this.getParent(); }
-  protected abstract getParent(): Transform | undefined;
-  public set parent(value: Transform | undefined) { this.setParent(value); }
-  protected abstract setParent(value: Transform | undefined): void;
+  public abstract get parent(): Transform | undefined;
+  public abstract set parent(value: Transform | undefined);
 
-  public get children(): Transform[] {
-    return this._children;
-  }
+  public abstract get gameObject(): GameObject;
 
-  public get gameObject(): GameObject {
-    return this._gameObject;
-  }
+  public abstract get children(): Transform[];
+
 }

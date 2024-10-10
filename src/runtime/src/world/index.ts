@@ -1,4 +1,4 @@
 export * from './components';
-export * from './GameObjectBabylon';
-export * from './TransformBabylon';
+export * from './GameObject';
+export * from './Transform';
 export * from './WorldState';

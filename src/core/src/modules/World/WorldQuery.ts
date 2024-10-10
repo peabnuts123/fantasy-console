@@ -1,3 +1,5 @@
+import type { ClassReference } from '@fantasy-console/core/src/util';
+
 import { GameObjectComponent, Transform } from "../../world";
 import { GameObject } from "../../world/GameObject";
 import { WorldModule } from './WorldModule';
@@ -6,8 +8,6 @@ import { WorldModule } from './WorldModule';
 export interface IQueryResult<TResult> {
   get result(): TResult;
 }
-
-export type ClassReference<TClass> = { prototype: TClass } & Function;
 
 export class QueryUtils {
   public static getPathSegments(pathString: string): string[] {

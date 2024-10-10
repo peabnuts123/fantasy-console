@@ -8,10 +8,12 @@ const DefaultOptions: ModificationOptions = {
  * A container for more easily manipulating JSONC documents.
  */
 export class JsoncContainer<TRawType extends object> {
-  private text: string;
+  private _text: string;
+  private currentValue: TRawType;
 
   public constructor(jsonc: string) {
-    this.text = jsonc;
+    this._text = jsonc;
+    this.currentValue = this.parse();
   }
 
   public mutate<TValue>(pathSelector: ResolvePathSelector<TRawType>, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void;
@@ -56,6 +58,14 @@ export class JsoncContainer<TRawType extends object> {
   public parse(): TRawType {
     return parse(this.text) as TRawType;
   }
+
+  private get text(): string { return this._text; }
+  private set text(value: string) {
+    this._text = value;
+    this.currentValue = this.parse();
+  }
+
+  public get value(): TRawType { return this.currentValue; }
 }
 
 /* ====================

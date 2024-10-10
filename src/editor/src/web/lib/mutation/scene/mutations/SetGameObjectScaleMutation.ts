@@ -1,16 +1,18 @@
-import { Vector3 as ArchiveVector3 } from "@fantasy-console/runtime/src/cartridge/archive/util";
+import { Vector3Definition as ArchiveVector3 } from "@fantasy-console/runtime/src/cartridge/archive/util";
 import { Vector3 } from "@fantasy-console/core/src/util";
 
-import { GameObjectConfigComposer } from "@lib/composer/config";
+import { GameObjectData } from "@lib/composer/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
 interface SetGameObjectScaleMutationDeltaUpdateArgs {
   scaleDelta: Vector3;
+  resetGizmo?: boolean;
 }
 interface SetGameObjectScaleMutationAbsoluteUpdateArgs {
   scale: Vector3;
+  resetGizmo?: boolean;
 }
 
 export type SetGameObjectScaleMutationUpdateArgs = SetGameObjectScaleMutationDeltaUpdateArgs | SetGameObjectScaleMutationAbsoluteUpdateArgs;
@@ -18,7 +20,7 @@ export type SetGameObjectScaleMutationUpdateArgs = SetGameObjectScaleMutationDel
 export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSceneMutation<SetGameObjectScaleMutationUpdateArgs> {
   // State
   // @TODO should we look you up by ID or something?
-  private readonly gameObject: GameObjectConfigComposer;
+  private readonly gameObject: GameObjectData;
   private scale: Vector3;
   private _hasBeenApplied: boolean = false;
   // Undo state
@@ -26,9 +28,9 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
   private sceneScale: Vector3 | undefined = undefined;
 
 
-  public constructor(gameObject: GameObjectConfigComposer) {
+  public constructor(gameObject: GameObjectData) {
     this.gameObject = gameObject;
-    this.scale = gameObject.transform.scale;
+    this.scale = gameObject.transform.scale.clone();
   }
 
   begin(_args: SceneMutationArguments): void {
@@ -53,7 +55,10 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
       // - 2. Babylon state
       this.gameObject.sceneInstance!.transform.scale = scale;
     }
-    SceneViewController.selectionManager.updateGizmos();
+
+    if (updateArgs.resetGizmo) {
+      SceneViewController.selectionManager.updateGizmos();
+    }
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {
@@ -63,7 +68,7 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
       y: this.scale.y,
       z: this.scale.z,
     };
-    const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.scene, (gameObject) => gameObject.transform.scale);
+    const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.sceneDefinition, (gameObject) => gameObject.transform.scale);
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 

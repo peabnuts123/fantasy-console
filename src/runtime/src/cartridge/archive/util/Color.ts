@@ -1,6 +1,4 @@
-/* @TODO probably rename to Color3Definition or something */
-
-export interface Color {
+export interface ColorDefinition {
   r: number;
   g: number;
   b: number;

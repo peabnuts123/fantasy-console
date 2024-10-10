@@ -1,6 +1,6 @@
 import { Color3, Color4 } from '@babylonjs/core/Maths/math.color';
 import { IColor3Like } from '@babylonjs/core/Maths/math.like';
-import { Color as Color3Archive } from '../cartridge/archive/util'
+import { ColorDefinition } from '../cartridge/archive/util'
 
 
 export function toColor3Babylon(color: IColor3Like): Color3 {
@@ -20,7 +20,7 @@ export function toColor4Babylon(color: IColor3Like): Color4 {
   );
 }
 
-export function toColor3Archive(color: IColor3Like): Color3Archive {
+export function toColor3Definition(color: IColor3Like): ColorDefinition {
   return {
     r: color.r,
     g: color.g,

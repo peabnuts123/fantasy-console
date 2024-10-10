@@ -1,4 +1,4 @@
-import { AssetConfig, AssetType } from './cartridge';
+import { AssetData, AssetType } from './cartridge';
 import { CoreModules } from './core.g';
 import { VirtualFile } from './filesystem';
 
@@ -15,10 +15,10 @@ interface ModuleDefinition {
 
 /**
  * A script module.
- * It's `any` because users could literally export anything.
+ * It's `unknown` because users could literally export anything.
  * Just a vanity type for declarative purposes.
  */
-export type Module = any;
+export type Module = unknown;
 
 /**
  * Utility class for the engine to load script modules at runtime
@@ -44,7 +44,7 @@ export class ScriptLoader {
    * Load a script module from a {@link VirtualFile} into the cache.
    * @param scriptFile The script file to load.
    */
-  public loadModule(scriptAsset: AssetConfig, file: VirtualFile) {
+  public loadModule(scriptAsset: AssetData, file: VirtualFile) {
     if (scriptAsset.type !== AssetType.Script) {
       throw new Error(`Cannot load non-script asset as module: ${scriptAsset}`);
     }
@@ -78,7 +78,7 @@ export class ScriptLoader {
     @TODO this could just be cached and async, removing the need
     to pre-load all the modules
    */
-  public getModule(scriptAsset: AssetConfig): Module {
+  public getModule(scriptAsset: AssetData): Module {
     if (scriptAsset.type !== AssetType.Script) {
       throw new Error(`Cannot get module for non-script file: ${scriptAsset}`);
     }

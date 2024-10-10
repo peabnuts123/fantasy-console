@@ -1,24 +1,25 @@
-import type { SceneConfig } from '../config';
+import type { SceneData } from '@fantasy-console/runtime/src/cartridge';
 
 import type { CartridgeArchive } from './CartridgeArchive';
-import { SceneObjectDefinition } from "./SceneObjectDefinition";
-import { Color } from "./util";
+import { GameObjectDefinition } from "./GameObjectDefinition";
+import { ColorDefinition } from "./util";
 
 
 /**
  * Raw game scene definition within the {@link CartridgeArchive}.
- * i.e. The raw data in the archive before being loaded by the engine into a {@link SceneConfig}.
+ * i.e. The raw data in the archive before being loaded by the engine into a {@link SceneData}.
  */
 export interface SceneDefinition {
+  id: string;
   path: string;
   config: {
-    clearColor: Color;
+    clearColor: ColorDefinition;
     lighting: {
       ambient: {
         intensity: number;
-        color: Color;
+        color: ColorDefinition;
       }
     }
   }
-  objects: SceneObjectDefinition[];
+  objects: GameObjectDefinition[];
 }

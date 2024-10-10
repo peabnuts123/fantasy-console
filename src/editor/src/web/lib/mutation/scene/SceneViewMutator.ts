@@ -1,17 +1,17 @@
+import { runInAction } from "mobx";
 import { ProjectController } from "@lib/project/ProjectController";
 import { SceneViewController } from "@lib/composer/scene";
+import { GameObjectData } from "@lib/composer/data";
+import { isContinuousMutation } from "../IContinuousMutation";
 import { ISceneMutation } from "./ISceneMutation";
 import { IContinuousSceneMutation } from "./IContinuousSceneMutation";
-import { runInAction } from "mobx";
-import { GameObjectConfigComposer } from "@lib/composer/config";
-import { isContinuousMutation } from "../IContinuousMutation";
 
 type Constructor<T> = new (...args: any[]) => T;
 type AnyContinuousSceneMutation = IContinuousSceneMutation<any>;
 
 class CurrentDebounceState {
   public readonly typeCtor: Constructor<AnyContinuousSceneMutation>;
-  public readonly mutationTarget: GameObjectConfigComposer;
+  public readonly mutationTarget: GameObjectData;
   public readonly mutation: AnyContinuousSceneMutation;
   /**
    * The function that is called after the debounce expires.
@@ -23,7 +23,7 @@ class CurrentDebounceState {
 
   public constructor(
     typeCtor: Constructor<AnyContinuousSceneMutation>,
-    mutationTarget: GameObjectConfigComposer,
+    mutationTarget: GameObjectData,
     mutation: AnyContinuousSceneMutation,
     onDebounceExpire: () => void,
   ) {
@@ -42,7 +42,7 @@ class CurrentDebounceState {
 
   public isSameDebounceAction(
     typeCtor: Constructor<AnyContinuousSceneMutation>,
-    mutationTarget: GameObjectConfigComposer,
+    mutationTarget: GameObjectData,
   ) {
     return this.typeCtor === typeCtor && this.mutationTarget === mutationTarget;
   }
@@ -180,7 +180,7 @@ export class SceneViewMutator {
    */
   public debounceContinuous<TMutation extends AnyContinuousSceneMutation>(
     typeCtor: Constructor<TMutation>,
-    mutationTarget: GameObjectConfigComposer,
+    mutationTarget: GameObjectData,
     createMutation: () => TMutation,
     getUpdateArgs: () => TMutation extends IContinuousSceneMutation<infer TUpdateArgs> ? TUpdateArgs : never,
     timeoutMs: number = 500,

@@ -35,7 +35,7 @@ export class ProjectController {
 
     const projectFile = await this._fileSystem.readFile(projectFileName);
     // @TODO JSONC Container
-    // @TODO also do we need some kind of ProjectConfig?
+    // @TODO also do we need some kind of ProjectData?
     const project = Jsonc.parse(projectFile.textContent) as ProjectDefinition;
 
     // Asset database

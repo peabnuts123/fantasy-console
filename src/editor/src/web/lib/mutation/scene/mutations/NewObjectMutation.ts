@@ -1,14 +1,14 @@
 import { v4 as uuid } from 'uuid';
 
-import { ComponentDefinitionType, MeshComponentDefinition, SceneObjectDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { ComponentDefinitionType, MeshComponentDefinition, GameObjectDefinition } from "@fantasy-console/runtime/src/cartridge";
 
-import { loadObjectDefinition } from "@lib/composer/config/loadObjectDefinition";
+import { loadObjectDefinition } from "@lib/composer/data";
 import { ISceneMutation, SceneMutationArguments } from '../ISceneMutation';
 
 export class NewObjectMutation implements ISceneMutation {
   apply({ SceneViewController, ProjectController }: SceneMutationArguments): void {
     // Create new object
-    let newObjectDefinition: SceneObjectDefinition = {
+    let newObjectDefinition: GameObjectDefinition = {
       id: uuid(),
       name: "Ball",
       transform: {
@@ -31,6 +31,7 @@ export class NewObjectMutation implements ISceneMutation {
       children: [],
       components: [
         {
+          id: uuid(),
           type: ComponentDefinitionType.Mesh,
           meshFileId: 'dba91ca4-6ab9-4336-ac9b-b758e59e881e',
         } satisfies MeshComponentDefinition as MeshComponentDefinition

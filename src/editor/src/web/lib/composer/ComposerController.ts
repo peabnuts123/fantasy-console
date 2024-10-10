@@ -93,7 +93,7 @@ export class ComposerController {
 
     // Build cartridge manifest
     const manifest: CartridgeArchiveManifest = {
-      assets: this.projectController.currentProject.assets
+      assets: this.projectController.assetDb.assets
         .map((asset) => {
           // @NOTE map assets to pluck only desired properties
           if (asset.type === AssetType.Script) {

@@ -8,32 +8,31 @@ import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { PointLight } from "@babylonjs/core/Lights/pointLight";
 
-import { GameObjectComponent, GameObjectComponentData } from "@fantasy-console/core/src/world/GameObjectComponent";
-import { GameObject } from "@fantasy-console/core/src/world/GameObject";
+import { ScriptComponent } from "@fantasy-console/core/src/world";
 import { World } from '@fantasy-console/core/src/modules/World';
 
 import { ScriptLoader } from './ScriptLoader';
-import { WorldState } from './world/WorldState';
-import { TransformBabylon } from "./world/TransformBabylon";
 import {
   Cartridge,
-  MeshComponentConfig,
-  SceneConfig as CartridgeScene,
-  GameObjectConfig,
-  ScriptComponentConfig,
-  CameraComponentConfig,
-  PointLightComponentConfig,
-  DirectionalLightComponentConfig,
+  MeshComponentData,
+  SceneData as CartridgeScene,
+  GameObjectData,
+  ScriptComponentData,
+  CameraComponentData,
+  PointLightComponentData,
+  DirectionalLightComponentData,
   AssetType,
-  AssetConfig,
-} from './cartridge/config';
+  AssetData,
+} from './cartridge';
 import {
-  MeshComponentBabylon,
-  CameraComponentBabylon,
-  DirectionalLightComponentBabylon,
-  PointLightComponentBabylon,
-} from './world/components';
-import { GameObjectBabylon } from "./world/GameObjectBabylon";
+  MeshComponent,
+  CameraComponent,
+  DirectionalLightComponent,
+  PointLightComponent,
+  GameObject,
+  Transform,
+  WorldState,
+} from './world';
 import Modules from './modules';
 
 /**
@@ -44,7 +43,7 @@ export class Game {
   private cartridge: Cartridge | undefined;
   private babylonScene: BabylonScene;
   private worldState: WorldState;
-  private assetCache: Map<AssetConfig, AssetContainer>;
+  private assetCache: Map<AssetData, AssetContainer>;
   private scriptLoader: ScriptLoader;
   private ambientLight: HemisphericLight | undefined;
 
@@ -112,7 +111,7 @@ export class Game {
 
     /* Load game objects */
     for (let sceneObject of scene.objects) {
-      const gameObject = await this.createGameObjectFromConfig(sceneObject);
+      const gameObject = await this.createGameObjectFromData(sceneObject);
       World.addObject(gameObject);
     }
 
@@ -126,73 +125,84 @@ export class Game {
   }
 
   /**
-   * Create a new instance of a GameObject from a {@link GameObjectConfig} i.e. a cartridge-defined object.
-   * @param gameObjectConfig The config to instantiate.
+   * Create a new instance of a GameObject from a {@link GameObjectData} i.e. a cartridge-defined object.
+   * @param gameObjectData The data to instantiate.
    */
-  private async createGameObjectFromConfig(gameObjectConfig: GameObjectConfig, parentTransform: TransformBabylon | undefined = undefined): Promise<GameObject> {
+  private async createGameObjectFromData(gameObjectData: GameObjectData, parentTransform: Transform | undefined = undefined): Promise<GameObject> {
     // Construct game object transform for constructing scene's hierarchy
-    const gameObjectTransform = new TransformBabylon(
-      gameObjectConfig.name,
+    const gameObjectTransform = new Transform(
+      gameObjectData.name,
       this.babylonScene,
       parentTransform,
-      gameObjectConfig.transform
+      gameObjectData.transform
     );
 
     // Create all child objects first
-    await Promise.all(gameObjectConfig.children.map((childObjectConfig) => this.createGameObjectFromConfig(childObjectConfig, gameObjectTransform)));
+    await Promise.all(gameObjectData.children.map((childObjectData) => this.createGameObjectFromData(childObjectData, gameObjectTransform)));
 
     // Create blank object
-    const gameObject: GameObject = new GameObjectBabylon(
-      gameObjectConfig.id,
-      {
-        name: gameObjectConfig.name,
-        transform: gameObjectTransform,
-      }
+    const gameObject = new GameObject(
+      gameObjectData.id,
+      gameObjectData.name,
+      gameObjectTransform,
     );
-
-    gameObjectTransform.setGameObject(gameObject);
+    gameObjectTransform.gameObject = gameObject;
 
     // Load game object components
     // @TODO this light thingy is nonsense, remove it
     let debug_lightCount = 0;
-    for (let componentConfig of gameObjectConfig.components) {
+    for (let componentData of gameObjectData.components) {
       // Load well-known inbuilt component types
-      if (componentConfig instanceof MeshComponentConfig) {
+      if (componentData instanceof MeshComponentData) {
         /* Mesh component */
-        const meshAsset = await this.loadAssetCached(componentConfig.meshAsset);
-        gameObject.addComponent(new MeshComponentBabylon({ gameObject }, meshAsset));
-      } else if (componentConfig instanceof ScriptComponentConfig) {
+        const meshAsset = await this.loadAssetCached(componentData.meshAsset);
+        gameObject.addComponent(new MeshComponent(componentData.id, gameObject, meshAsset));
+      } else if (componentData instanceof ScriptComponentData) {
         /* Custom component script */
-        let scriptModule = this.scriptLoader.getModule(componentConfig.scriptAsset);
-        if (!scriptModule.hasOwnProperty('default')) {
-          throw new Error(`Module is missing default export: ${componentConfig.scriptAsset.path}`);
+        let scriptModule = this.scriptLoader.getModule(componentData.scriptAsset);
+        if (
+          scriptModule === undefined ||
+          scriptModule === null ||
+          !(scriptModule instanceof Object) ||
+          !('default' in scriptModule)
+        ) {
+          throw new Error(`Module is missing default export: ${componentData.scriptAsset.path}`);
         }
-        let ScriptComponent = scriptModule.default;
-        if (!GameObjectComponent.isPrototypeOf(ScriptComponent)) {
-          throw new Error(`Cannot add component to GameObject. Default export from script '${componentConfig.scriptAsset.path}' is not of type 'GameObjectComponent': ${ScriptComponent}`);
+
+        // Ensure script is of correct type
+        let CustomScriptComponent = scriptModule.default as typeof ScriptComponent;
+        if (
+          !(
+            (CustomScriptComponent instanceof Object) &&
+            ScriptComponent.isPrototypeOf(CustomScriptComponent)
+          )
+        ) {
+          throw new Error(`Cannot add component to GameObject. Default export from script '${componentData.scriptAsset.path}' is not of type 'ScriptComponent': ${CustomScriptComponent}`);
         }
-        gameObject.addComponent(new ScriptComponent({ gameObject } satisfies GameObjectComponentData));
-      } else if (componentConfig instanceof CameraComponentConfig) {
+
+        // Construct new instance of script component
+        gameObject.addComponent(new CustomScriptComponent(componentData.id, gameObject));
+      } else if (componentData instanceof CameraComponentData) {
         /* Camera component */
         const camera = new FreeCamera("Main Camera", Vector3Babylon.Zero(), this.babylonScene, true);
         camera.inputs.clear();
-        gameObject.addComponent(new CameraComponentBabylon({ gameObject }, camera));
-      } else if (componentConfig instanceof DirectionalLightComponentConfig) {
+        gameObject.addComponent(new CameraComponent(componentData.id, gameObject, camera));
+      } else if (componentData instanceof DirectionalLightComponentData) {
         /* Directional Light component */
         const light = new DirectionalLight(`light_directional_${debug_lightCount++}`, Vector3Babylon.Down(), this.babylonScene);
         light.specular = Color3.Black();
-        light.intensity = componentConfig.intensity;
-        light.diffuse = componentConfig.color;
-        gameObject.addComponent(new DirectionalLightComponentBabylon({ gameObject }, light));
-      } else if (componentConfig instanceof PointLightComponentConfig) {
+        light.intensity = componentData.intensity;
+        light.diffuse = componentData.color;
+        gameObject.addComponent(new DirectionalLightComponent(componentData.id, gameObject, light));
+      } else if (componentData instanceof PointLightComponentData) {
         /* Point Light component */
         const light = new PointLight(`light_point_${debug_lightCount++}`, Vector3Babylon.Zero(), this.babylonScene);
         light.specular = Color3.Black();
-        light.intensity = componentConfig.intensity;
-        light.diffuse = componentConfig.color;
-        gameObject.addComponent(new PointLightComponentBabylon({ gameObject }, light));
+        light.intensity = componentData.intensity;
+        light.diffuse = componentData.color;
+        gameObject.addComponent(new PointLightComponent(componentData.id, gameObject, light));
       } else {
-        console.error(`[Game] (createGameObjectFromConfig) Unrecognised component config: `, componentConfig);
+        console.error(`[Game] (createGameObjectFromData) Unrecognised component data: `, componentData);
       }
     };
 
@@ -200,11 +210,11 @@ export class Game {
   }
 
   /**
-   * Load an {@link AssetConfig} through a cache.
+   * Load an {@link AssetData} through a cache.
    * @param asset Asset to load.
    * @returns The new asset, or a reference to the existing asset if it existed in the cache.
    */
-  private async loadAssetCached(asset: AssetConfig): Promise<AssetContainer> {
+  private async loadAssetCached(asset: AssetData): Promise<AssetContainer> {
     let cached = this.assetCache.get(asset);
     if (cached) {
       return cached;

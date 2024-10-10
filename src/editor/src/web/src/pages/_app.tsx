@@ -1,11 +1,13 @@
-import { FunctionComponent, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import { useState } from 'react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
-import { createLibrary, Library, LibraryContext } from '@lib/index';
 import '@app/styles/index.css';
 import Condition from '@app/components/util/condition';
+import type { Library } from '@lib/index';
+import { createLibrary, LibraryContext } from '@lib/index';
 
 /* Mock Tauri IPC if not running in Tauri */
 if (typeof window !== "undefined") {

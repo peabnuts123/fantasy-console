@@ -1,19 +1,20 @@
-import { Vector3 as ArchiveVector3 } from "@fantasy-console/runtime/src/cartridge/archive/util";
+import { Vector3Definition as ArchiveVector3 } from "@fantasy-console/runtime/src/cartridge/archive/util";
 import { Vector3 } from "@fantasy-console/core/src/util";
 
-import { GameObjectConfigComposer } from "@lib/composer/config";
+import { GameObjectData } from "@lib/composer/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
 export interface SetGameObjectRotationMutationUpdateArgs {
   rotation: Vector3;
+  resetGizmo?: boolean;
 }
 
 export class SetGameObjectRotationMutation implements ISceneMutation, IContinuousSceneMutation<SetGameObjectRotationMutationUpdateArgs> {
   // State
   // @TODO should we look you up by ID or something?
-  private readonly gameObject: GameObjectConfigComposer;
+  private readonly gameObject: GameObjectData;
   private rotation: Vector3;
   private _hasBeenApplied: boolean = false;
 
@@ -22,7 +23,7 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
   private sceneRotation: Vector3 | undefined = undefined;
 
 
-  public constructor(gameObject: GameObjectConfigComposer) {
+  public constructor(gameObject: GameObjectData) {
     this.gameObject = gameObject;
     this.rotation = gameObject.transform.rotation;
   }
@@ -33,13 +34,15 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
     this.sceneRotation = this.gameObject.sceneInstance!.transform.rotation;
   }
 
-  update({ SceneViewController }: SceneMutationArguments, { rotation }: SetGameObjectRotationMutationUpdateArgs): void {
+  update({ SceneViewController }: SceneMutationArguments, { rotation, resetGizmo }: SetGameObjectRotationMutationUpdateArgs): void {
     this.rotation = rotation;
     // - 1. Config state
     this.gameObject.transform.rotation = rotation;
     // - 2. Babylon state
     this.gameObject.sceneInstance!.transform.rotation = rotation;
-    SceneViewController.selectionManager.updateGizmos();
+    if (resetGizmo) {
+      SceneViewController.selectionManager.updateGizmos();
+    }
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {
@@ -49,7 +52,7 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
       y: this.rotation.y,
       z: this.rotation.z,
     };
-    const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.scene, (gameObject) => gameObject.transform.rotation);
+    const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.sceneDefinition, (gameObject) => gameObject.transform.rotation);
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 

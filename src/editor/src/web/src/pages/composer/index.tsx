@@ -1,17 +1,20 @@
-import { FunctionComponent, useEffect, useState } from "react";
+import type { FunctionComponent } from "react";
+import { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { save } from '@tauri-apps/api/dialog';
 import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon } from '@heroicons/react/24/solid'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 
 import { useLibrary } from "@lib/index";
-import { SceneManifest } from "@lib/project/definition/scene";
-import SceneView from "@app/components/pages/composer/SceneView";
+import type { SceneManifest } from "@lib/project/definition/scene";
+import SceneView from "@app/components/composer/SceneView";
 import { Condition } from '@app/components/util/condition';
 import Player from "@app/components/player";
-import AssetList from "@app/components/pages/composer/AssetList";
+import AssetList from "@app/components/composer/AssetList";
 
 
 interface Props { }
@@ -60,7 +63,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   };
 
   return (
-    <>
+    <DndProvider backend={HTML5Backend}>
       {/* Header */}
       <header className="flex items-center w-full justify-between py-1 px-2">
         <Link href="/" className="button"><ArrowLeftEndOnRectangleIcon /> Exit</Link>
@@ -109,7 +112,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
             </Panel>
             <PanelResizeHandle className="drag-separator" />
             <Panel minSize={10}>
-                <AssetList />
+              <AssetList />
             </Panel>
           </PanelGroup>
         )}
@@ -120,7 +123,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
           </>
         )}
       />
-    </>
+    </DndProvider>
   )
 });
 

@@ -1,10 +1,12 @@
 import { Unzipped, unzip } from 'fflate';
 
 export * from './archive';
-export * from './config';
+export * from './data';
+export * from './Cartridge';
 
 import { CartridgeArchive } from './archive/CartridgeArchive';
-import { AssetDb, Cartridge, SceneDb } from './config';
+import { AssetDb, SceneDb } from './data';
+import { Cartridge } from './Cartridge';
 
 
 export async function readCartridgeArchive(cartridgeBytes: Uint8Array): Promise<CartridgeArchive> {

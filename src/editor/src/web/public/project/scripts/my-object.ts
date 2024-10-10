@@ -1,12 +1,11 @@
 import { Vector2 } from '@fantasy-console/core/util';
 import { Input, InputButton } from '@fantasy-console/core/modules/Input';
 import { World } from '@fantasy-console/core/modules/World';
-import { CameraComponent } from '@fantasy-console/core/world/components/CameraComponent';
-import { GameObjectComponent } from '@fantasy-console/core/world/GameObjectComponent';
+import { CameraComponent, ScriptComponent } from '@fantasy-console/core/world';
 
 const SPEED_PER_SECOND = 3.0;
 
-class MyObject extends GameObjectComponent {
+class MyObject extends ScriptComponent {
   private camera!: CameraComponent;
 
   public override init(): void {

@@ -1,4 +1,5 @@
 {
+  "id": "d7641dad-c3f9-46cf-a0cc-79db0201ca0d",
   "config": {
     "clearColor": {
       "r": 0.9,
@@ -39,6 +40,7 @@
       },
       "components": [
         {
+          "id": "6d0c108b-74df-436b-ab6a-09664143abe0",
           "type": "light_directional",
           "intensity": 0.2,
           "color": {
@@ -71,10 +73,12 @@
       },
       "components": [
         {
+          "id": "3cb76802-fa54-498a-93ae-a0bd428ff9d8",
           "type": "mesh",
           "meshFileId": "dba91ca4-6ab9-4336-ac9b-b758e59e881e"
         },
         {
+          "id": "b5cbbff3-dfad-4ee5-b628-5661b1794a6a",
           "type": "script",
           "scriptFileId": "58189dec-56a3-44db-b7a5-c8171abfb3aa"
         },
@@ -102,6 +106,7 @@
       },
       "components": [
         {
+          "id": "2009895e-10b0-41f2-9b8b-aad8c1ecdd89",
           "type": "mesh",
           "meshFileId": "dba91ca4-6ab9-4336-ac9b-b758e59e881e"
         },

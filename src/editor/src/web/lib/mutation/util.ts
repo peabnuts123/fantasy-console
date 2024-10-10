@@ -1,4 +1,5 @@
-import { GameObjectConfigComposer, SceneConfigComposer } from "@lib/composer/config";
+import { GameObjectDefinition, SceneDefinition } from "@fantasy-console/runtime/src/cartridge";
+
 import { MutationPath, resolvePath, ResolvePathSelector } from "@lib/util/JsoncContainer";
 
 /**
@@ -7,17 +8,19 @@ import { MutationPath, resolvePath, ResolvePathSelector } from "@lib/util/JsoncC
  * @param id ID of the GameObject to find.
  * @param parentObject Parent GameObject in which to search.
  */
-function findGameObject(id: string, parentObject: GameObjectConfigComposer): [GameObjectConfigComposer, MutationPath] | undefined {
+export function findGameObjectInChildren(id: string, parentObject: GameObjectDefinition): [GameObjectDefinition, MutationPath] | undefined {
+  if (parentObject.children === undefined) return;
+
   // Iterate children objects
   for (let i = 0; i < parentObject.children.length; i++) {
     const object = parentObject.children[i];
-    const objectPath = resolvePath<GameObjectConfigComposer>((parent) => parent.children[i]);
+    const objectPath = resolvePath<GameObjectDefinition>((parent) => parent.children![i]);
     if (object.id === id) {
       // Found object as child of parent
       return [object, objectPath];
     } else {
       // Look for object as descendent of child
-      const childResult = findGameObject(id, object);
+      const childResult = findGameObjectInChildren(id, object);
       if (childResult !== undefined) {
         const [targetObject, childPath] = childResult;
         return [targetObject, objectPath.concat(childPath)];
@@ -30,7 +33,7 @@ function findGameObject(id: string, parentObject: GameObjectConfigComposer): [Ga
  * Given the ID of a GameObject, find its path in the hierarchy of the scene. Additionally,
  * resolve a path relative to this GameObject and return the entire path to the relative property.
  * Intended for JSONC mutation.
- * @param targetId ID of the GameObject to find
+ * @param gameObjectId ID of the GameObject to find
  * @param scene Scene in which to find the GameObject
  * @param pathSelector Path resolver function to select a path relative to the target GameObject.
  * @returns The entire path from the scene root to the property returned by `pathSelector`, for use in JSONC mutation.
@@ -40,19 +43,19 @@ function findGameObject(id: string, parentObject: GameObjectConfigComposer): [Ga
  * console.log(path); // Prints `["objects", 1, "children", 2, "transform", "position"]
  * ```
  */
-export function resolvePathForSceneObjectMutation(targetId: string, scene: SceneConfigComposer, pathSelector: ResolvePathSelector<GameObjectConfigComposer>): MutationPath {
-  let target: [GameObjectConfigComposer, MutationPath] | undefined = undefined;
+export function resolvePathForSceneObjectMutation(gameObjectId: string, scene: SceneDefinition, pathSelector: ResolvePathSelector<GameObjectDefinition>): MutationPath {
+  let target: [GameObjectDefinition, MutationPath] | undefined = undefined;
 
   for (let i = 0; i < scene.objects.length; i++) {
     const object = scene.objects[i];
-    const objectPath = resolvePath<SceneConfigComposer>((scene) => scene.objects[i]);
-    if (object.id === targetId) {
+    const objectPath = resolvePath<SceneDefinition>((scene) => scene.objects[i]);
+    if (object.id === gameObjectId) {
       // Found object as top-level object
       target = [object, objectPath];
       break;
     } else {
       // Look for object as descendent of top-level object
-      const childResult = findGameObject(targetId, object);
+      const childResult = findGameObjectInChildren(gameObjectId, object);
       if (childResult !== undefined) {
         const [targetObject, childPath] = childResult;
         target = [targetObject, objectPath.concat(childPath)];
@@ -62,7 +65,7 @@ export function resolvePathForSceneObjectMutation(targetId: string, scene: Scene
   }
 
   if (target === undefined) {
-    throw new Error(`Could not find any object in scene '${scene.path}' with id: '${targetId}'`)
+    throw new Error(`Could not find any object in scene '${scene.path}' with id: '${gameObjectId}'`)
   }
 
   // @NOTE No need for the actual game object at this time, but left it in anyways 🤷‍♀️
@@ -70,6 +73,6 @@ export function resolvePathForSceneObjectMutation(targetId: string, scene: Scene
   const relativePath = resolvePath(pathSelector);
 
   const debug_result = mutationPath.concat(relativePath);
-  console.log(`[resolvePathForSceneObjectMutation] Resolved path: ${debug_result.map((x) => typeof(x) === 'number' ? `[${x}]` : `.${x}`).join('')}`);
+  console.log(`[resolvePathForSceneObjectMutation] Resolved path: ${debug_result.map((x) => typeof (x) === 'number' ? `[${x}]` : `.${x}`).join('')}`);
   return debug_result;
 }
