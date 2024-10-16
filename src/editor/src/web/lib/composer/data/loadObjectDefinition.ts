@@ -22,7 +22,10 @@ export function loadObjectDefinition(objectDefinition: GameObjectDefinition, ass
       }
       case ComponentDefinitionType.Script: {
         const scriptComponentDefinition = componentDefinition as ScriptComponentDefinition;
-        const scriptAsset = assetDb.getById(scriptComponentDefinition.scriptFileId, ScriptAssetData);
+        let scriptAsset: ScriptAssetData | undefined = undefined;
+        if (scriptComponentDefinition.scriptFileId !== undefined) {
+          scriptAsset = assetDb.getById(scriptComponentDefinition.scriptFileId, ScriptAssetData);
+        }
         components.push(new ScriptComponentData(componentDefinition.id, scriptAsset));
         break;
       }

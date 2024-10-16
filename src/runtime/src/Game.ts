@@ -164,29 +164,34 @@ export class Game {
         gameObject.addComponent(new MeshComponent(componentData.id, gameObject, meshAsset));
       } else if (componentData instanceof ScriptComponentData) {
         /* Custom component script */
-        let scriptModule = this.scriptLoader.getModule(componentData.scriptAsset);
-        if (
-          scriptModule === undefined ||
-          scriptModule === null ||
-          !(scriptModule instanceof Object) ||
-          !('default' in scriptModule)
-        ) {
-          throw new Error(`Module is missing default export: ${componentData.scriptAsset.path}`);
-        }
+        // Instantiate instance of script component (i.e. user-defined class)
+        // Obviously only do this if the script component has a script asset assigned to it
+        // otherwise, do nothing.
+        if (componentData.scriptAsset) {
+          let scriptModule = this.scriptLoader.getModule(componentData.scriptAsset);
+          if (
+            scriptModule === undefined ||
+            scriptModule === null ||
+            !(scriptModule instanceof Object) ||
+            !('default' in scriptModule)
+          ) {
+            throw new Error(`Module is missing default export: ${componentData.scriptAsset.path}`);
+          }
 
-        // Ensure script is of correct type
-        let CustomScriptComponent = scriptModule.default as typeof ScriptComponent;
-        if (
-          !(
-            (CustomScriptComponent instanceof Object) &&
-            ScriptComponent.isPrototypeOf(CustomScriptComponent)
-          )
-        ) {
-          throw new Error(`Cannot add component to GameObject. Default export from script '${componentData.scriptAsset.path}' is not of type 'ScriptComponent': ${CustomScriptComponent}`);
-        }
+          // Ensure script is of correct type
+          let CustomScriptComponent = scriptModule.default as typeof ScriptComponent;
+          if (
+            !(
+              (CustomScriptComponent instanceof Object) &&
+              ScriptComponent.isPrototypeOf(CustomScriptComponent)
+            )
+          ) {
+            throw new Error(`Cannot add component to GameObject. Default export from script '${componentData.scriptAsset.path}' is not of type 'ScriptComponent': ${CustomScriptComponent}`);
+          }
 
-        // Construct new instance of script component
-        gameObject.addComponent(new CustomScriptComponent(componentData.id, gameObject));
+          // Construct new instance of script component
+          gameObject.addComponent(new CustomScriptComponent(componentData.id, gameObject));
+        }
       } else if (componentData instanceof CameraComponentData) {
         /* Camera component */
         const camera = new FreeCamera("Main Camera", Vector3Babylon.Zero(), this.babylonScene, true);

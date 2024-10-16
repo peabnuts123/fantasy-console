@@ -7,9 +7,9 @@ import { IComposerComponentData } from "./IComposerComponentData";
 export class ScriptComponentData implements IComposerComponentData {
   public readonly id: string;
   /** {@link ScriptAssetData} containing the script asset. */
-  public scriptAsset: ScriptAssetData;
+  public scriptAsset: ScriptAssetData | undefined;
 
-  public constructor(id: string, scriptAsset: ScriptAssetData) {
+  public constructor(id: string, scriptAsset: ScriptAssetData | undefined) {
     this.id = id;
     this.scriptAsset = scriptAsset;
 

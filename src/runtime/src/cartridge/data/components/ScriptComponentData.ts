@@ -1,5 +1,4 @@
 import type { ScriptAssetData } from "../assets/AssetData";
-import { AssetType } from "../assets/AssetType";
 import { ComponentData } from "./ComponentData";
 
 /**
@@ -8,9 +7,9 @@ import { ComponentData } from "./ComponentData";
  */
 export class ScriptComponentData extends ComponentData {
   /** {@link ScriptAssetData} containing the script asset. */
-  public readonly scriptAsset: ScriptAssetData;
+  public readonly scriptAsset: ScriptAssetData | undefined;
 
-  public constructor(id: string, scriptAsset: ScriptAssetData) {
+  public constructor(id: string, scriptAsset: ScriptAssetData | undefined) {
     super(id);
 
     this.scriptAsset = scriptAsset;
