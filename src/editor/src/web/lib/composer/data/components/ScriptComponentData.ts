@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 
-import type { ScriptAssetData } from "@fantasy-console/runtime/src/cartridge";
+import { ComponentDefinitionType, type ComponentDefinition, type ScriptAssetData, type ScriptComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
 
 import { IComposerComponentData } from "./IComposerComponentData";
 
@@ -15,6 +15,15 @@ export class ScriptComponentData implements IComposerComponentData {
 
     makeAutoObservable(this);
   }
+
+  public toComponentDefinition(): ComponentDefinition {
+    return {
+      id: this.id,
+      type: ComponentDefinitionType.Script,
+      scriptFileId: this.scriptAsset?.id,
+    } satisfies ScriptComponentDefinition as ScriptComponentDefinition;
+  }
+
   get componentName(): string {
     return `Script`;
   }

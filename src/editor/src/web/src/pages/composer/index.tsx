@@ -14,7 +14,7 @@ import type { SceneManifest } from "@lib/project/definition/scene";
 import SceneView from "@app/components/composer/SceneView";
 import { Condition } from '@app/components/util/condition';
 import Player from "@app/components/player";
-import AssetList from "@app/components/composer/AssetList";
+import { AssetList } from "@app/components/composer/AssetList";
 
 
 interface Props { }

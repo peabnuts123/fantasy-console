@@ -27,7 +27,16 @@ const App: FunctionComponent<AppProps> = ({ Component }) => {
   const { ProjectController } = library;
 
   let isRedirecting = false;
-  if (!ProjectController.hasLoadedProject && Router.route !== '/') {
+  if (
+    // ... there is no project loaded (or loading)
+    !(ProjectController.hasLoadedProject || ProjectController.isLoadingProject) &&
+    // ... and the route is not the home page (project select)
+    Router.route !== '/' &&
+    // ... and the app is not viewing a modal
+    !Router.asPath.startsWith('/modal/') &&
+    // ... and the app is not viewing the 404 page
+    Router.route !== '/404'
+  ) {
     isRedirecting = true
     if (typeof window !== 'undefined') {
       void Router.push('/');

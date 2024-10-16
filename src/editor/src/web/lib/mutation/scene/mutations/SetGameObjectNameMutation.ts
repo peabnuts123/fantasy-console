@@ -32,7 +32,7 @@ export class SetGameObjectNameMutation implements ISceneMutation, IContinuousSce
 
   public update({ }: SceneMutationArguments, { name }: SetGameObjectNameMutationUpdateArgs): void {
     this.name = name;
-    // - 1. Config state
+    // - 1. Data
     this.gameObject.name = name;
     // - 2. Babylon state
     this.gameObject.sceneInstance!.name = name;

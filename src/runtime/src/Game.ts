@@ -1,4 +1,4 @@
-import type { AssetContainer } from "@babylonjs/core/assetContainer";
+import { AssetContainer } from "@babylonjs/core/assetContainer";
 import type { Scene as BabylonScene } from "@babylonjs/core/scene";
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
@@ -155,7 +155,12 @@ export class Game {
       // Load well-known inbuilt component types
       if (componentData instanceof MeshComponentData) {
         /* Mesh component */
-        const meshAsset = await this.loadAssetCached(componentData.meshAsset);
+        let meshAsset: AssetContainer;
+        if (componentData.meshAsset !== undefined) {
+          meshAsset = await this.loadAssetCached(componentData.meshAsset);
+        } else {
+          meshAsset = new AssetContainer(this.babylonScene!);
+        }
         gameObject.addComponent(new MeshComponent(componentData.id, gameObject, meshAsset));
       } else if (componentData instanceof ScriptComponentData) {
         /* Custom component script */

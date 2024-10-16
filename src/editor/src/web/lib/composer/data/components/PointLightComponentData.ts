@@ -1,6 +1,10 @@
 
 import { makeAutoObservable } from "mobx";
-import type { Color3 } from "@babylonjs/core/Maths/math.color";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
+import { v4 as uuid } from 'uuid';
+
+import { ComponentDefinition, ComponentDefinitionType, PointLightComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { toColor3Definition } from "@fantasy-console/runtime/src/util";
 
 import type { IComposerComponentData } from "./IComposerComponentData";
 
@@ -15,6 +19,23 @@ export class PointLightComponentData implements IComposerComponentData {
     this.color = color;
 
     makeAutoObservable(this);
+  }
+
+  public toComponentDefinition(): ComponentDefinition {
+    return {
+      id: this.id,
+      type: ComponentDefinitionType.PointLight,
+      color: toColor3Definition(this.color),
+      intensity: this.intensity,
+    } satisfies PointLightComponentDefinition as PointLightComponentDefinition;
+  }
+
+  public static createDefault(): PointLightComponentData {
+    return new PointLightComponentData(
+      uuid(),
+      1,
+      Color3.White(),
+    )
   }
 
   get componentName(): string {

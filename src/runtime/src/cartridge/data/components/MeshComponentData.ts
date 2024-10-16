@@ -10,9 +10,9 @@ import { ComponentData } from "./ComponentData";
  */
 export class MeshComponentData extends ComponentData {
   /** {@link AssetData} containing the mesh asset. */
-  public readonly meshAsset: MeshAssetData;
+  public readonly meshAsset?: MeshAssetData;
 
-  public constructor(id: string, meshAsset: MeshAssetData) {
+  public constructor(id: string, meshAsset?: MeshAssetData) {
     super(id);
 
     this.meshAsset = meshAsset;

@@ -15,6 +15,14 @@ import { CameraComponentInspector } from "./CameraComponentInspector";
 import { DirectionalLightInspector } from "./DirectionalLightInspector";
 import { PointLightInspector } from "./PointLightInspector";
 
+export * from './CameraComponentInspector';
+export * from './DirectionalLightInspector';
+export * from './InspectorComponent';
+export * from './InspectorComponentBase';
+export * from './MeshComponentInspector';
+export * from './PointLightInspector';
+export * from './ScriptComponentInspector';
+
 const UnimplementedComponentInspector: InspectorComponent<IComposerComponentData> = ({ component, controller, gameObject }) => {
   return (
     <InspectorComponentBase component={component} controller={controller} gameObject={gameObject}>

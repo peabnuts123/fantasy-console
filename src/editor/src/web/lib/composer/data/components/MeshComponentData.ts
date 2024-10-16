@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
+import { v4 as uuid } from 'uuid';
 
-import type { MeshAssetData } from "@fantasy-console/runtime/src/cartridge";
+import { ComponentDefinitionType, MeshComponentDefinition, type ComponentDefinition, type MeshAssetData } from "@fantasy-console/runtime/src/cartridge";
 
 import type { MeshComponent } from "@lib/composer/scene/components";
 import type { IComposerComponentData } from "./IComposerComponentData";
@@ -8,15 +9,30 @@ import type { IComposerComponentData } from "./IComposerComponentData";
 export class MeshComponentData implements IComposerComponentData {
   public readonly id: string;
   /** {@link MeshAssetData} containing the mesh asset. */
-  public meshAsset: MeshAssetData;
+  public meshAsset?: MeshAssetData;
 
   public componentInstance: MeshComponent | undefined = undefined;
 
-  public constructor(id: string, meshAsset: MeshAssetData) {
+  public constructor(id: string, meshAsset: MeshAssetData | undefined) {
     this.id = id;
     this.meshAsset = meshAsset;
 
     makeAutoObservable(this);
+  }
+
+  public toComponentDefinition(): ComponentDefinition {
+    return {
+      id: this.id,
+      type: ComponentDefinitionType.Mesh,
+      meshFileId: this.meshAsset?.id,
+    } satisfies MeshComponentDefinition as MeshComponentDefinition;
+  }
+
+  public static createDefault(): MeshComponentData {
+    return new MeshComponentData(
+      uuid(),
+      undefined,
+    );
   }
 
   get componentName(): string {

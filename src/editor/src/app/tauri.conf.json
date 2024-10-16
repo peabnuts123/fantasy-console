@@ -45,6 +45,10 @@
       },
       "path": {
         "all": true
+      },
+      "window": {
+        "create": true,
+        "close": true
       }
     },
     "windows": [

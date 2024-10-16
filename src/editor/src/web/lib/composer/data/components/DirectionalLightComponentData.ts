@@ -1,5 +1,9 @@
-import type { Color3 } from "@babylonjs/core/Maths/math.color";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { makeAutoObservable } from "mobx";
+import { v4 as uuid } from 'uuid';
+
+import { ComponentDefinition, ComponentDefinitionType, DirectionalLightComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { toColor3Definition } from "@fantasy-console/runtime/src/util";
 
 import type { IComposerComponentData } from "./IComposerComponentData";
 
@@ -14,6 +18,23 @@ export class DirectionalLightComponentData implements IComposerComponentData {
     this.color = color;
 
     makeAutoObservable(this);
+  }
+
+  public toComponentDefinition(): ComponentDefinition {
+    return {
+      id: this.id,
+      type: ComponentDefinitionType.DirectionalLight,
+      color: toColor3Definition(this.color),
+      intensity: this.intensity,
+    } satisfies DirectionalLightComponentDefinition as DirectionalLightComponentDefinition;
+  }
+
+  public static createDefault(): DirectionalLightComponentData {
+    return new DirectionalLightComponentData(
+      uuid(),
+      1,
+      Color3.White(),
+    )
   }
 
   get componentName(): string {

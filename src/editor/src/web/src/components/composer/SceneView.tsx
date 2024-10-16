@@ -8,12 +8,10 @@ import cn from 'classnames';
 import type { SceneViewController } from "@lib/composer/scene";
 import { CurrentSelectionTool } from "@lib/composer/scene/SelectionManager";
 import type { GameObjectData } from "@lib/composer/data";
-import { SetGameObjectPositionMutation, SetGameObjectRotationMutation, SetGameObjectScaleMutation, SetGameObjectNameMutation, NewObjectMutation } from "@lib/mutation/scene/mutations";
+import { NewObjectMutation } from "@lib/mutation/scene/mutations";
 
 import Condition from "@app/components/util/condition";
-import { VectorInput } from "./inspector/VectorInput";
-import { TextInput } from "./inspector/TextInput";
-import { getInspectorFor } from "./inspector/GameObjectComponents";
+import { Inspector } from "./Inspector";
 
 
 interface Props {
@@ -70,91 +68,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
       <PanelResizeHandle className="drag-separator" />
       <Panel defaultSize={20} minSize={10} className="flex flex-col">
         {/* Inspector */}
-        <div className="p-2 bg-gradient-to-b from-[blue] to-pink-500 text-white text-retro-shadow shrink-0">
-          <h2 className="text-lg">Inspector</h2>
-        </div>
-        <div className="bg-slate-300 h-full overflow-y-scroll grow">
-          <Condition if={!!controller.selectedObject}
-            then={() => (
-              <>
-                <div className="p-2">
-                  {/* Name */}
-                  <TextInput
-                    label="Name"
-                    value={controller.selectedObject!.name}
-                    onChange={(newName) => {
-                      if (newName && newName.trim()) {
-                        controller.mutator.debounceContinuous(
-                          SetGameObjectNameMutation,
-                          controller.selectedObject!,
-                          () => new SetGameObjectNameMutation(controller.selectedObject!),
-                          () => ({ name: newName })
-                        )
-                      }
-                    }}
-                  />
-
-                  {/* Position */}
-                  <VectorInput
-                    label="Position"
-                    vector={controller.selectedObject!.transform.position}
-                    onChange={(newValue) => controller.mutator.debounceContinuous(
-                      SetGameObjectPositionMutation,
-                      controller.selectedObject!,
-                      () => new SetGameObjectPositionMutation(controller.selectedObject!),
-                      () => ({ position: newValue, resetGizmo: true })
-                    )}
-                  />
-
-                  {/* Rotation */}
-                  <VectorInput
-                    label="Rotation"
-                    vector={controller.selectedObject!.transform.rotation}
-                    incrementInterval={Math.PI / 8}
-                    // @TODO Parse value and limit to rotational values
-                    onChange={(newValue) => controller.mutator.debounceContinuous(
-                      SetGameObjectRotationMutation,
-                      controller.selectedObject!,
-                      () => new SetGameObjectRotationMutation(controller.selectedObject!),
-                      () => ({ rotation: newValue, resetGizmo: true })
-                    )}
-                  />
-
-                  {/* Scale */}
-                  <VectorInput
-                    label="Scale"
-                    vector={controller.selectedObject!.transform.scale}
-                    incrementInterval={0.25}
-                    onChange={(newValue) => controller.mutator.debounceContinuous(
-                      SetGameObjectScaleMutation,
-                      controller.selectedObject!,
-                      () => new SetGameObjectScaleMutation(controller.selectedObject!),
-                      () => ({ scale: newValue, resetGizmo: true })
-                    )}
-                  />
-                </div>
-
-                {/* Components */}
-                {controller.selectedObject!.components.map((component, index) => {
-                  // Look up inspector UI for component
-                  const InspectorComponent = getInspectorFor(component);
-                  return <InspectorComponent
-                    key={index}
-                    component={component}
-                    controller={controller}
-                    gameObject={controller.selectedObject!}
-                  />;
-                })}
-              </>
-            )}
-            else={() => (
-              <div className="p-2">
-                <p className="italic">No object selected</p>
-              </div>
-            )}
-          />
-
-        </div>
+        <Inspector sceneViewController={controller} />
       </Panel>
     </PanelGroup>
   );

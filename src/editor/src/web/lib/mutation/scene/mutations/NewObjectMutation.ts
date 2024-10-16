@@ -43,7 +43,7 @@ export class NewObjectMutation implements ISceneMutation {
     SceneViewController.scene.objects.push(newGameObject);
 
     // 2. Add to babylon scene
-    SceneViewController.createSceneObject(newGameObject);
+    SceneViewController.createGameObject(newGameObject);
 
     // 3. Modify JSONC
     SceneViewController.sceneJson.mutate((scene) => scene.objects[SceneViewController.scene.objects.length], newObjectDefinition, { isArrayInsertion: true });

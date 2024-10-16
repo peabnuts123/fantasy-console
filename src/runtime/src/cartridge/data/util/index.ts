@@ -15,7 +15,10 @@ export function loadObjectDefinition(objectDefinition: GameObjectDefinition, ass
     switch (componentDefinition.type) {
       case ComponentDefinitionType.Mesh: {
         const meshComponentDefinition = componentDefinition as MeshComponentDefinition;
-        const meshAsset = assetDb.getById(meshComponentDefinition.meshFileId, MeshAssetData);
+        let meshAsset: MeshAssetData | undefined = undefined;
+        if (meshComponentDefinition.meshFileId !== undefined) {
+          meshAsset = assetDb.getById(meshComponentDefinition.meshFileId, MeshAssetData);
+        }
         components.push(new MeshComponentData(componentDefinition.id, meshAsset));
         break;
       }

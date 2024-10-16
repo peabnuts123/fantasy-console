@@ -24,16 +24,17 @@ import {
 import { AssetData } from '@fantasy-console/runtime/src/cartridge';
 import { SceneDefinition } from '@fantasy-console/runtime/src/cartridge/archive';
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
+import { GameObjectComponent } from '@fantasy-console/core/src/world';
 
 import { SceneManifest } from '@lib/project/definition/scene';
 import { JsoncContainer } from '@lib/util/JsoncContainer';
 import { ProjectController } from '@lib/project/ProjectController';
 import { SceneViewMutator } from '@lib/mutation/scene/SceneViewMutator';
-import { CameraComponentData, DirectionalLightComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from '../data/components';
+import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from '../data/components';
 import { SceneData } from '../data/SceneData';
 import { GameObjectData } from '../data/GameObjectData';
 import { ComposerSelectionCache } from '../util/ComposerSelectionCache';
-import { ISelectableObject, MeshComponent } from './components';
+import { ISelectableObject, isSelectableObject, MeshComponent } from './components';
 import { CurrentSelectionTool, SelectionManager } from './SelectionManager';
 
 export class SceneViewController {
@@ -151,7 +152,7 @@ export class SceneViewController {
     ambientLight.specular = Color3Babylon.Black();
 
     for (let sceneObject of this.scene.objects) {
-      await this.createSceneObject(sceneObject);
+      await this.createGameObject(sceneObject);
     }
   }
 
@@ -168,7 +169,7 @@ export class SceneViewController {
   }
 
   // @TODO we probably should try to share this with the runtime in some kind of overridable fashion (?)
-  public async createSceneObject(gameObjectData: GameObjectData, parentTransform: TransformRuntime | undefined = undefined): Promise<GameObjectRuntime> {
+  public async createGameObject(gameObjectData: GameObjectData, parentTransform: TransformRuntime | undefined = undefined): Promise<GameObjectRuntime> {
     console.log(`[SceneViewController] (createSceneObject) Loading scene object: `, gameObjectData.name);
     // Construct game object transform for constructing scene's hierarchy
     const transform = new TransformRuntime(
@@ -179,7 +180,7 @@ export class SceneViewController {
     );
 
     // Create all child objects first
-    await Promise.all(gameObjectData.children.map((childObjectData) => this.createSceneObject(childObjectData, transform)));
+    await Promise.all(gameObjectData.children.map((childObjectData) => this.createGameObject(childObjectData, transform)));
 
     // Create blank object
     const gameObject = new GameObjectRuntime(
@@ -195,39 +196,53 @@ export class SceneViewController {
 
     // Load game object components
     for (let componentData of gameObjectData.components) {
-      if (componentData instanceof MeshComponentData) {
-        /* Mesh component */
-        let meshAsset = await this.loadAssetCached(componentData.meshAsset);
-        const meshComponent = new MeshComponent(componentData.id, gameObject, meshAsset);
-        // Mesh component is selectable so populate selection cache
-        this.addToSelectionCache(gameObjectData, meshComponent);
-        // Store reverse reference to new instance for managing instance later (e.g. autoload)
-        componentData.componentInstance = meshComponent;
-        gameObject.addComponent(meshComponent);
-      } else if (componentData instanceof ScriptComponentData) {
-        /* @NOTE Script has no effect in the Composer */
-      } else if (componentData instanceof CameraComponentData) {
-        /* @NOTE Camera has no effect in the Composer */
-      } else if (componentData instanceof DirectionalLightComponentData) {
-        /* Directional Light component */
-        const light = new DirectionalLightBabylon(`light_directional`, Vector3Babylon.Down(), this.babylonScene);
-        light.specular = Color3Babylon.Black();
-        light.intensity = componentData.intensity;
-        light.diffuse = componentData.color;
-        gameObject.addComponent(new DirectionalLightComponentRuntime(componentData.id, gameObject, light));
-      } else if (componentData instanceof PointLightComponentData) {
-        /* Point Light component */
-        const light = new PointLightBabylon(`light_point`, Vector3Babylon.Zero(), this.babylonScene);
-        light.specular = Color3Babylon.Black();
-        light.intensity = componentData.intensity;
-        light.diffuse = componentData.color;
-        gameObject.addComponent(new PointLightComponentRuntime(componentData.id, gameObject, light));
-      } else {
-        console.error(`[SceneViewController] (loadSceneObject) Unrecognised component data: `, componentData);
+      const component = await this.createGameObjectComponent(gameObject, componentData);
+      // @NOTE This logic is duplicated in `AddGameObjectComponentMutation`
+      if (component !== undefined) {
+        if (isSelectableObject(component)) {
+          this.addToSelectionCache(gameObjectData, component);
+        }
+        gameObject.addComponent(component);
       }
     }
 
     return gameObject;
+  }
+
+  public async createGameObjectComponent(gameObject: GameObjectRuntime, componentData: IComposerComponentData): Promise<GameObjectComponent | undefined> {
+    if (componentData instanceof MeshComponentData) {
+      /* Mesh component */
+      let meshAsset: AssetContainer;
+      if (componentData.meshAsset !== undefined) {
+        meshAsset = await this.loadAssetCached(componentData.meshAsset);
+      } else {
+        meshAsset = new AssetContainer(this.babylonScene!);
+      }
+      const meshComponent = new MeshComponent(componentData.id, gameObject, meshAsset);
+      // Store reverse reference to new instance for managing instance later (e.g. autoload)
+      componentData.componentInstance = meshComponent;
+      return meshComponent;
+    } else if (componentData instanceof ScriptComponentData) {
+      /* @NOTE Script has no effect in the Composer */
+    } else if (componentData instanceof CameraComponentData) {
+      /* @NOTE Camera has no effect in the Composer */
+    } else if (componentData instanceof DirectionalLightComponentData) {
+      /* Directional Light component */
+      const light = new DirectionalLightBabylon(`light_directional`, Vector3Babylon.Down(), this.babylonScene);
+      light.specular = Color3Babylon.Black();
+      light.intensity = componentData.intensity;
+      light.diffuse = componentData.color;
+      return new DirectionalLightComponentRuntime(componentData.id, gameObject, light);
+    } else if (componentData instanceof PointLightComponentData) {
+      /* Point Light component */
+      const light = new PointLightBabylon(`light_point`, Vector3Babylon.Zero(), this.babylonScene);
+      light.specular = Color3Babylon.Black();
+      light.intensity = componentData.intensity;
+      light.diffuse = componentData.color;
+      return new PointLightComponentRuntime(componentData.id, gameObject, light);
+    } else {
+      console.error(`[SceneViewController] (loadSceneObject) Unrecognised component data: `, componentData);
+    }
   }
 
   /**

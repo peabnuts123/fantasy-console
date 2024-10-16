@@ -17,7 +17,7 @@ export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {
-    // 1. Update config state
+    // 1. Update data
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentData = gameObjectData.getComponent(this.componentId, MeshComponentData);
     // - Replace mesh asset reference
@@ -26,7 +26,7 @@ export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
 
     // 2. Update babylon scene
     const gameObject = gameObjectData.sceneInstance!;
-    const oldMeshComponent = gameObject.components[componentIndex] as MeshComponent;
+    const oldMeshComponent = gameObject.components.find((component) => component.id === this.componentId) as MeshComponent;
     // - Remove from selection cache
     SceneViewController.removeFromSelectionCache(oldMeshComponent);
     // - Cull old assets
