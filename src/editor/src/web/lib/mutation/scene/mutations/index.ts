@@ -5,3 +5,4 @@ export * from './SetGameObjectNameMutation';
 export * from './SetGameObjectPositionMutation';
 export * from './SetGameObjectRotationMutation';
 export * from './SetGameObjectScaleMutation';
+export * from './SetGameObjectScriptComponentAssetMutation';

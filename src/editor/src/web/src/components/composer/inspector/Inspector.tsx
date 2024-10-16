@@ -15,7 +15,7 @@ import type { SceneViewController } from "@lib/composer/scene";
 import { VectorInput } from "./VectorInput";
 import { TextInput } from "./TextInput";
 import { getInspectorFor } from "./GameObjectComponents";
-import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData } from "@lib/composer/data";
+import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from "@lib/composer/data";
 
 
 
@@ -90,7 +90,8 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
         newComponent = PointLightComponentData.createDefault();
         break;
       case ComponentDefinitionType.Script:
-      // break;
+        newComponent = ScriptComponentData.createDefault();
+        break;
       default:
         throw new Error(`Cannot add new component. Unimplemented component type: '${type}'`);
     }

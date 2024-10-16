@@ -13,19 +13,7 @@ export interface AssetListFileItemProps {
 }
 
 export const AssetListFileItem: FunctionComponent<AssetListFileItemProps> = observer(({ asset }) => {
-  let AssetIcon = DocumentIcon;
-
-  switch (asset.data.type) {
-    case AssetType.Mesh:
-      AssetIcon = CubeIcon;
-      break;
-    case AssetType.Script:
-      AssetIcon = DocumentTextIcon;
-      break;
-    case AssetType.Texture:
-      AssetIcon = PhotoIcon;
-      break;
-  }
+  let AssetIcon = getIconForAssetType(asset.data.type);
 
   // Drag and drop hook
   let [{ }, DragSource] = useAssetDrag(asset.data);
@@ -39,3 +27,17 @@ export const AssetListFileItem: FunctionComponent<AssetListFileItemProps> = obse
     />
   );
 });
+
+
+export function getIconForAssetType(assetType: AssetType) {
+  switch (assetType) {
+    case AssetType.Mesh:
+      return CubeIcon;
+    case AssetType.Script:
+      return DocumentTextIcon;
+    case AssetType.Texture:
+      return PhotoIcon;
+    default:
+      return DocumentIcon;
+  }
+}

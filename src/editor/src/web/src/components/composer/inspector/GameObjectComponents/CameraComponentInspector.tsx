@@ -1,8 +1,10 @@
+import { observer } from "mobx-react-lite";
+
 import type { CameraComponentData } from "@lib/composer/data";
 import type { InspectorComponent } from "./InspectorComponent";
 import { InspectorComponentBase } from "./InspectorComponentBase";
 
-export const CameraComponentInspector: InspectorComponent<CameraComponentData> = ({ component, controller, gameObject }) => {
+export const CameraComponentInspector: InspectorComponent<CameraComponentData> = observer(({ component, controller, gameObject }) => {
   return (
     <InspectorComponentBase component={component} controller={controller} gameObject={gameObject}>
       <label>
@@ -10,4 +12,4 @@ export const CameraComponentInspector: InspectorComponent<CameraComponentData> =
       </label>
     </InspectorComponentBase>
   )
-};
+});

@@ -1,9 +1,11 @@
+import { observer } from "mobx-react-lite";
+
 import type { DirectionalLightComponentData } from "@lib/composer/data";
 import { ColorInput } from "../ColorInput";
 import type { InspectorComponent } from "./InspectorComponent";
 import { InspectorComponentBase } from "./InspectorComponentBase";
 
-export const DirectionalLightInspector: InspectorComponent<DirectionalLightComponentData> = ({ component, controller, gameObject }) => {
+export const DirectionalLightInspector: InspectorComponent<DirectionalLightComponentData> = observer(({ component, controller, gameObject }) => {
   return (
     <InspectorComponentBase component={component} controller={controller} gameObject={gameObject}>
       <label>
@@ -15,4 +17,4 @@ export const DirectionalLightInspector: InspectorComponent<DirectionalLightCompo
       </label>
     </InspectorComponentBase>
   )
-};
+});

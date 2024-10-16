@@ -1,5 +1,7 @@
-import type { ColorDefinition } from "@fantasy-console/runtime/src/cartridge/archive/util";
+import { observer } from "mobx-react-lite";
 import type { FunctionComponent } from "react";
+
+import type { ColorDefinition } from "@fantasy-console/runtime/src/cartridge/archive/util";
 
 interface Props {
   label: string;
@@ -17,7 +19,7 @@ function formatColorString(color: ColorDefinition) {
   );
 }
 
-export const ColorInput: FunctionComponent<Props> = ({ label, color }) => {
+export const ColorInput: FunctionComponent<Props> = observer(({ label, color }) => {
   const bgColor = formatColorString(color);
   return (
     <div className="mt-2">
@@ -32,7 +34,7 @@ export const ColorInput: FunctionComponent<Props> = ({ label, color }) => {
       </div>
     </div>
   );
-};
+});
 
 interface ColorInputComponentProps {
   label: string;
