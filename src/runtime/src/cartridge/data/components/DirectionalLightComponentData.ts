@@ -1,5 +1,4 @@
-import { Color3 } from "@babylonjs/core/Maths/math.color";
-
+import type { Color3 } from '@fantasy-console/core/src/util';
 import type { DirectionalLightComponent } from '@fantasy-console/runtime/src/world/components';
 
 import { ComponentData } from "./ComponentData";

@@ -1,4 +1,5 @@
-import type { Color3 } from "@babylonjs/core/Maths/math.color";
+import type { Color3 } from '@fantasy-console/core/src/util';
+
 
 import type { PointLightComponent } from '@fantasy-console/runtime/src/world/components';
 
@@ -10,7 +11,7 @@ import { ComponentData } from "./ComponentData";
  */
 export class PointLightComponentData extends ComponentData {
   public readonly intensity: number;
-  public readonly color: Color3; // @TODO From Babylon are you sure?
+  public readonly color: Color3;
 
   public constructor(id: string, intensity: number, color: Color3) {
     super(id);

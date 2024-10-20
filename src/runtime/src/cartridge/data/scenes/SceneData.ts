@@ -1,6 +1,5 @@
-import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
-
-import { toColor3Babylon, toColor4Babylon } from "@fantasy-console/runtime/src/util";
+import { toColor3Core } from "@fantasy-console/runtime/src/util";
+import { Color3 } from "@fantasy-console/core/src/util";
 
 import { SceneDefinition } from "../../archive";
 import { AssetDb } from "../assets/AssetDb";
@@ -8,7 +7,7 @@ import { GameObjectData } from "../GameObjectData";
 import { loadObjectDefinition } from "../util";
 
 export interface SceneDataConfiguration {
-  clearColor: Color4,
+  clearColor: Color3,
   lighting: {
     ambient: {
       intensity: number;
@@ -35,11 +34,11 @@ export class SceneData {
 
     /* Config */
     this.config = {
-      clearColor: toColor4Babylon(sceneDefinition.config.clearColor),
+      clearColor: toColor3Core(sceneDefinition.config.clearColor),
       lighting: {
         ambient: {
           intensity: sceneDefinition.config.lighting.ambient.intensity,
-          color: toColor3Babylon(sceneDefinition.config.lighting.ambient.color),
+          color: toColor3Core(sceneDefinition.config.lighting.ambient.color),
         },
       }
     }

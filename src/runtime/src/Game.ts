@@ -34,6 +34,7 @@ import {
   WorldState,
 } from './world';
 import Modules from './modules';
+import { toColor3Babylon } from "./util";
 
 /**
  * Top-level system containing the entire game and all content
@@ -100,13 +101,13 @@ export class Game {
 
     // @TODO I guess we need a runtime object for a Scene (rather than storing it on Game)
     /* Scene clear color */
-    this.babylonScene.clearColor = scene.config.clearColor;
+    this.babylonScene.clearColor = toColor3Babylon(scene.config.clearColor).toColor4();
 
     /* Set up global ambient lighting */
     this.ambientLight = new HemisphericLight("__ambient", new Vector3Babylon(0, 0, 0), this.babylonScene);
     this.ambientLight.intensity = scene.config.lighting.ambient.intensity;
-    this.ambientLight.diffuse = scene.config.lighting.ambient.color;
-    this.ambientLight.groundColor = scene.config.lighting.ambient.color;
+    this.ambientLight.diffuse = toColor3Babylon(scene.config.lighting.ambient.color);
+    this.ambientLight.groundColor = toColor3Babylon(scene.config.lighting.ambient.color);
     this.ambientLight.specular = Color3.Black();
 
     /* Load game objects */
@@ -202,14 +203,14 @@ export class Game {
         const light = new DirectionalLight(`light_directional_${debug_lightCount++}`, Vector3Babylon.Down(), this.babylonScene);
         light.specular = Color3.Black();
         light.intensity = componentData.intensity;
-        light.diffuse = componentData.color;
+        light.diffuse = toColor3Babylon(componentData.color);
         gameObject.addComponent(new DirectionalLightComponent(componentData.id, gameObject, light));
       } else if (componentData instanceof PointLightComponentData) {
         /* Point Light component */
         const light = new PointLight(`light_point_${debug_lightCount++}`, Vector3Babylon.Zero(), this.babylonScene);
         light.specular = Color3.Black();
         light.intensity = componentData.intensity;
-        light.diffuse = componentData.color;
+        light.diffuse = toColor3Babylon(componentData.color);
         gameObject.addComponent(new PointLightComponent(componentData.id, gameObject, light));
       } else {
         console.error(`[Game] (createGameObjectFromData) Unrecognised component data: `, componentData);

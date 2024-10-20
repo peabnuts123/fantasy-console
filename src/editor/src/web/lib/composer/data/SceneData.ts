@@ -2,7 +2,7 @@ import { makeAutoObservable } from "mobx";
 
 import { SceneDefinition } from "@fantasy-console/runtime/src/cartridge/archive";
 import { AssetDb, SceneDataConfiguration } from "@fantasy-console/runtime/src/cartridge";
-import { toColor3Babylon, toColor4Babylon } from "@fantasy-console/runtime/src/util";
+import { toColor3Babylon, toColor3Core, toColor4Babylon } from "@fantasy-console/runtime/src/util";
 
 import { loadObjectDefinition } from "./loadObjectDefinition";
 import { GameObjectData } from "./GameObjectData";
@@ -21,11 +21,11 @@ export class SceneData {
 
     /* Config */
     this.config = {
-      clearColor: toColor4Babylon(sceneDefinition.config.clearColor),
+      clearColor: toColor3Core(sceneDefinition.config.clearColor),
       lighting: {
         ambient: {
           intensity: sceneDefinition.config.lighting.ambient.intensity,
-          color: toColor3Babylon(sceneDefinition.config.lighting.ambient.color),
+          color: toColor3Core(sceneDefinition.config.lighting.ambient.color),
         },
       }
     }

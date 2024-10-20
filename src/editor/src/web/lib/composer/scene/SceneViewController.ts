@@ -25,6 +25,7 @@ import { AssetData } from '@fantasy-console/runtime/src/cartridge';
 import { SceneDefinition } from '@fantasy-console/runtime/src/cartridge/archive';
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 import { GameObjectComponent } from '@fantasy-console/core/src/world';
+import { toColor3Babylon } from '@fantasy-console/runtime/src/util';
 
 import { SceneManifest } from '@lib/project/definition/scene';
 import { JsoncContainer } from '@lib/util/JsoncContainer';
@@ -142,13 +143,13 @@ export class SceneViewController {
 
   private async createScene() {
     /* Scene clear color */
-    this.babylonScene!.clearColor = this.scene.config.clearColor;
+    this.babylonScene!.clearColor =  toColor3Babylon(this.scene.config.clearColor).toColor4();
 
     /* Set up global ambient lighting */
     const ambientLight = new HemisphericLightBabylon("__ambient", new Vector3Babylon(0, 0, 0), this.babylonScene);
     ambientLight.intensity = this.scene.config.lighting.ambient.intensity;
-    ambientLight.diffuse = this.scene.config.lighting.ambient.color;
-    ambientLight.groundColor = this.scene.config.lighting.ambient.color;
+    ambientLight.diffuse = toColor3Babylon(this.scene.config.lighting.ambient.color);
+    ambientLight.groundColor = toColor3Babylon(this.scene.config.lighting.ambient.color);
     ambientLight.specular = Color3Babylon.Black();
 
     for (let sceneObject of this.scene.objects) {

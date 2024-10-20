@@ -1,7 +1,6 @@
-// @TODO Mixed use of core vs. babylon types?
-import { toVector3Core, toColor3Babylon } from '@fantasy-console/runtime/src/util';
-import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition, GameObjectDefinition } from "../../archive";
+import { toVector3Core, toColor3Core } from '@fantasy-console/runtime/src/util';
 
+import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition, GameObjectDefinition } from "../../archive";
 import { GameObjectData } from "../GameObjectData";
 import { CameraComponentData, ComponentData, DirectionalLightComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from "../components";
 import { AssetDb } from "../assets/AssetDb";
@@ -38,13 +37,13 @@ export function loadObjectDefinition(objectDefinition: GameObjectDefinition, ass
       }
       case ComponentDefinitionType.DirectionalLight: {
         const directionalLightComponentDefinition = componentDefinition as DirectionalLightComponentDefinition;
-        const color = toColor3Babylon(directionalLightComponentDefinition.color);
+        const color = toColor3Core(directionalLightComponentDefinition.color);
         components.push(new DirectionalLightComponentData(componentDefinition.id, directionalLightComponentDefinition.intensity, color));
         break;
       }
       case ComponentDefinitionType.PointLight: {
         const pointLightComponentDefinition = componentDefinition as PointLightComponentDefinition;
-        const color = toColor3Babylon(pointLightComponentDefinition.color);
+        const color = toColor3Core(pointLightComponentDefinition.color);
         components.push(new PointLightComponentData(componentDefinition.id, pointLightComponentDefinition.intensity, color));
         break;
       }
