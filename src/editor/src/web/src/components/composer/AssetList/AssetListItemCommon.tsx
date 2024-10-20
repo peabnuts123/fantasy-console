@@ -7,7 +7,7 @@ export interface AssetListItemCommonProps {
   asset: AssetDbVirtualNode;
   classNames: string;
   onClick?: () => void;
-  Icon: ComponentType;
+  Icon: ComponentType<React.HTMLAttributes<Element>>;
   innerRef?: LegacyRef<any>;
 }
 
@@ -25,7 +25,7 @@ export const AssetListItemCommon: FunctionComponent<AssetListItemCommonProps> = 
       onClick={onClick}
       ref={innerRef}
     >
-      <Icon />
+      <Icon className="icon" />
       <span className="ml-2">{asset.name}</span>
     </div>
   )

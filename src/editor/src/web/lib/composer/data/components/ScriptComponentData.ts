@@ -21,7 +21,7 @@ export class ScriptComponentData implements IComposerComponentData {
     return {
       id: this.id,
       type: ComponentDefinitionType.Script,
-      scriptFileId: this.scriptAsset?.id,
+      scriptFileId: this.scriptAsset?.id ?? null,
     } satisfies ScriptComponentDefinition as ScriptComponentDefinition;
   }
 

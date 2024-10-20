@@ -14,7 +14,7 @@ export function loadObjectDefinition(objectDefinition: GameObjectDefinition, ass
       case ComponentDefinitionType.Mesh: {
         const meshComponentDefinition = componentDefinition as MeshComponentDefinition;
         let meshAsset: MeshAssetData | undefined = undefined;
-        if (meshComponentDefinition.meshFileId !== undefined) {
+        if (meshComponentDefinition.meshFileId !== null) {
           meshAsset = assetDb.getById(meshComponentDefinition.meshFileId, MeshAssetData);
         }
         components.push(new MeshComponentData(componentDefinition.id, meshAsset));
@@ -23,7 +23,7 @@ export function loadObjectDefinition(objectDefinition: GameObjectDefinition, ass
       case ComponentDefinitionType.Script: {
         const scriptComponentDefinition = componentDefinition as ScriptComponentDefinition;
         let scriptAsset: ScriptAssetData | undefined = undefined;
-        if (scriptComponentDefinition.scriptFileId !== undefined) {
+        if (scriptComponentDefinition.scriptFileId !== null) {
           scriptAsset = assetDb.getById(scriptComponentDefinition.scriptFileId, ScriptAssetData);
         }
         components.push(new ScriptComponentData(componentDefinition.id, scriptAsset));

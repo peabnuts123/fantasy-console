@@ -47,9 +47,9 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
       <Panel className="flex flex-col h-full">
         {/* Viewport */}
         <div className="p-2 bg-slate-300 flex flex-row shrink-0">
-          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Move)}><ArrowsPointingOutIcon /> Move</button>
-          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Rotate)}><ArrowPathIcon /> Rotate</button>
-          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Scale)}><ArrowsPointingInIcon /> Scale</button>
+          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Move)}><ArrowsPointingOutIcon className="icon" /> Move</button>
+          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Rotate)}><ArrowPathIcon className="icon" /> Rotate</button>
+          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Scale)}><ArrowsPointingInIcon className="icon" /> Scale</button>
         </div>
         <div className="grow relative">
           <div className="absolute inset-0">
@@ -101,12 +101,12 @@ const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = obser
           then={() =>
             <span onClick={() => setIsCollapsed(!isCollapsed)}>
               <Condition if={!isCollapsed}
-                then={() => <ChevronDownIcon />}
-                else={() => <ChevronRightIcon />}
+                then={() => <ChevronDownIcon className="icon" />}
+                else={() => <ChevronRightIcon className="icon" />}
               />
             </span>
           }
-          else={() => <ArrowTurnDownRightIcon className="opacity-20" />}
+          else={() => <ArrowTurnDownRightIcon className="icon opacity-20" />}
         />
         {gameObject.name}
       </div>

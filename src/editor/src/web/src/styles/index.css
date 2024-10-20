@@ -8,10 +8,6 @@
     @apply h-full flex flex-col overflow-hidden;
   }
 
-  svg[data-slot="icon"] {
-    display: inline;
-    width: 24px;
-  }
   [data-resize-handle] {
     @apply bg-slate-300
     ;
@@ -31,6 +27,15 @@
     @apply border border-black mt-1 ml-1 mr-2 mb-2 py-1 px-2 bg-white text-black retro-shadow hover:bg-blue-300 focus:bg-blue-300
       active:bg-blue-500 flex flex-row items-center [&>svg]:mr-1
     ;
+  }
+
+  .icon {
+    display: inline;
+    width: 24px;
+  }
+  .icon--small {
+    display: inline;
+    width: 16px;
   }
 }
 

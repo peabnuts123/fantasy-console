@@ -1,16 +1,19 @@
+import { AssetContainer } from "@babylonjs/core/assetContainer";
+
 import type { MeshAssetData, MeshComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
+
 import { GameObjectData, MeshComponentData } from "@lib/composer/data";
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { MeshComponent } from "@lib/composer/scene";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
+import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 
 export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
   // Mutation parameters
   private readonly gameObjectId: string;
   private readonly componentId: string;
-  private readonly meshAsset: MeshAssetData;
+  private readonly meshAsset: MeshAssetData | undefined;
 
-  public constructor(gameObject: GameObjectData, component: MeshComponentData, meshAsset: MeshAssetData) {
+  public constructor(gameObject: GameObjectData, component: MeshComponentData, meshAsset: MeshAssetData | undefined) {
     this.gameObjectId = gameObject.id;
     this.componentId = component.id;
     this.meshAsset = meshAsset;
@@ -20,7 +23,7 @@ export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
     // 1. Update data
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentData = gameObjectData.getComponent(this.componentId, MeshComponentData);
-    // - Replace mesh asset reference
+    // - Replace asset reference
     componentData.meshAsset = this.meshAsset;
     const componentIndex = gameObjectData.components.indexOf(componentData);
 
@@ -31,8 +34,16 @@ export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
     SceneViewController.removeFromSelectionCache(oldMeshComponent);
     // - Cull old assets
     oldMeshComponent.onDestroy();
-    // - Load new assets
-    SceneViewController.loadAssetCached(this.meshAsset).then((newAssetContainer) => {
+    // - Load new assets (if applicable)
+    let meshAssetPromise: Promise<AssetContainer>;
+    if (this.meshAsset !== undefined) {
+      // @NOTE Setting mesh to a defined value
+      meshAssetPromise = SceneViewController.loadAssetCached(this.meshAsset)
+    } else {
+      meshAssetPromise = Promise.resolve(new AssetContainer());
+    }
+
+    meshAssetPromise.then((newAssetContainer) => {
       const newMeshComponent = new MeshComponent(componentData.id, gameObject, newAssetContainer);
       // - Add to selection cache
       SceneViewController.addToSelectionCache(gameObjectData, newMeshComponent);
@@ -44,8 +55,8 @@ export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
     });
 
     // 3. Modify JSONC
-    // - Replace ID of mesh asset in component definition
-    const updatedValue = this.meshAsset.id;
+    // - Replace ID of asset in component definition
+    const updatedValue = this.meshAsset?.id ?? null;
     const mutationPath = resolvePathForSceneObjectMutation(
       this.gameObjectId,
       SceneViewController.sceneDefinition,
@@ -59,6 +70,10 @@ export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
   }
 
   get description(): string {
-    return `Change mesh asset`
+    if (this.meshAsset !== undefined) {
+      return `Change mesh asset`;
+    } else {
+      return `Remove mesh asset`;
+    }
   }
 }

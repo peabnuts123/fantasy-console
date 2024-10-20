@@ -11,7 +11,7 @@ import { InspectorComponentBase } from "./InspectorComponentBase";
 const ScriptAssetReference = createAssetReferenceComponentOfType<AssetType.Script>();
 
 export const ScriptComponentInspector: InspectorComponent<ScriptComponentData> = observer(({ component, controller, gameObject }) => {
-  const onUpdateScriptAsset = (scriptAsset: ScriptAssetData) => {
+  const onUpdateScriptAsset = (scriptAsset: ScriptAssetData | undefined) => {
     controller.mutator.apply(
       new SetGameObjectScriptComponentAssetMutation(
         gameObject,

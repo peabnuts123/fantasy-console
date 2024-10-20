@@ -24,7 +24,7 @@ export class MeshComponentData implements IComposerComponentData {
     return {
       id: this.id,
       type: ComponentDefinitionType.Mesh,
-      meshFileId: this.meshAsset?.id,
+      meshFileId: this.meshAsset?.id ?? null,
     } satisfies MeshComponentDefinition as MeshComponentDefinition;
   }
 

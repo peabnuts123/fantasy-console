@@ -11,5 +11,5 @@ import { ComponentDefinitionType } from "./ComponentDefinitionType";
  */
 export interface MeshComponentDefinition extends ComponentDefinition {
   type: ComponentDefinitionType.Mesh;
-  meshFileId?: string; // @TODO Rename to `meshAssetId`
+  meshFileId: string | null; // @TODO Rename to `meshAssetId`
 }

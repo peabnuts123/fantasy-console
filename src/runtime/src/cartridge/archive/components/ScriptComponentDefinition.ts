@@ -10,5 +10,5 @@ import { ComponentDefinitionType } from "./ComponentDefinitionType";
  */
 export interface ScriptComponentDefinition extends ComponentDefinition {
   type: ComponentDefinitionType.Script;
-  scriptFileId?: string; // @TODO Rename to `scriptAssetId`
+  scriptFileId: string | null; // @TODO Rename to `scriptAssetId`
 }

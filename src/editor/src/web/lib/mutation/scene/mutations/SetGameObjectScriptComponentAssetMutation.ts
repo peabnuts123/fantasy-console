@@ -43,6 +43,10 @@ export class SetGameObjectScriptComponentAssetMutation implements ISceneMutation
   }
 
   get description(): string {
-    return `Change script asset`
+    if (this.scriptAsset !== undefined) {
+      return `Change script asset`;
+    } else {
+      return `Remove script asset`;
+    }
   }
 }

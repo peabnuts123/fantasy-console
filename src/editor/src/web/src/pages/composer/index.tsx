@@ -66,20 +66,20 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
     <DndProvider backend={HTML5Backend}>
       {/* Header */}
       <header className="flex items-center w-full justify-between py-1 px-2">
-        <Link href="/" className="button"><ArrowLeftEndOnRectangleIcon /> Exit</Link>
+        <Link href="/" className="button"><ArrowLeftEndOnRectangleIcon className="icon" /> Exit</Link>
         <Condition if={!isPlaying}
           then={() => (
             <>
-              <button onClick={debug_playProject} className="button"><PlayIcon /> Play</button>
+              <button onClick={debug_playProject} className="button"><PlayIcon className="icon" /> Play</button>
             </>
           )}
           else={() => (
             <>
-              <button onClick={debug_stopPlaying} className="button"><StopIcon /> Stop</button>
+              <button onClick={debug_stopPlaying} className="button"><StopIcon className="icon" /> Stop</button>
             </>
           )}
         />
-        <button onClick={debug_exportScene} className="button"><CubeIcon /> Export</button>
+        <button onClick={debug_exportScene} className="button"><CubeIcon className="icon" /> Export</button>
       </header>
 
       <Condition if={!isPlaying}

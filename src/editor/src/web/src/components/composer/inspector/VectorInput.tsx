@@ -177,7 +177,7 @@ const VectorInputComponent: FunctionComponent<VectorInputComponentProps> = ({ la
             onBlur={onBlurInputElement}
             onClick={incrementValue}
           >
-            <ArrowUpIcon className="!w-4" />
+            <ArrowUpIcon className="icon--small" />
           </button>
           <button
             tabIndex={-1}
@@ -187,7 +187,7 @@ const VectorInputComponent: FunctionComponent<VectorInputComponentProps> = ({ la
             onBlur={onBlurInputElement}
             onClick={decrementValue}
           >
-            <ArrowDownIcon className="!w-4" />
+            <ArrowDownIcon className="icon--small" />
           </button>
         </div>
       </label>

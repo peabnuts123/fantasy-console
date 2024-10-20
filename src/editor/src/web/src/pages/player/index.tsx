@@ -31,11 +31,11 @@ const PlayerPage: FunctionComponent<Props> = ({ }) => {
     <header className="flex items-center w-full justify-between py-1 px-2">
       {/* Left */}
       <div className="flex grow basis-0">
-        <Link href="/" className="button"><ArrowLeftEndOnRectangleIcon /> Exit</Link>
+        <Link href="/" className="button"><ArrowLeftEndOnRectangleIcon className="icon" /> Exit</Link>
       </div>
       {/* Middle */}
       <div className="flex grow basis-0 justify-center">
-        <button onClick={loadCartridge} className="button"><FolderIcon /> Open</button>
+        <button onClick={loadCartridge} className="button"><FolderIcon className="icon" /> Open</button>
       </div>
       {/* Right */}
       <div className="flex grow basis-0">
