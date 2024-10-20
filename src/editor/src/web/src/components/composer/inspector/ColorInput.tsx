@@ -1,21 +1,21 @@
 import { observer } from "mobx-react-lite";
 import type { FunctionComponent } from "react";
 
-import type { ColorDefinition } from "@fantasy-console/runtime/src/cartridge/archive/util";
+import { Color3 } from "@fantasy-console/core/src/util";
 
 interface Props {
   label: string;
-  color: ColorDefinition; // @TODO LOL this is going to change! Core needs a color type, like Vector
+  color: Color3;
 }
 
 /**
  * Convert a colour into a CSS hex string e.g. `#FF7000`
  */
-function formatColorString(color: ColorDefinition) {
+function formatColorString(color: Color3) {
   return '#' + (
-    (~~(color.r * 0xFF)).toString(16).padStart(2, '0') +
-    (~~(color.g * 0xFF)).toString(16).padStart(2, '0') +
-    (~~(color.b * 0xFF)).toString(16).padStart(2, '0')
+    (~~color.r).toString(16).padStart(2, '0') +
+    (~~color.g).toString(16).padStart(2, '0') +
+    (~~color.b).toString(16).padStart(2, '0')
   );
 }
 

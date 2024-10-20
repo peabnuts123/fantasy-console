@@ -1,7 +1,7 @@
-import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { makeAutoObservable } from "mobx";
 import { v4 as uuid } from 'uuid';
 
+import { Color3 } from '@fantasy-console/core/src/util';
 import { ComponentDefinition, ComponentDefinitionType, DirectionalLightComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
 import { toColor3Definition } from "@fantasy-console/runtime/src/util";
 
@@ -33,7 +33,7 @@ export class DirectionalLightComponentData implements IComposerComponentData {
     return new DirectionalLightComponentData(
       uuid(),
       1,
-      Color3.White(),
+      Color3.white(),
     )
   }
 

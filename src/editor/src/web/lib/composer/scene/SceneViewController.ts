@@ -232,14 +232,14 @@ export class SceneViewController {
       const light = new DirectionalLightBabylon(`light_directional`, Vector3Babylon.Down(), this.babylonScene);
       light.specular = Color3Babylon.Black();
       light.intensity = componentData.intensity;
-      light.diffuse = componentData.color;
+      light.diffuse = toColor3Babylon(componentData.color);
       return new DirectionalLightComponentRuntime(componentData.id, gameObject, light);
     } else if (componentData instanceof PointLightComponentData) {
       /* Point Light component */
       const light = new PointLightBabylon(`light_point`, Vector3Babylon.Zero(), this.babylonScene);
       light.specular = Color3Babylon.Black();
       light.intensity = componentData.intensity;
-      light.diffuse = componentData.color;
+      light.diffuse = toColor3Babylon(componentData.color);
       return new PointLightComponentRuntime(componentData.id, gameObject, light);
     } else {
       console.error(`[SceneViewController] (loadSceneObject) Unrecognised component data: `, componentData);
