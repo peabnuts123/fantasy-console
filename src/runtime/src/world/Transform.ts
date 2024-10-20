@@ -70,10 +70,9 @@ export class WrappedBabylonVector3 extends Vector3 {
   }
 }
 
-// const debugLog = (_: string) => {};
-const debugLog = console.log;
+const debugLog = (_: string) => {};
+// const debugLog = console.log;
 // const debugLog = console.trace;
-// function debugLog(s: string): void
 
 /**
  * Implementation of the `ITransform` interface wrapped around
