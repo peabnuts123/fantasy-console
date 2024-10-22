@@ -76,16 +76,6 @@
           "id": "21c414bb-bde8-4c25-bbcd-ac2e1b911db6",
           "type": "script",
           "scriptFileId": "58189dec-56a3-44db-b7a5-c8171abfb3aa"
-        },
-        {
-          "id": "319956a3-2153-4272-9bbb-d7c89e7ec84c",
-          "type": "light_point",
-          "intensity": 1,
-          "color": {
-            "r": 255,
-            "g": 128,
-            "b": 0
-          }
         }
       ],
       "children": [
@@ -114,6 +104,16 @@
               "id": "a6463e06-aeb6-4d52-b447-46dd55584b2c",
               "type": "mesh",
               "meshFileId": "a0bfe951-b0e3-449c-a9ef-37734a81a6e6"
+            },
+            {
+              "id": "319956a3-2153-4272-9bbb-d7c89e7ec84c",
+              "type": "light_point",
+              "intensity": 1,
+              "color": {
+                "r": 255,
+                "g": 128,
+                "b": 0
+              }
             }
           ]
         }

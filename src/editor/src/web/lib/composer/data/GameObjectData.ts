@@ -33,20 +33,38 @@ export class GameObjectData {
    * Get a component on this GameObjectData. If the component cannot be found or is not of the expected type,
    * an Error is thrown.
    * @param componentId Id of the component to get.
-   * @param ComponentType Expected type of the component.
+   * @param ExpectedComponentType Expected type of the component.
    */
-  public getComponent<TComponent extends IComposerComponentData>(componentId: string, ComponentType: ClassReference<TComponent>): TComponent {
+  public getComponent<TComponent extends IComposerComponentData>(componentId: string, ExpectedComponentType: ClassReference<TComponent>): TComponent;
+  /**
+   * Get a component on this GameObjectData. If the component cannot be found or is not of the expected type,
+   * an Error is thrown.
+   * @param componentId Id of the component to get.
+   * @param ExpectedComponentType Array of possible expected types of the component.
+   */
+  public getComponent<TComponent extends IComposerComponentData>(componentId: string, ExpectedComponentTypes: ClassReference<TComponent>[]): TComponent;
+  public getComponent<TComponent extends IComposerComponentData>(componentId: string, expectedTypeOrTypes: ClassReference<TComponent> | ClassReference<TComponent>[]): TComponent {
     const component = this.components.find((component) => component.id === componentId);
 
     if (component === undefined) {
       throw new Error(`No component with ID '${componentId}' exists on GameObjectData '${this.name}' (${this.id})`);
     }
 
-    if (!(component instanceof ComponentType)) {
-      throw new Error(`Component with ID '${componentId}' on GameObjectData '${this.name}' (${this.id}) is not of expected type. (Expected='${ComponentType.name}') (Actual='${component.constructor.name}')`)
+    let expectedComponentTypes: ClassReference<TComponent>[] = [];
+    if (Array.isArray(expectedTypeOrTypes)) {
+      expectedComponentTypes = expectedTypeOrTypes;
+    } else {
+      expectedComponentTypes.push(expectedTypeOrTypes);
     }
 
-    return component;
+    const instanceOfAnyComponentType = expectedComponentTypes.some((ComponentType) => component instanceof ComponentType);
+    if (!instanceOfAnyComponentType) {
+      const expectedComponentTypeNames = expectedComponentTypes.map((x) => x.name).join('|');
+      throw new Error(`Component with ID '${componentId}' on GameObjectData '${this.name}' (${this.id}) is not of expected type. (Expected='${expectedComponentTypeNames}') (Actual='${component.constructor.name}')`)
+    }
+
+    // Sadly we have to launder as the `instanceof` check is inside a `some()` aggregation
+    return component as TComponent;
   }
 
   /**

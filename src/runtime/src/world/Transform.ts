@@ -6,69 +6,9 @@ import { Vector3 } from '@fantasy-console/core/src/util/Vector3';
 import { Transform as TransformCore } from '@fantasy-console/core/src/world';
 
 import type { TransformData } from '../cartridge';
-import { toVector3Babylon } from '../util';
+import { toVector3Babylon, WrappedVector3Babylon } from '../util';
 import type { GameObject } from './GameObject';
 
-/**
- * A Vector3 that is implemented around wrapping a Babylon Vector3 internally.
- */
-export class WrappedBabylonVector3 extends Vector3 {
-
-  /**
-   * A function that can access the vector that is being wrapped.
-   */
-  private readonly getValue: () => Vector3Babylon;
-  /**
-   * A function that can set the value of the vector being wrapped.
-   */
-  private readonly _setValue: (value: Vector3Babylon) => void;
-
-  public constructor(getValue: () => Vector3Babylon, setValue: (value: Vector3Babylon) => void) {
-    const vector = getValue();
-    super(vector.x, vector.y, vector.z);
-    this.getValue = getValue;
-    this._setValue = setValue;
-  }
-
-  public override get x(): number { return this.getValue().x; }
-  public override set x(value: number) {
-    super.x = value;
-    this._setValue(new Vector3Babylon(super.x, super.y, super.z));
-  }
-
-  public override get y(): number { return this.getValue().y; }
-  public override set y(value: number) {
-    super.y = value;
-    this._setValue(new Vector3Babylon(super.x, super.y, super.z));
-  }
-
-  public override get z(): number { return this.getValue().z; }
-  public override set z(value: number) {
-    super.z = value;
-    this._setValue(new Vector3Babylon(super.x, super.y, super.z));
-  }
-
-  public setValue(value: Vector3Babylon): void {
-    super.x = value.x;
-    super.y = value.y;
-    super.z = value.z;
-    this._setValue(value);
-  }
-
-  public toString(): string {
-    return `[${this.x}, ${this.y}, ${this.z}]`;
-  }
-
-  // @TODO We should probably stop relying on `super.x/y/z`
-  // being the same as the underlying value
-  // If we could just issue partial updates or always
-  // reference the underlying value instead then we wouldn't
-  // have to initialise + would prevent a category of bugs
-  public initialise(value: Vector3Babylon | undefined = undefined) {
-    value ??= this.getValue().clone();
-    this.setValue(value);
-  }
-}
 
 const debugLog = (_: string) => {};
 // const debugLog = console.log;
@@ -83,12 +23,12 @@ export class Transform extends TransformCore {
   private _parent: Transform | undefined;
   private _gameObject!: GameObject;
   private _children: Transform[];
-  private readonly _position: WrappedBabylonVector3;
-  private readonly _localPosition: WrappedBabylonVector3;
-  private readonly _rotation: WrappedBabylonVector3;
-  private readonly _localRotation: WrappedBabylonVector3;
-  private readonly _scale: WrappedBabylonVector3;
-  private readonly _localScale: WrappedBabylonVector3;
+  private readonly _position: WrappedVector3Babylon;
+  private readonly _localPosition: WrappedVector3Babylon;
+  private readonly _rotation: WrappedVector3Babylon;
+  private readonly _localRotation: WrappedVector3Babylon;
+  private readonly _scale: WrappedVector3Babylon;
+  private readonly _localScale: WrappedVector3Babylon;
 
   public constructor(name: string, scene: BabylonScene, parent: Transform | undefined, transform: TransformData) {
     super();
@@ -104,14 +44,14 @@ export class Transform extends TransformCore {
       using the getter / setter lambdas provided.
     */
     /* Position */
-    this._position = new WrappedBabylonVector3(
+    this._position = new WrappedVector3Babylon(
       () => this.node.absolutePosition,
       (value) => {
         debugLog(`[Transform] (position.set): ${value}`);
         this.node.setAbsolutePosition(value);
       },
     );
-    this._localPosition = new WrappedBabylonVector3(
+    this._localPosition = new WrappedVector3Babylon(
       () => this.node.position,
       (value) => {
         debugLog(`[Transform] (localPosition.set): ${value}`);
@@ -119,7 +59,7 @@ export class Transform extends TransformCore {
       },
     );
     /* Rotation */
-    this._rotation = new WrappedBabylonVector3(
+    this._rotation = new WrappedVector3Babylon(
       () => this.node.absoluteRotationQuaternion.toEulerAngles(),
       (value) => {
         debugLog(`[Transform] (rotation.set): ${value}`);
@@ -137,7 +77,7 @@ export class Transform extends TransformCore {
         this.node.rotationQuaternion = this.node.rotationQuaternion.multiply(rotationDelta);
       }
     );
-    this._localRotation = new WrappedBabylonVector3(
+    this._localRotation = new WrappedVector3Babylon(
       () => {
         if (this.node.rotationQuaternion === null) {
           return this.node.rotation;
@@ -151,7 +91,7 @@ export class Transform extends TransformCore {
       },
     );
     /* Scale */
-    this._scale = new WrappedBabylonVector3(
+    this._scale = new WrappedVector3Babylon(
       () => this.node.absoluteScaling,
       (value) => {
         debugLog(`[Transform] (scale.set): ${value}`);
@@ -201,7 +141,7 @@ export class Transform extends TransformCore {
         this.node.computeWorldMatrix(); // @NOTE force re-compute absolute scale
       }
     );
-    this._localScale = new WrappedBabylonVector3(
+    this._localScale = new WrappedVector3Babylon(
       () => this.node.scaling,
       (value) => {
         debugLog(`[Transform] (localScale.set): ${value}`);

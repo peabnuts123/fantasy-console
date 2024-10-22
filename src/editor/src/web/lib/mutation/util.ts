@@ -8,13 +8,13 @@ import { MutationPath, resolvePath, ResolvePathSelector } from "@lib/util/JsoncC
  * @param id ID of the GameObject to find.
  * @param parentObject Parent GameObject in which to search.
  */
-export function findGameObjectInChildren(id: string, parentObject: GameObjectDefinition): [GameObjectDefinition, MutationPath] | undefined {
+export function findGameObjectInChildren(id: string, parentObject: GameObjectDefinition): [GameObjectDefinition, MutationPath<GameObjectDefinition>] | undefined {
   if (parentObject.children === undefined) return;
 
   // Iterate children objects
   for (let i = 0; i < parentObject.children.length; i++) {
     const object = parentObject.children[i];
-    const objectPath = resolvePath<GameObjectDefinition>((parent) => parent.children![i]);
+    const objectPath = resolvePath<GameObjectDefinition, GameObjectDefinition>((parent) => parent.children![i]);
     if (object.id === id) {
       // Found object as child of parent
       return [object, objectPath];
@@ -43,12 +43,12 @@ export function findGameObjectInChildren(id: string, parentObject: GameObjectDef
  * console.log(path); // Prints `["objects", 1, "children", 2, "transform", "position"]
  * ```
  */
-export function resolvePathForSceneObjectMutation(gameObjectId: string, scene: SceneDefinition, pathSelector: ResolvePathSelector<GameObjectDefinition>): MutationPath {
-  let target: [GameObjectDefinition, MutationPath] | undefined = undefined;
+export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: string, scene: SceneDefinition, pathSelector: ResolvePathSelector<GameObjectDefinition, TPathTarget>): MutationPath<TPathTarget> {
+  let target: [GameObjectDefinition, MutationPath<TPathTarget>] | undefined = undefined;
 
   for (let i = 0; i < scene.objects.length; i++) {
     const object = scene.objects[i];
-    const objectPath = resolvePath<SceneDefinition>((scene) => scene.objects[i]);
+    const objectPath = resolvePath<SceneDefinition, GameObjectDefinition>((scene) => scene.objects[i]);
     if (object.id === gameObjectId) {
       // Found object as top-level object
       target = [object, objectPath];

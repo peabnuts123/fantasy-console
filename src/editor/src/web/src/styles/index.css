@@ -33,9 +33,17 @@
     display: inline;
     width: 24px;
   }
-  .icon--small {
-    display: inline;
-    width: 16px;
+
+  /* Bloody react-color picker has all these hard-coded inline styles for some reason */
+  .color-picker .w-color-editable-input {
+    --editable-input-label-color: black !important;
+    --editable-input-color: black !important;
+  }
+  .color-picker .w-color-editable-input input {
+    padding: 5px !important;
+  }
+  .color-picker .w-color-swatch > div:focus {
+    outline: 1px solid fuchsia !important;
   }
 }
 

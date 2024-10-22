@@ -70,7 +70,7 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
                 className="flex bg-white hover:bg-blue-300 active:bg-blue-500 justify-center items-center p-2 cursor-pointer"
                 onClick={onClickDelete}
               >
-                <TrashIcon className="icon--small" />
+                <TrashIcon className="icon w-4" />
               </button>
             )}
           />

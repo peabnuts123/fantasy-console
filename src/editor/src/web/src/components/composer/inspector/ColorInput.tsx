@@ -1,59 +1,102 @@
 import { observer } from "mobx-react-lite";
-import type { FunctionComponent } from "react";
+import { KeyboardEventHandler, useEffect, useMemo, useRef, useState, type FunctionComponent } from "react";
+import { ColorResult, getContrastingColor, rgbaToHex, rgbStringToHsva } from '@uiw/color-convert';
+import Sketch from '@uiw/react-color-sketch';
 
 import { Color3 } from "@fantasy-console/core/src/util";
 
 interface Props {
   label: string;
   color: Color3;
+  onChange?: (newValue: Color3) => void;
 }
 
-/**
- * Convert a colour into a CSS hex string e.g. `#FF7000`
- */
-function formatColorString(color: Color3) {
-  return '#' + (
-    (~~color.r).toString(16).padStart(2, '0') +
-    (~~color.g).toString(16).padStart(2, '0') +
-    (~~color.b).toString(16).padStart(2, '0')
-  );
-}
+export const ColorInput: FunctionComponent<Props> = observer(({ label, color, onChange }) => {
+  // Prop defaults
+  onChange ??= () => { };
 
-export const ColorInput: FunctionComponent<Props> = observer(({ label, color }) => {
-  const bgColor = formatColorString(color);
+  // Refs
+  const divRef = useRef<HTMLDivElement>(null);
+
+  // State
+  const [isColorPickerVisible, setIsColorPickerVisible] = useState<boolean>(false);
+
+  // Computed state
+  const colorHex = rgbaToHex({ r: color.r, g: color.g, b: color.b, a: 255 });
+  const textColor = getContrastingColor(colorHex);
+
+  // Memoized state
+  const initialColor = useMemo(() => colorHex, [isColorPickerVisible]);
+
+  /*
+   * Toggle visibility of the picker when anything under this control has
+   * focus. Close enough for what we're doing here.
+   */
+  useEffect(() => {
+    const onFocus = (e: FocusEvent) => {
+      const isTargetChildOfThisControl = divRef.current!.contains(e.target as Node);
+      setIsColorPickerVisible(isTargetChildOfThisControl);
+    };
+
+    document.addEventListener('focusin', onFocus);
+    return () => {
+      document.removeEventListener('focusin', onFocus);
+    };
+  }, []);
+
+  // Functions
+  /**
+   * Hide the colour picker when user presses Escape
+   */
+  const onKeyPress: KeyboardEventHandler<HTMLDivElement> = (e) => {
+    if (!isColorPickerVisible) return;
+    if (e.key === 'Escape') {
+      setIsColorPickerVisible(false);
+    }
+  };
+
+  /**
+   * Hide the colour picker when user clicks outside of it
+   */
+  const onClickFacade = () => {
+    setIsColorPickerVisible(false);
+  }
+
+  const onColorChange = ({ rgb }: ColorResult) => {
+    const result = new Color3(rgb.r, rgb.g, rgb.b);
+    onChange(result);
+  };
+
   return (
-    <div className="mt-2">
+    <div ref={divRef}>
       <label className="font-bold">{label}</label>
-      <div className="">
-        {/* X */}
-        <ColorInputComponent label="R" value={color.r} bgColor={bgColor} />
-        {/* Y */}
-        <ColorInputComponent label="G" value={color.g} bgColor={bgColor} />
-        {/* Z */}
-        <ColorInputComponent label="B" value={color.b} bgColor={bgColor} />
+      <div className="relative" onKeyDown={onKeyPress}>
+        <input
+          type="text"
+          className="w-full p-2"
+          style={{ backgroundColor: colorHex, color: textColor }}
+          value={colorHex}
+          readOnly={true}
+        />
+
+        {isColorPickerVisible && (
+          <Sketch
+            /* @NOTE Bloody hell, react-color has all these hard-coded inline styles that have to be overridden */
+            className="color-picker absolute bottom-full !w-full z-20 !rounded-none !shadow-none border border-[blue]"
+            color={initialColor}
+            disableAlpha={true}
+            presetColors={false}
+            onChange={onColorChange}
+          />
+        )}
+
       </div>
+      {isColorPickerVisible && (
+        <div
+          className="w-screen h-screen absolute inset-0 z-10"
+          onClick={onClickFacade}
+        />
+      )}
     </div>
   );
 });
-
-interface ColorInputComponentProps {
-  label: string;
-  value: number;
-  bgColor: string;
-}
-
-const ColorInputComponent: FunctionComponent<ColorInputComponentProps> = ({ label, value, bgColor }) => {
-  return (
-    <div className="pl-3 mb-1">
-      <label className="block relative pl-5">
-        <span className="absolute left-0 py-1">{label}</span>
-        <input
-          type="number"
-          className="w-full p-1"
-          style={{ backgroundColor: bgColor }}
-          value={value} readOnly={true}
-        />
-      </label>
-    </div>
-  );
-}

@@ -16,9 +16,9 @@ export class JsoncContainer<TRawType extends object> {
     this.currentValue = this.parse();
   }
 
-  public mutate<TValue>(pathSelector: ResolvePathSelector<TRawType>, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void;
-  public mutate<TValue>(path: MutationPath, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void;
-  public mutate<TValue>(pathOrSelector: ResolvePathSelector<TRawType> | MutationPath, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void {
+  public mutate<TValue>(pathSelector: ResolvePathSelector<TRawType, TValue>, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void;
+  public mutate<TValue>(path: MutationPath<TValue>, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void;
+  public mutate<TValue>(pathOrSelector: ResolvePathSelector<TRawType, TValue> | MutationPath<TValue>, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void {
     // Validate for sanity (typechecking should disallow, but...)
     if (value === undefined) throw new Error('Cannot set JSON value to `undefined`. Use `delete()` to remove a value, or `null` to set it to null.');
 
@@ -30,7 +30,7 @@ export class JsoncContainer<TRawType extends object> {
         ...options,
       };
 
-    let path: MutationPath;
+    let path: MutationPath<TValue>;
     if (Array.isArray(pathOrSelector)) {
       // Path
       path = pathOrSelector;
@@ -80,10 +80,10 @@ interface ITerminatableProxy {
 }
 
 /** A selector function that takes an object and returns some sub-property */
-export type ResolvePathSelector<TTarget extends object> = (target: TTarget) => any;
+export type ResolvePathSelector<TContext extends object, TTarget> = (target: TContext) => TTarget;
 
 /** An array of path segments. Strings are properties, and numbers are array indices. */
-export type MutationPath = (string | number)[];
+export type MutationPath<_TTarget> = (string | number)[];
 
 /**
  * Use an arrow function to select a path within a given target object type
@@ -92,9 +92,9 @@ export type MutationPath = (string | number)[];
  * @returns An array of path segments, for interacting with JSON. Numeric path segments will be converted to numbers.
  * @example resolvePath<MyObject>((myObject) => myObject.people[0].name) // Returns ['people', 0, 'name']
  */
-export function resolvePath<TTarget extends object>(selector: ResolvePathSelector<TTarget>): MutationPath {
+export function resolvePath<TContext extends object, TTarget>(selector: ResolvePathSelector<TContext, TTarget>): MutationPath<TTarget> {
   // Create a proxy for the type
-  const proxy = createPathProxy<TTarget>();
+  const proxy = createPathProxy<TContext>();
   // Look up a path within the type (using a lambda function)
   const result = selector(proxy) as ITerminatableProxy;
   // Use special symbol to resolve path from proxy
@@ -108,7 +108,7 @@ export function resolvePath<TTarget extends object>(selector: ResolvePathSelecto
  * Indexing a path proxy with `ResolvePathTerminatingSymbol` will return the path value.
  * @param path Persistent state passed down through recursive calls
  */
-function createPathProxy<TTarget extends object>(path: MutationPath = []) {
+function createPathProxy<TTarget extends object>(path: MutationPath<any> = []) {
   /* @NOTE Capture `path` in a closure */
   return new Proxy<TTarget>({} as TTarget, {
     get(_, prop) {

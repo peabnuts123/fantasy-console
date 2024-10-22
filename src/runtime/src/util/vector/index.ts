@@ -1,7 +1,9 @@
 import { Vector3 as Vector3Babylon } from '@babylonjs/core/Maths/math.vector'
 import { IVector3Like } from '@babylonjs/core/Maths/math.like';
 import { Vector3 as Vector3Core } from '@fantasy-console/core/src/util';
-import { Vector3Definition } from '../cartridge/archive/util/vector';
+import { Vector3Definition } from '../../cartridge/archive/util/vector';
+
+export * from './WrappedVector3Babylon';
 
 export function toVector3Core(vector: IVector3Like): Vector3Core {
   return new Vector3Core(

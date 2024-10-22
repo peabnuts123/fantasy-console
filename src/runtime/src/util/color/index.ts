@@ -1,7 +1,9 @@
 import { Color3 as Color3Babylon, Color4 as Color4Babylon } from '@babylonjs/core/Maths/math.color';
 import { IColor3Like, IColor4Like } from '@babylonjs/core/Maths/math.like';
 import { Color3 as Color3Core, Color4 as Color4Core } from '@fantasy-console/core/src/util';
-import { ColorDefinition } from '../cartridge/archive/util'
+import { ColorDefinition } from '../../cartridge/archive/util'
+
+export * from './WrappedColor3Babylon';
 
 export function toColor3Core(color: IColor3Like): Color3Core {
   // Convert from Babylon [0..1] domain to typical [0..255] domain
