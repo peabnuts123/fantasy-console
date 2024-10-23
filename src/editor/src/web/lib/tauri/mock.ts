@@ -6,9 +6,10 @@ const zipAsync = promisify(zip);
 import type * as TauriDialog from '@tauri-apps/api/dialog';
 import type * as TauriPath from '@tauri-apps/api/path';
 import type * as TauriFs from '@tauri-apps/api/fs';
-import type * as TauriEvent from '@tauri-apps/api/event';
+import type * as TauriWindow from '@tauri-apps/api/window';
 import type { CreateCartridgeCmdArgs } from "@lib/composer/ComposerController";
 import type * as WatchFsPlugin from "tauri-plugin-fs-watch-api";
+import { EventCallback, EventName } from "@tauri-apps/api/event";
 
 /* Configuration */
 /**
@@ -55,7 +56,7 @@ export class BrowserMock {
       }
     }
 
-    throw throwUnhandled(`[BrowserMock] (mockTauri) Unimplemented 'tauri' command: `, args);
+    throw throwUnhandled(`[BrowserMock] (mockTauri) Unimplemented 'tauri' command. (Module='${args.__tauriModule}') (cmd='${String(args.message.cmd)}')`, args);
   }
 
   /**
@@ -100,6 +101,10 @@ export function mockTauri() {
   window.__TAURI__ ??= {
     convertFileSrc: mock.mockConvertFileSrc.bind(mock),
   };
+  // Window metadata
+  (window as any).__TAURI_METADATA__ ??= {
+    __currentWindow: MockEventSystem.windowLabel,
+  }
 
   mockIPC((cmd, args) =>
     mock.handle(cmd, args)
@@ -144,6 +149,10 @@ function promisify<TArgument, TAsyncError, TAsyncResult>(asyncFunction: (arg: TA
  * Declare the function's argument names (as passed by the IPC) and then
  * reference the function's declaration for type inference.
  */
+/*
+  @NOTE The typedefs need to match the actual JS where __TAURI_IPC__ is called, not necessarily
+  the definition of the function that's exposed through the API
+ */
 interface ITauriMock {
   Dialog: {
     openDialog: MockHandlerWith1Arg<'options', typeof TauriDialog.open>;
@@ -158,11 +167,18 @@ interface ITauriMock {
     writeFile: MockHandlerWith3Args<'path', 'content', 'options', typeof TauriFs.writeBinaryFile>;
   },
   Event: {
-    listen: MockHandlerWith2Args<'event', 'handler', typeof TauriEvent.listen>
+    listen(args: { event: EventName, handler: number }): number;
+    unlisten(args: { event: EventName, eventId: number }): void;
+    emit(args: { event: EventName, payload: any }): void;
+  },
+  Window: {
+    createWebview: MockHandlerWith1Arg<'data', (args: { options: TauriWindow.WindowOptions & { label: string } }) => Promise<void>>;
+    manage(args: { data: { label: string | undefined, cmd: { type: string } } }): Promise<void>;
   }
 }
 
 /* Tauri mocks */
+const openWebviews: Record<string, Window> = {};
 const TauriMock: ITauriMock = {
   Dialog: {
     openDialog({ options }) {
@@ -204,7 +220,7 @@ const TauriMock: ITauriMock = {
         throw throwUnhandled(`[Fs] (readFile) Unimplemented - 'options.dir': `, path, options);
       }
       if (path.startsWith(Paths.MagicFileRoot)) {
-        const result = await fetch(path.replace(Paths.MagicFileRoot, ''))
+        const result = await fetch(path.replace(Paths.MagicFileRoot, ''));
         if (result.ok) {
           const buffer = await result.arrayBuffer();
           return new Uint8Array(buffer);
@@ -220,12 +236,149 @@ const TauriMock: ITauriMock = {
     },
   },
   Event: {
-    listen(args) {
-      console.log(`[TauriMock] (listen) got args: `, args);
-      return () => { };
+    listen({ event, handler: handlerId }) {
+      console.log(`[Event] (listen) (event='${event}') (handlerId='${handlerId}')`);
+      MockEventSystem.on(event, handlerId);
+      return handlerId;
     },
+    unlisten({ event, eventId }) {
+      console.log(`[Event] (unlisten) (event='${event}') (eventId='${eventId}')`);
+      MockEventSystem.off(event, eventId);
+    },
+    emit({ event, payload }) {
+      console.log(`[Event] (emit) (event='${event}') Payload: `, payload);
+      MockEventSystem.emit(event, payload);
+    },
+  },
+  Window: {
+    createWebview({ data: { options } }) {
+      console.log(`[Window] (createWebview) Opening: ${options.url}`, options);
+      if (openWebviews[options.label]) {
+        throw new Error(`Attempted to open new web view with the same name: '${options.label}'`);
+      }
+
+      const width = 640;
+      const height = 480;
+      const left = (window.screen.width / 2) - (width / 2);
+      const top = (window.screen.height / 2) - (height / 2);
+      const webview = window.open(options.url, options.label, `width=${width},height=${height},popup=true,left=${left},top=${top}`)!;
+
+      // Wait for modal to load
+      webview.addEventListener('load', () => {
+        // Store in dictionary
+        openWebviews[options.label] = webview;
+
+        // Bind "onClose" event
+        webview.addEventListener('beforeunload', (e) => {
+          delete openWebviews[options.label]
+        });
+      });
+    },
+    manage({ data: { label, cmd: { type } } }) {
+      console.log(`[Window] (manage) (type='${type}')`);
+      switch (type) {
+        case 'close':
+          if (label === undefined || label === MockEventSystem.windowLabel) {
+            // Closing self
+            window.close();
+          } else {
+            // Trying to close another window (that presumably this instance opened)
+            // @TODO if we have child windows closing each other, we'll need to make the `main` window
+            //  coordinate this through channel messages
+            const webview = openWebviews[label];
+            if (!webview) {
+              throw new Error(`Could not close webview with name '${label}' - No webview is open with this name`);
+            }
+            webview.close();
+          }
+          break;
+        default:
+          throw new Error(`Unimplemented Tauri Window.manage command type: '${type}'`);
+      }
+
+      return Promise.resolve();
+    }
   }
 }
+
+interface MockEventSystemMessage {
+  event: string;
+  payload: any;
+  windowLabel: string;
+}
+type StoredHandler = (args: MockEventSystemMessage) => void;
+
+class MockEventSystem {
+  // State
+  private static channel: BroadcastChannel = (() => {
+    const channel = new BroadcastChannel('tauri_mock_events');
+    channel.addEventListener('message', this.onMessage.bind(this));
+    return channel;
+  })();
+
+  private static subscriptions: Record<string, number[]> = {};
+
+  public static on<T>(event: EventName, handlerId: number) {
+    if (this.subscriptions[event] === undefined) {
+      this.subscriptions[event] = [];
+    }
+    this.subscriptions[event].push(handlerId);
+  }
+
+  public static off<T>(event: EventName, handlerId: number) {
+    if (this.subscriptions[event] === undefined) {
+      return;
+    }
+    const index = this.subscriptions[event].indexOf(handlerId);
+    if (index >= 0) {
+      this.subscriptions[event].splice(index, 1);
+    }
+  }
+
+  public static emit(event: string, payload: any) {
+    this.channel.postMessage(JSON.stringify({
+      event,
+      payload,
+      windowLabel: MockEventSystem.windowLabel,
+    } satisfies MockEventSystemMessage));
+  }
+
+  private static resolveHandlerId(handlerId: number): StoredHandler {
+    // @NOTE Resolve handler ID => handler from window prop
+    // @TODO Is there a proper way to actually fetch this?
+    const handler = (window as any)[`_${handlerId}`] as EventCallback<any>;
+    if (handler === undefined) return () => { };
+
+    return (data) => {
+      handler({
+        ...data,
+        id: handlerId,
+      })
+    }
+  }
+
+  private static onMessage(e: MessageEvent) {
+    const { event, payload, windowLabel } = JSON.parse(e.data) as MockEventSystemMessage;
+
+    if (this.subscriptions[event] === undefined) {
+      return;
+    }
+
+    this.subscriptions[event]
+      .map((handlerId) => this.resolveHandlerId(handlerId))
+      .forEach((handler) => handler({
+        event,
+        payload,
+        windowLabel,
+      }));
+  }
+
+  public static get windowLabel(): string {
+    // @NOTE @ASSUMPTION: Only `main` will have empty window.name
+    return window.name || 'main';
+  }
+}
+
 
 /* Type Definitions */
 

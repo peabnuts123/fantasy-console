@@ -8,6 +8,7 @@ import '@app/styles/index.css';
 import Condition from '@app/components/util/condition';
 import type { Library } from '@lib/index';
 import { createLibrary, LibraryContext } from '@lib/index';
+import { mockTauri } from '@lib/tauri/mock'; // @TODO Exclude from production build
 
 /* Mock Tauri IPC if not running in Tauri */
 if (typeof window !== "undefined") {
@@ -15,7 +16,7 @@ if (typeof window !== "undefined") {
     console.log(`Running in Tauri`);
   } else {
     console.log(`Running in browser`);
-    void import('@lib/tauri/mock').then(({ mockTauri }) => mockTauri())
+    mockTauri();
   }
 }
 
