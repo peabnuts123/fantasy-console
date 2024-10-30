@@ -36,17 +36,17 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
 
   public update({ SceneViewController }: SceneMutationArguments, { position, resetGizmo }: SetGameObjectPositionMutationUpdateArgs): void {
     this.position = position;
-    // - 1. Config state
+    // - 1. Update data
     this.gameObject.transform.position = position;
-    // - 2. Babylon state
-    this.gameObject.sceneInstance!.transform.position = position;
+    // - 2. Update scene
+    this.gameObject.sceneInstance!.transform.localPosition = position;
     if (resetGizmo) {
       SceneViewController.selectionManager.updateGizmos();
     }
   }
 
   public apply({ SceneViewController }: SceneMutationArguments): void {
-    // - 3. JSONC
+    // - 3. Update JSONC
     const updatedValue: Vector3Archive = {
       x: this.position.x,
       y: this.position.y,

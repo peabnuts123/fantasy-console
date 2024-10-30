@@ -149,9 +149,30 @@ export class SelectionManager {
         this.fakeTransformTarget = new TransformNode("SelectionManager_fakeTransformTarget");
       }
 
+      // Ensure fake transform target's local coordinates match the local coordinates of the
+      // real transform target by giving it a dummy parent transform
+      if (realTransformTarget.parent !== null) {
+        const realParent = realTransformTarget.parent as TransformNode;
+        if (this.fakeTransformTarget.parent === null) {
+          // Creating a new fake transform parent
+          const fakeParent = new TransformNode(`SelectionManager_fakeTransformParent`);
+          fakeParent.position = realParent.absolutePosition.clone();
+          fakeParent.rotationQuaternion = realParent.absoluteRotationQuaternion.clone();
+          this.fakeTransformTarget.parent = fakeParent;
+        } else {
+          // Re-using an existing fake transform parent
+          const fakeParent = this.fakeTransformTarget.parent as TransformNode;
+          fakeParent.position = realParent.absolutePosition.clone();
+          fakeParent.rotationQuaternion = realParent.absoluteRotationQuaternion.clone();
+        }
+      } else {
+        // No fake transform parent
+        this.fakeTransformTarget.parent = null;
+      }
+
       // Position dummy transform target on the selection target
-      this.fakeTransformTarget.position = realTransformTarget.absolutePosition.clone();
-      this.fakeTransformTarget.rotationQuaternion = realTransformTarget.absoluteRotationQuaternion.clone();
+      this.fakeTransformTarget.position = realTransformTarget.position.clone();
+      this.fakeTransformTarget.rotationQuaternion = (realTransformTarget.rotationQuaternion ?? realTransformTarget.rotation.toQuaternion()).clone();
       // Reset scaling to uniform scale, because rotation doesn't work with non-uniform scaling
       // Scaling is done as a percentage to accommodate this
       this.fakeTransformTarget.scaling = Vector3Babylon.One();

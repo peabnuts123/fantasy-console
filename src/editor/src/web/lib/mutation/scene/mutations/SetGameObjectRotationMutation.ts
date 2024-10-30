@@ -36,17 +36,17 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
 
   update({ SceneViewController }: SceneMutationArguments, { rotation, resetGizmo }: SetGameObjectRotationMutationUpdateArgs): void {
     this.rotation = rotation;
-    // - 1. Config state
+    // - 1. Update Data
     this.gameObject.transform.rotation = rotation;
-    // - 2. Babylon state
-    this.gameObject.sceneInstance!.transform.rotation = rotation;
+    // - 2. Update Scene
+    this.gameObject.sceneInstance!.transform.localRotation = rotation;
     if (resetGizmo) {
       SceneViewController.selectionManager.updateGizmos();
     }
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {
-    // - 3. JSONC
+    // - 3. Update JSONC
     const updatedValue: ArchiveVector3 = {
       x: this.rotation.x,
       y: this.rotation.y,

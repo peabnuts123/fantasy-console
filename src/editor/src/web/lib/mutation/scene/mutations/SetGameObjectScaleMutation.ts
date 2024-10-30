@@ -43,17 +43,17 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
     if ('scaleDelta' in updateArgs) {
       const { scaleDelta } = updateArgs;
       this.scale.multiplySelf(scaleDelta);
-      // - 1. Config state
+      // - 1. Update Data
       this.gameObject.transform.scale.multiplySelf(scaleDelta);
-      // - 2. Babylon state
-      this.gameObject.sceneInstance!.transform.scale.multiplySelf(scaleDelta);
+      // - 2. Update Scene
+      this.gameObject.sceneInstance!.transform.localScale.multiplySelf(scaleDelta);
     } else {
       const { scale } = updateArgs;
       this.scale = scale;
-      // - 1. Config state
+      // - 1. Update Data
       this.gameObject.transform.scale = scale;
-      // - 2. Babylon state
-      this.gameObject.sceneInstance!.transform.scale = scale;
+      // - 2. Update Scene
+      this.gameObject.sceneInstance!.transform.localScale = scale;
     }
 
     if (updateArgs.resetGizmo) {
@@ -62,7 +62,7 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {
-    // - 3. JSONC
+    // - 3. Update JSONC
     const updatedValue: ArchiveVector3 = {
       x: this.scale.x,
       y: this.scale.y,
