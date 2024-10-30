@@ -28,6 +28,9 @@
       active:bg-blue-500 flex flex-row items-center [&>svg]:mr-1
     ;
   }
+  .button:disabled {
+    @apply border-[#AAA] text-[#AAA] hover:bg-white focus:bg-white active:bg-white cursor-not-allowed
+  }
 
   .icon {
     display: inline;
@@ -66,5 +69,12 @@
       2px 2px 0 black,
       3px 3px 0 black,
       4px 4px 0 black;
+  }
+  .retro-shadow:disabled {
+    box-shadow:
+      1px 1px 0 #AAA,
+      2px 2px 0 #AAA,
+      3px 3px 0 #AAA,
+      4px 4px 0 #AAA;
   }
 }

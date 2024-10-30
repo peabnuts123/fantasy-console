@@ -5,7 +5,10 @@ import { TrashIcon } from '@heroicons/react/24/solid'
 
 import { AssetDataOfType, AssetType } from "@fantasy-console/runtime/src/cartridge";
 
+import { useLibrary } from "@lib/index";
+import { showModal } from '@lib/modal';
 import { useAssetDrop } from "@app/interactions/assets";
+import { AssetReferenceModalAssetReference, AssetReferenceModalData, AssetReferenceResultPayload } from "@app/pages/modal/asset-reference";
 import Condition from "@app/components/util/condition";
 import { getIconForAssetType } from "../AssetList";
 
@@ -26,6 +29,8 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
     // Prop defaults
     onAssetChange ??= () => { };
 
+    const { ProjectController } = useLibrary();
+
     // Computed state
     const AssetIcon = getIconForAssetType(assetType);
     const hasAsset = asset !== undefined;
@@ -39,7 +44,36 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
     // Functions
     const onClickDelete = () => {
       onAssetChange(undefined);
-    }
+    };
+    const onClickAssetButton = async () => {
+      // Map asset data into modal data
+      const assets = ProjectController.assetDb.assets
+        .filter((asset) => asset.type === assetType)
+        .map((assetData) => ({
+          id: assetData.id,
+          type: assetData.type as TAssetType,
+          name: assetData.baseName,
+          path: assetData.pathList,
+        } satisfies AssetReferenceModalAssetReference<TAssetType>));
+
+      // Show modal
+      const result = await showModal<AssetReferenceModalData<TAssetType>, AssetReferenceResultPayload>(
+        '/modal/asset-reference',
+        { assets }
+      );
+
+      // Handle result from modal
+      if (result.selected) {
+        // User selected an asset in the modal
+        // Resolve asset ID back into full AssetData instance
+        console.log(`[AssetReference] (onClickAssetButton) Selected asset: ${result.assetId}`);
+        const selectedAsset = ProjectController.assetDb.assets.find((asset) => asset.id === result.assetId) as AssetDataOfType<TAssetType>;
+        onAssetChange(selectedAsset);
+      } else {
+        // User cancelled
+        console.log(`[AssetReference] (onClickAssetButton) Modal cancelled.`);
+      }
+    };
 
     return (
       <>
@@ -51,18 +85,19 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
           </div>
 
           {/* Asset reference / name */}
-          <div
+          <button
             ref={DropTarget}
-            className={cn("w-full p-2 bg-white overflow-scroll whitespace-nowrap", {
+            className={cn("w-full p-2 bg-white overflow-scroll whitespace-nowrap cursor-pointer text-left overflow-ellipsis", {
               "!bg-blue-300": isDragOverTarget,
               'italic': !hasAsset,
             })}
+            onClick={onClickAssetButton}
           >
             <Condition if={hasAsset}
               then={() => asset!.path}
               else={() => "No asset assigned"}
             />
-          </div>
+          </button>
 
           <Condition if={hasAsset}
             then={() => (

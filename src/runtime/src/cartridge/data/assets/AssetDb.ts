@@ -11,7 +11,7 @@ import { AssetType } from './AssetType';
 
 export type AssetDbVirtualNode = AssetDbVirtualFile | AssetDbVirtualDirectory;
 
-interface AssetDbVirtualNodeBase {
+export interface AssetDbVirtualNodeBase {
   id: string;
   name: string;
 }

@@ -31,44 +31,6 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
   const selectedObject = sceneViewController.selectedObject;
   const isAnyObjectSelected = selectedObject !== undefined;
 
-  const debug_newWindow = async () => {
-    const { WebviewWindow } = await import("@tauri-apps/api/window")
-    const webview = new WebviewWindow('theUniqueLabel', {
-      url: '/modal/placeholder',
-      // center: true,
-      hiddenTitle: true,
-      skipTaskbar: true,
-      title: "Hoopla"
-    })
-    // since the webview window is created asynchronously,
-    // Tauri emits the `tauri://created` and `tauri://error` to notify you of the creation response
-    webview.once('tauri://created', function () {
-      console.log(`[SceneView] (debug_newWindow) Created new window`);
-      const doItYeah = () => {
-        console.log(`Calling back from modal`);
-      }
-      setTimeout(() => {
-        console.log(`pong!`);
-
-        webview.emit('init', {
-          a: 2,
-          name: "hello (rambotan included)",
-          something: doItYeah,
-          rambotan: () => { console.log("Rmabotan") },
-
-          // etc.
-        })
-
-        webview.once('result', (e) => {
-          console.log(`[SceneView] (debug_newWindow) Got result from modal:`, e);
-        });
-      }, 600);
-    })
-    webview.once('tauri://error', function (e) {
-      console.error(`[SceneView] (debug_newWindow) Failed to create new window`, e);
-    })
-  };
-
   const onAddNewComponent = (type: ComponentDefinitionType) => {
     const selectControl = addNewComponentElement.current!;
 
@@ -106,7 +68,6 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
     <>
       <div className="p-2 bg-gradient-to-b from-[blue] to-pink-500 text-white text-retro-shadow shrink-0">
         <h2 className="text-lg">Inspector</h2>
-        <button className="button" onClick={debug_newWindow}>[DEBUG] New window</button>
       </div>
       <div className="bg-slate-300 h-full overflow-y-scroll grow">
         <Condition if={isAnyObjectSelected}

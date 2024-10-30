@@ -1,10 +1,10 @@
 import { ComponentType, FunctionComponent, LegacyRef } from "react";
-import { AssetDbVirtualNode } from "@fantasy-console/runtime/src/cartridge";
+import { AssetDbVirtualNodeBase } from "@fantasy-console/runtime/src/cartridge";
 import { observer } from "mobx-react-lite";
 import cn from 'classnames';
 
 export interface AssetListItemCommonProps {
-  asset: AssetDbVirtualNode;
+  asset: AssetDbVirtualNodeBase;
   classNames: string;
   onClick?: () => void;
   Icon: ComponentType<React.HTMLAttributes<Element>>;

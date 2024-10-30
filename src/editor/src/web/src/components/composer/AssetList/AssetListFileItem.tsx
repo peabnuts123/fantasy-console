@@ -22,7 +22,7 @@ export const AssetListFileItem: FunctionComponent<AssetListFileItemProps> = obse
     <AssetListItemCommon
       asset={asset}
       Icon={AssetIcon}
-      classNames={cn("cursor-grab")}
+      classNames="cursor-grab"
       innerRef={DragSource}
     />
   );
