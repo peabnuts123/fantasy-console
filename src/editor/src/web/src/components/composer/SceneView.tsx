@@ -8,7 +8,7 @@ import cn from 'classnames';
 import type { SceneViewController } from "@lib/composer/scene";
 import { CurrentSelectionTool } from "@lib/composer/scene/SelectionManager";
 import type { GameObjectData } from "@lib/composer/data";
-import { NewObjectMutation } from "@lib/mutation/scene/mutations";
+import { CreateBlankGameObjectMutation } from "@lib/mutation/scene/mutations";
 
 import Condition from "@app/components/util/condition";
 import { Inspector } from "./Inspector";
@@ -29,6 +29,11 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
     return controller.startBabylonView(canvas);
   }, [controller]);
 
+  // Functions
+  const onClickNewObject = () => {
+    controller.mutator.apply(new CreateBlankGameObjectMutation());
+  }
+
   return (
     <PanelGroup direction="horizontal" className="h-full select-none">
       <Panel defaultSize={20} minSize={10}>
@@ -37,7 +42,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
           <h2 className="text-lg">{controller.scene.path}</h2>
         </div>
         <div className="p-3 bg-slate-300 h-full">
-          <button className="button" onClick={() => controller.mutator.apply(new NewObjectMutation())}>[Debug] New Object</button>
+          <button className="button" onClick={onClickNewObject}>New Object</button>
           {controller.scene.objects.map((gameObject, index) => (
             <SceneHierarchyObject key={index} gameObject={gameObject} controller={controller} />
           ))}
