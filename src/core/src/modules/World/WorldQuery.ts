@@ -114,10 +114,10 @@ export class GameObjectQuery implements IQueryResult<GameObject> {
     }) as TGameObjectComponent[];
 
     if (components.length === 0) {
-      throw new Error(`No component of type '${componentCtor.name}' found on ${this.gameObject}`);
+      throw new Error(`No component of type '${componentCtor.name}' found on GameObject '${this.gameObject.name}' ($${this.gameObject.id})`);
     } else if (components.length > 1) {
       // @TODO
-      throw new Error(`Not yet implemented. ${this.gameObject} has multiple instances of '${componentCtor.name}' component on it`);
+      throw new Error(`Not yet implemented. '${this.gameObject.name}' ($${this.gameObject.id}) has multiple instances of '${componentCtor.name}' component on it`);
     } else {
       return new GameObjectComponentQuery(components[0]);
     }
