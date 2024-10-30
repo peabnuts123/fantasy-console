@@ -1,5 +1,5 @@
 import { FreeCamera } from "@babylonjs/core/Cameras/freeCamera";
-import { Vector3 as Vector3Babylon } from "@babylonjs/core/Maths/math.vector";
+import { Quaternion } from "@babylonjs/core/Maths/math.vector";
 
 import { CameraComponent as CameraComponentCore } from "@fantasy-console/core/src/world/components";
 import { Vector3 } from "@fantasy-console/core/src/util";
@@ -24,14 +24,18 @@ export class CameraComponent extends CameraComponentCore {
   }
 
   public pointAt(target: Vector3) {
-    this.camera.setTarget(this.toLocalCoordinates(toVector3Babylon(target)));
+    const direction = toVector3Babylon(target.subtract(this.gameObject.transform.position)).normalize();
+    const quaternion = Quaternion.RotationYawPitchRoll(
+      Math.atan2(direction.x, direction.z),
+      Math.atan2(-direction.y, Math.sqrt(direction.x * direction.x + direction.z * direction.z)),
+      0
+    );
+
+    // @NOTE Set the rotation of the GameObject itself
+    this.gameObject.transform.node.rotationQuaternion = quaternion;
   }
 
   public override onDestroy(): void {
     this.camera.dispose();
-  }
-
-  private toLocalCoordinates(worldVector: Vector3Babylon): Vector3Babylon {
-    return worldVector.subtract(this.gameObject.transform.node.position);
   }
 }
