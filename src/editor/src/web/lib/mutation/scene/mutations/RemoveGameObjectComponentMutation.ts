@@ -1,39 +1,50 @@
-import { GameObjectData, IComposerComponentData } from "@lib/composer/data";
+import { CameraComponentData, GameObjectData, IComposerComponentData, MeshComponentData, ScriptComponentData } from "@lib/composer/data";
 import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { isSelectableObject } from "@lib/composer/scene/components";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import { GameObjectComponent } from "@fantasy-console/core";
 
+// Constants
+/** Certain components aren't instantiated in the composer and need to be ignored */
+const ComponentTypesThatDontExistInTheComposer = [
+  CameraComponentData,
+  ScriptComponentData,
+]
+
 export class RemoveGameObjectComponentMutation implements ISceneMutation {
   // Mutation parameters
   private readonly gameObjectId: string;
-  private readonly componentToRemoveId: string;
-  private readonly componentToRemoveName: string;
+  private readonly componentToRemove: IComposerComponentData;
 
   public constructor(gameObject: GameObjectData, componentToRemove: IComposerComponentData) {
     this.gameObjectId = gameObject.id;
-    this.componentToRemoveId = componentToRemove.id;
-    this.componentToRemoveName = componentToRemove.componentName;
+    this.componentToRemove = componentToRemove;
   }
 
   apply({ SceneViewController }: SceneMutationArguments): void {
     // 1. Update data
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
-    const componentToRemoveDataIndex = gameObjectData.components.findIndex((component) => component.id === this.componentToRemoveId);
+    const componentToRemoveDataIndex = gameObjectData.components.findIndex((component) => component.id === this.componentToRemove.id);
     gameObjectData.components.splice(
       componentToRemoveDataIndex,
       1
     )
 
     // 2. Update scene
-    const gameObject = gameObjectData.sceneInstance!;
-    const sceneComponent = gameObject.getComponent(this.componentToRemoveId, GameObjectComponent);
-    if (isSelectableObject(sceneComponent)) {
-      SceneViewController.removeFromSelectionCache(sceneComponent);
+    // @NOTE Don't need to update scene for certain types (since they aren't instantiated in the composer)
+    if (!ComponentTypesThatDontExistInTheComposer.some((Type) => this.componentToRemove instanceof Type)) {
+      const gameObject = gameObjectData.sceneInstance!;
+      const sceneComponent = gameObject.getComponent(this.componentToRemove.id, GameObjectComponent);
+      if (isSelectableObject(sceneComponent)) {
+        SceneViewController.removeFromSelectionCache(sceneComponent);
+      }
+      gameObject.removeComponent(this.componentToRemove.id);
+
+      // - Update selection gizmo if component was a mesh
+      if (this.componentToRemove instanceof MeshComponentData) {
+        SceneViewController.selectionManager.updateGizmos();
+      }
     }
-    gameObject.removeComponent(this.componentToRemoveId);
-    // - Update selection gizmo
-    SceneViewController.selectionManager.updateGizmos();
 
     // 3. Update JSONC
     const mutationPath = resolvePathForSceneObjectMutation(
@@ -49,6 +60,6 @@ export class RemoveGameObjectComponentMutation implements ISceneMutation {
   }
 
   get description(): string {
-    return `Remove ${this.componentToRemoveName} component`;
+    return `Remove ${this.componentToRemove.componentName} component`;
   }
 }
