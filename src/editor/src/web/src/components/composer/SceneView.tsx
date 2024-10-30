@@ -47,9 +47,9 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
       <Panel className="flex flex-col h-full">
         {/* Viewport */}
         <div className="p-2 bg-slate-300 flex flex-row shrink-0">
-          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Move)}><ArrowsPointingOutIcon className="icon" /> Move</button>
-          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Rotate)}><ArrowPathIcon className="icon" /> Rotate</button>
-          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Scale)}><ArrowsPointingInIcon className="icon" /> Scale</button>
+          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Move)}><ArrowsPointingOutIcon className="icon mr-1" /> Move</button>
+          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Rotate)}><ArrowPathIcon className="icon mr-1" /> Rotate</button>
+          <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Scale)}><ArrowsPointingInIcon className="icon mr-1" /> Scale</button>
         </div>
         <div className="grow relative">
           <div className="absolute inset-0">

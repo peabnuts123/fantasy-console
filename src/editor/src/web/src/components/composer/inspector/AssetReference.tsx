@@ -99,6 +99,7 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
             />
           </button>
 
+          {/* Delete icon */}
           <Condition if={hasAsset}
             then={() => (
               <button

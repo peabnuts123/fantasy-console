@@ -25,7 +25,7 @@
 @layer components {
   .button {
     @apply border border-black mt-1 ml-1 mr-2 mb-2 py-1 px-2 bg-white text-black retro-shadow hover:bg-blue-300 focus:bg-blue-300
-      active:bg-blue-500 flex flex-row items-center [&>svg]:mr-1
+      active:bg-blue-500 flex flex-row items-center
     ;
   }
   .button:disabled {
@@ -55,20 +55,30 @@
   .text-h2 { @apply text-3xl; }
   .text-h3 { @apply text-xl; }
 
-  .text-retro-shadow {
+  .text-retro-shadow:not(.is-shallow) {
     text-shadow:
       1px 1px black,
       2px 2px black,
       3px 3px black,
       4px 4px black;
   }
+  .text-retro-shadow.is-shallow {
+    text-shadow:
+      1px 1px black,
+      2px 2px black;
+  }
 
-  .retro-shadow {
+  .retro-shadow:not(.is-shallow) {
     box-shadow:
       1px 1px 0 black,
       2px 2px 0 black,
       3px 3px 0 black,
       4px 4px 0 black;
+  }
+  .retro-shadow.is-shallow {
+    box-shadow:
+      1px 1px 0 black,
+      2px 2px 0 black;
   }
   .retro-shadow:disabled {
     box-shadow:

@@ -30,6 +30,11 @@ export class GameObjectData {
   }
 
   /**
+   * Get a component on this GameObjectData. If the component cannot be found, an Error is thrown.
+   * @param componentId Id of the component to get.
+   */
+  public getComponent(componentId: string): IComposerComponentData;
+  /**
    * Get a component on this GameObjectData. If the component cannot be found or is not of the expected type,
    * an Error is thrown.
    * @param componentId Id of the component to get.
@@ -43,11 +48,15 @@ export class GameObjectData {
    * @param ExpectedComponentType Array of possible expected types of the component.
    */
   public getComponent<TComponent extends IComposerComponentData>(componentId: string, ExpectedComponentTypes: ClassReference<TComponent>[]): TComponent;
-  public getComponent<TComponent extends IComposerComponentData>(componentId: string, expectedTypeOrTypes: ClassReference<TComponent> | ClassReference<TComponent>[]): TComponent {
+  public getComponent<TComponent extends IComposerComponentData>(componentId: string, expectedTypeOrTypes: ClassReference<TComponent> | ClassReference<TComponent>[] | undefined = undefined): TComponent {
     const component = this.components.find((component) => component.id === componentId);
 
     if (component === undefined) {
       throw new Error(`No component with ID '${componentId}' exists on GameObjectData '${this.name}' (${this.id})`);
+    }
+
+    if (expectedTypeOrTypes === undefined) {
+      return component as TComponent;
     }
 
     let expectedComponentTypes: ClassReference<TComponent>[] = [];

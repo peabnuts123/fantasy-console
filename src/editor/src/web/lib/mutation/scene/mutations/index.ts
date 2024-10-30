@@ -1,5 +1,6 @@
 export * from './AddGameObjectComponentMutation';
 export * from './NewObjectMutation';
+export * from './RemoveGameObjectComponentMutation';
 export * from './SetGameObjectLightComponentColorMutation';
 export * from './SetGameObjectLightComponentIntensityMutation';
 export * from './SetGameObjectMeshComponentAssetMutation';

@@ -23,22 +23,30 @@ export class GameObject extends GameObjectCore {
     this._transform = transform;
   }
 
-  addComponent(component: GameObjectComponent): void {
+  public addComponent(component: GameObjectComponent): void {
     this.components.push(component);
   }
-  init(): void {
+  public removeComponent(componentId: string): void {
+    const index = this.components.findIndex((component) => component.id === componentId);
+    if (index === -1) {
+      throw new Error(`Cannot remove component from GameObject. No component exists with Id: '${componentId}'`);
+    }
+    this.components[index].onDestroy();
+    this.components.splice(index, 1);
+  }
+  public init(): void {
     this.components.forEach((component) => component.init());
     this.transform.children.forEach((child) => child.gameObject.init());
   }
-  update(deltaTime: number): void {
+  public update(deltaTime: number): void {
     this.components.forEach((component) => component.onUpdate(deltaTime));
     this.transform.children.forEach((child) => child.gameObject.update(deltaTime));
   }
-  destroy(): void {
+  public destroy(): void {
     this.transform.children.forEach((child) => child.gameObject.destroy());
     World.destroyObject(this);
   }
-  onDestroy(): void {
+  public onDestroy(): void {
     this.components.forEach((component) => component.onDestroy());
   }
 
