@@ -10,6 +10,9 @@ import type { Library } from '@lib/index';
 import { createLibrary, LibraryContext } from '@lib/index';
 import { mockTauri } from '@lib/tauri/mock'; // @TODO Exclude from production build
 
+// @NOTE Dear diary, I am so, so sorry for doing this.
+__hackNextJsServerSideRenderingForTauri();
+
 /* Mock Tauri IPC if not running in Tauri */
 if (typeof window !== "undefined") {
   if ((window as any).__TAURI_IPC__) {
@@ -68,3 +71,43 @@ const App: FunctionComponent<AppProps> = ({ Component }) => {
 };
 
 export default App;
+
+/*
+  We do this PURELY because some tauri modules operate on `window` at the top
+  level. So we need to mock `window` on the global context. Mocking `window` tricks
+  a few internal processes (that I guess rely on `typeof window` to detect whether the code
+  is being rendered server-side) so a few more things need to be mocked also.
+  This shouldn't / doesn't seem to matter (?) as its just fooling the server-side
+  rendering of Next.js. I really, genuinely wish I could disable this and just use
+  Next.js as a "managed React installation".
+*/
+function __hackNextJsServerSideRenderingForTauri() {
+  // `global` is the Node.js global equivalent to `window` (its supported by a few browsers now too)
+  if (typeof global !== 'undefined' && typeof window === 'undefined') {
+    // "Just enough mocking"
+    const mockWindow = {
+      location: {
+        protocol: 'http://',
+        hostname: 'localhost',
+        port: '3000'
+      },
+      document: {
+        querySelector: () => { },
+      },
+      navigator: {
+        userAgent: "",
+      },
+      __TAURI_METADATA__: {
+        __currentWindow: {
+          label: "",
+        }
+      }
+    };
+    // Define `window`
+    (global as any)['window'] = mockWindow;
+    // Define all properties of `window` on the global object to simulate `window` containing itself
+    for (const prop in mockWindow) {
+      (global as any)[prop] = mockWindow[prop as keyof typeof mockWindow];
+    }
+  }
+}
