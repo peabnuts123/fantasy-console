@@ -1,11 +1,14 @@
 import { Paths } from "./config";
-import { PolyZoneMockModule } from "./modules/PolyZoneMockModule";
-import { TauriPluginDialogMockModule } from "./modules/TauriPluginDialogMockModule";
-import { TauriPluginEventMockModule } from "./modules/TauriPluginEventMockModule";
-import { TauriPluginFsMockModule } from "./modules/TauriPluginFsMockModule";
-import { TauriPluginPathMockModule } from "./modules/TauriPluginPathMockModule";
-import { TauriPluginWebviewMockModule } from "./modules/TauriPluginWebviewMockModule";
-import { TauriPluginWindowMockModule } from "./modules/TauriPluginWindowMockModule";
+import {
+  PolyZoneMockModule,
+  TauriPluginDialogMockModule,
+  TauriPluginEventMockModule,
+  TauriPluginFsMockModule,
+  TauriPluginMenuMockModule,
+  TauriPluginPathMockModule,
+  TauriPluginWebviewMockModule,
+  TauriPluginWindowMockModule,
+} from "./modules";
 import { throwUnhandled } from "./util";
 
 interface TauriPluginCommand {
@@ -42,6 +45,8 @@ export class BrowserMock {
           return TauriPluginWebviewMockModule.handle(parsed.action, args);
         case 'window':
           return TauriPluginWindowMockModule.handle(parsed.action, args);
+        case 'menu':
+          return TauriPluginMenuMockModule.handle(parsed.action, args);
         default:
           throw throwUnhandled(`[BrowserMock] (handle) Unimplemented plugin. (plugin='${parsed.plugin}') (action='${parsed.action}') args: `, args);
       }

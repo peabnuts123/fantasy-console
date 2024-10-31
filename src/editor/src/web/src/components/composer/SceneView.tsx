@@ -12,6 +12,8 @@ import { CreateBlankGameObjectMutation } from "@lib/mutation/scene/mutations";
 
 import Condition from "@app/components/util/condition";
 import { Inspector } from "./Inspector";
+import { Menu, MenuItem } from "@tauri-apps/api/menu";
+import { isRunningInBrowser } from "@lib/tauri";
 
 
 interface Props {
@@ -30,8 +32,31 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
   }, [controller]);
 
   // Functions
-  const onClickNewObject = () => {
+  const createNewObject = () => {
     controller.mutator.apply(new CreateBlankGameObjectMutation());
+  }
+
+  const showContextMenu = async (e: React.MouseEvent) => {
+    // @NOTE Skip context menu in browser
+    if (isRunningInBrowser()) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const menuItems = await Promise.all([
+      MenuItem.new({
+        text: 'Create new object',
+        action: () => {
+          createNewObject();
+        },
+      }),
+    ]);
+
+    const menu = await Menu.new({
+      items: menuItems,
+    });
+
+    await menu.popup();
   }
 
   return (
@@ -41,10 +66,10 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
         <div className="p-2 bg-gradient-to-b from-[blue] to-teal-500 text-white text-retro-shadow">
           <h2 className="text-lg">{controller.scene.path}</h2>
         </div>
-        <div className="p-3 bg-slate-300 h-full">
-          <button className="button" onClick={onClickNewObject}>New Object</button>
+        <div className="p-3 bg-slate-300 h-full" onContextMenu={showContextMenu}>
+          <button className="button" onClick={createNewObject}>New Object</button>
           {controller.scene.objects.map((gameObject, index) => (
-            <SceneHierarchyObject key={index} gameObject={gameObject} controller={controller} />
+            <SceneHierarchyObject key={index} gameObject={gameObject} controller={controller} contextActions={{ createNewObject }} />
           ))}
         </div>
       </Panel>
@@ -82,9 +107,12 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
 interface SceneHierarchyObjectProps {
   controller: SceneViewController;
   gameObject: GameObjectData;
+  contextActions: {
+    createNewObject: () => void;
+  };
   indentLevel?: number;
 }
-const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = observer(({ gameObject, indentLevel, controller }) => {
+const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = observer(({ gameObject, indentLevel, controller, contextActions }) => {
   // Default `indentLevel` to 0 if not provided
   indentLevel ??= 0;
 
@@ -95,12 +123,56 @@ const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = obser
   const hasChildren = gameObject.children.length > 0;
   const isSelected = controller.selectedObject === gameObject;
 
+  const showContextMenu = async (e: React.MouseEvent) => {
+    // @NOTE Skip context menu in browser
+    if (isRunningInBrowser()) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const menuItems = await Promise.all([
+      MenuItem.new({
+        text: 'Create new object',
+        action: () => {
+          contextActions.createNewObject();
+        },
+      }),
+      // MenuItem.new({
+      //   text: 'Delete',
+      //   action: async () => {
+      //     console.log(`[Action] Delete`);
+      //   },
+      // }),
+      // PredefinedMenuItem.new({ item: 'Separator' }),
+      // MenuItem.new({
+      //   text: 'Duplicate',
+      //   action: async () => {
+      //     console.log(`[Action] Duplicate`);
+      //   },
+      // }),
+      // PredefinedMenuItem.new({ item: 'Separator' }),
+      // MenuItem.new({
+      //   text: 'Export',
+      //   action: async () => {
+      //     console.log(`[Action] Export`);
+      //   },
+      // }),
+    ]);
+
+    const menu = await Menu.new({
+      items: menuItems,
+    });
+
+    await menu.popup();
+  }
+
   return (
     <>
       <div
         style={{ paddingLeft: `${indentLevel * 10}px` }}
         className={cn("cursor-pointer hover:bg-slate-400", { '!bg-blue-400': isSelected })}
         onClick={() => controller.selectionManager.select(gameObject)}
+        onContextMenu={showContextMenu}
       >
         <Condition if={hasChildren}
           then={() =>
@@ -118,7 +190,7 @@ const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = obser
       <Condition if={hasChildren && !isCollapsed}
         then={() =>
           gameObject.children.map((gameObject, index) => (
-            <SceneHierarchyObject key={index} gameObject={gameObject} indentLevel={indentLevel + 1} controller={controller} />
+            <SceneHierarchyObject key={index} gameObject={gameObject} indentLevel={indentLevel + 1} controller={controller} contextActions={contextActions} />
           ))
         }
       />

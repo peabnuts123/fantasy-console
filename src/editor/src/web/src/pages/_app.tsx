@@ -9,13 +9,14 @@ import Condition from '@app/components/util/condition';
 import type { Library } from '@lib/index';
 import { createLibrary, LibraryContext } from '@lib/index';
 import { mockTauri } from '@lib/tauri/mock'; // @TODO Exclude from production build
+import { isRunningInTauri } from '@lib/tauri';
 
 // @NOTE Dear diary, I am so, so sorry for doing this.
 __hackNextJsServerSideRenderingForTauri();
 
 /* Mock Tauri IPC if not running in Tauri */
 if (typeof window !== "undefined") {
-  if ((window as any).__TAURI__) {
+  if (isRunningInTauri()) {
     console.log(`Running in Tauri`);
   } else {
     console.log(`Running in browser`);
