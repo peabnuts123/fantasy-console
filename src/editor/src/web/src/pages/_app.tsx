@@ -5,7 +5,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import '@app/styles/index.css';
-import Condition from '@app/components/util/condition';
 import type { Library } from '@lib/index';
 import { createLibrary, LibraryContext } from '@lib/index';
 import { mockTauri } from '@lib/tauri/mock'; // @TODO Exclude from production build
@@ -62,11 +61,9 @@ const App: FunctionComponent<AppProps> = ({ Component }) => {
     </Head>
 
     <LibraryContext.Provider value={library}>
-      <Condition if={!isRedirecting}
-        then={() => (
-          <Component />
-        )}
-      />
+      {!isRedirecting && (
+        <Component />
+      )}
     </LibraryContext.Provider>
   </>;
 };

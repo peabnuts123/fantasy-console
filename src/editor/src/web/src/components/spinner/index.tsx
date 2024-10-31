@@ -1,7 +1,6 @@
 import cn from 'classnames';
 import type { FunctionComponent } from 'react';
 
-import Condition from '@app/components/util/condition';
 
 interface Props {
   inverted?: boolean;
@@ -18,11 +17,10 @@ const Spinner: FunctionComponent<Props> = ({ inverted, message }: Props) => {
         <div className="rect rect4"></div>
         <div className="rect rect5"></div>
       </div>
-      <Condition if={!!message}
-        then={() => (
-          <span>{message}</span>
-        )}
-      />
+
+      {message && (
+        <span>{message}</span>
+      )}
     </div>
   );
 };

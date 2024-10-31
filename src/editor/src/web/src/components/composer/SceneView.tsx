@@ -10,7 +10,6 @@ import { CurrentSelectionTool } from "@lib/composer/scene/SelectionManager";
 import type { GameObjectData } from "@lib/composer/data";
 import { CreateBlankGameObjectMutation, DeleteGameObjectMutation } from "@lib/mutation/scene/mutations";
 
-import Condition from "@app/components/util/condition";
 import { Inspector } from "./Inspector";
 import { Menu, MenuItem } from "@tauri-apps/api/menu";
 import { isRunningInBrowser } from "@lib/tauri";

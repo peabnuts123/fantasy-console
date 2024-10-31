@@ -2,7 +2,6 @@ import type { FunctionComponent } from "react";
 import { useState } from "react";
 import { observer } from "mobx-react-lite";
 
-import Condition from "@app/components/util/condition";
 import { useLibrary } from "@lib/index";
 import { AssetListFileItem } from "./AssetListFileItem";
 import { AssetListDirectoryItem } from "./AssetListDirectoryItem";
@@ -23,18 +22,16 @@ export const AssetList: FunctionComponent<Props> = observer(({ }) => {
       <div className="relative px-2 h-full overflow-y-scroll grow">
         {/* Parent directory button */}
         {/* Only visible if you are not in the root */}
-        <Condition if={currentDirectory.length > 0}
-          then={() => (
-            <div
-              role="button"
-              tabIndex={0}
-              className="my-2 flex flex-row items-center p-2 border select-none cursor-pointer bg-white hover:bg-blue-100 focus:bg-blue-100 active:bg-blue-200"
-              onClick={() => setCurrentDirectory(currentDirectory.slice(0, currentDirectory.length - 1))}
-            >
-              <span className="ml-2">..</span>
-            </div>
-          )}
-        />
+        {currentDirectory.length > 0 && (
+          <div
+            role="button"
+            tabIndex={0}
+            className="my-2 flex flex-row items-center p-2 border select-none cursor-pointer bg-white hover:bg-blue-100 focus:bg-blue-100 active:bg-blue-200"
+            onClick={() => setCurrentDirectory(currentDirectory.slice(0, currentDirectory.length - 1))}
+          >
+            <span className="ml-2">..</span>
+          </div>
+        )}
         {/* Assets in the current folder */}
         {assetDb.dir(currentDirectory).map((asset) => {
           if (asset.type === 'file') {

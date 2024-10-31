@@ -9,7 +9,6 @@ import { useLibrary } from "@lib/index";
 import { showModal } from '@lib/modal';
 import { useAssetDrop } from "@app/interactions/assets";
 import { AssetReferenceModalAssetReference, AssetReferenceModalData, AssetReferenceResultPayload } from "@app/pages/modal/asset-reference";
-import Condition from "@app/components/util/condition";
 import { getIconForAssetType } from "../AssetList";
 
 interface Props<TAssetType extends AssetType> {
@@ -93,23 +92,22 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
             })}
             onClick={onClickAssetButton}
           >
-            <Condition if={hasAsset}
-              then={() => asset!.path}
-              else={() => "No asset assigned"}
-            />
+            {hasAsset ? (
+              asset.path
+            ) : (
+              "No asset assigned"
+            )}
           </button>
 
           {/* Delete icon */}
-          <Condition if={hasAsset}
-            then={() => (
-              <button
-                className="flex bg-white hover:bg-blue-300 active:bg-blue-500 justify-center items-center p-2 cursor-pointer"
-                onClick={onClickDelete}
-              >
-                <TrashIcon className="icon w-4" />
-              </button>
-            )}
-          />
+          {hasAsset && (
+            <button
+              className="flex bg-white hover:bg-blue-300 active:bg-blue-500 justify-center items-center p-2 cursor-pointer"
+              onClick={onClickDelete}
+            >
+              <TrashIcon className="icon w-4" />
+            </button>
+          )}
         </div>
       </>
     );

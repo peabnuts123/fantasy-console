@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ArrowLeftEndOnRectangleIcon, FolderIcon } from '@heroicons/react/24/solid'
 
 import Player from "@app/components/player";
-import Condition from "@app/components/util/condition";
 
 interface Props { }
 
@@ -41,9 +40,10 @@ const PlayerPage: FunctionComponent<Props> = ({ }) => {
       <div className="flex grow basis-0">
       </div>
     </header>
-    <Condition if={cartridge !== undefined}
-      then={() => <Player cartridge={cartridge!} />}
-    />
+
+    {cartridge !== undefined && (
+      <Player cartridge={cartridge} />
+    )}
   </>
 };
 

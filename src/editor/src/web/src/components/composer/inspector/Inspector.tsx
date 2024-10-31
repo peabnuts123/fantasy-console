@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite";
 
 import { ComponentDefinitionType } from "@fantasy-console/runtime/src/cartridge";
 
-import Condition from "@app/components/util/condition";
 import {
   SetGameObjectPositionMutation,
   SetGameObjectRotationMutation,
@@ -30,6 +29,7 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
   // Computed state
   const selectedObject = sceneViewController.selectedObject;
   const isAnyObjectSelected = selectedObject !== undefined;
+  const isNoObjectSelected = selectedObject === undefined;
 
   const onAddNewComponent = (type: ComponentDefinitionType) => {
     const selectControl = addNewComponentElement.current!;
@@ -70,101 +70,102 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
         <h2 className="text-lg">Inspector</h2>
       </div>
       <div className="bg-slate-300 h-full overflow-y-scroll grow">
-        <Condition if={isAnyObjectSelected}
-          then={() => (
-            <>
-              <div className="p-2">
-                {/* Name */}
-                <TextInput
-                  label="Name"
-                  value={selectedObject!.name}
-                  onChange={(newName) => {
-                    if (newName && newName.trim()) {
-                      sceneViewController.mutator.debounceContinuous(
-                        SetGameObjectNameMutation,
-                        selectedObject!,
-                        () => new SetGameObjectNameMutation(selectedObject!),
-                        () => ({ name: newName })
-                      )
-                    }
-                  }}
-                />
+        {/* No object selected */}
+        {isNoObjectSelected && (
+          <div className="p-2">
+            <p className="italic">No object selected</p>
+          </div>
+        )}
 
-                {/* Position */}
-                <VectorInput
-                  label="Position"
-                  vector={selectedObject!.transform.position}
-                  onChange={(newValue) => sceneViewController.mutator.debounceContinuous(
-                    SetGameObjectPositionMutation,
-                    selectedObject!,
-                    () => new SetGameObjectPositionMutation(selectedObject!),
-                    () => ({ position: newValue, resetGizmo: true })
-                  )}
-                />
-
-                {/* Rotation */}
-                <VectorInput
-                  label="Rotation"
-                  vector={selectedObject!.transform.rotation}
-                  incrementInterval={Math.PI / 8}
-                  // @TODO Parse value and limit to rotational values
-                  onChange={(newValue) => sceneViewController.mutator.debounceContinuous(
-                    SetGameObjectRotationMutation,
-                    selectedObject!,
-                    () => new SetGameObjectRotationMutation(selectedObject!),
-                    () => ({ rotation: newValue, resetGizmo: true })
-                  )}
-                />
-
-                {/* Scale */}
-                <VectorInput
-                  label="Scale"
-                  vector={selectedObject!.transform.scale}
-                  incrementInterval={0.25}
-                  onChange={(newValue) => sceneViewController.mutator.debounceContinuous(
-                    SetGameObjectScaleMutation,
-                    selectedObject!,
-                    () => new SetGameObjectScaleMutation(selectedObject!),
-                    () => ({ scale: newValue, resetGizmo: true })
-                  )}
-                />
-              </div>
-
-              {/* Components */}
-              {selectedObject!.components.map((component, index) => {
-                // Look up inspector UI for component
-                const InspectorComponent = getInspectorFor(component);
-                return <InspectorComponent
-                  key={index}
-                  component={component}
-                  controller={sceneViewController}
-                  gameObject={selectedObject!}
-                />;
-              })}
-
-              {/* Add new component */}
-              <select
-                ref={addNewComponentElement}
-                name="add-new-component"
-                className="w-full p-3"
-                onChange={(e) => onAddNewComponent(e.target.value as ComponentDefinitionType)}
-                value=""
-              >
-                <option value=""> -- Add new component -- </option>
-                <option value={ComponentDefinitionType.Mesh}>Mesh</option>
-                <option value={ComponentDefinitionType.Script}>Script</option>
-                <option value={ComponentDefinitionType.Camera}>Camera</option>
-                <option value={ComponentDefinitionType.DirectionalLight}>Directional Light</option>
-                <option value={ComponentDefinitionType.PointLight}>Point Light</option>
-              </select>
-            </>
-          )}
-          else={() => (
+        {/* At least 1 object selected */}
+        {isAnyObjectSelected && (
+          <>
             <div className="p-2">
-              <p className="italic">No object selected</p>
+              {/* Name */}
+              <TextInput
+                label="Name"
+                value={selectedObject.name}
+                onChange={(newName) => {
+                  if (newName && newName.trim()) {
+                    sceneViewController.mutator.debounceContinuous(
+                      SetGameObjectNameMutation,
+                      selectedObject!,
+                      () => new SetGameObjectNameMutation(selectedObject!),
+                      () => ({ name: newName })
+                    )
+                  }
+                }}
+              />
+
+              {/* Position */}
+              <VectorInput
+                label="Position"
+                vector={selectedObject.transform.position}
+                onChange={(newValue) => sceneViewController.mutator.debounceContinuous(
+                  SetGameObjectPositionMutation,
+                  selectedObject!,
+                  () => new SetGameObjectPositionMutation(selectedObject!),
+                  () => ({ position: newValue, resetGizmo: true })
+                )}
+              />
+
+              {/* Rotation */}
+              <VectorInput
+                label="Rotation"
+                vector={selectedObject.transform.rotation}
+                incrementInterval={Math.PI / 8}
+                // @TODO Parse value and limit to rotational values
+                onChange={(newValue) => sceneViewController.mutator.debounceContinuous(
+                  SetGameObjectRotationMutation,
+                  selectedObject!,
+                  () => new SetGameObjectRotationMutation(selectedObject!),
+                  () => ({ rotation: newValue, resetGizmo: true })
+                )}
+              />
+
+              {/* Scale */}
+              <VectorInput
+                label="Scale"
+                vector={selectedObject.transform.scale}
+                incrementInterval={0.25}
+                onChange={(newValue) => sceneViewController.mutator.debounceContinuous(
+                  SetGameObjectScaleMutation,
+                  selectedObject!,
+                  () => new SetGameObjectScaleMutation(selectedObject!),
+                  () => ({ scale: newValue, resetGizmo: true })
+                )}
+              />
             </div>
-          )}
-        />
+
+            {/* Components */}
+            {selectedObject.components.map((component, index) => {
+              // Look up inspector UI for component
+              const InspectorComponent = getInspectorFor(component);
+              return <InspectorComponent
+                key={index}
+                component={component}
+                controller={sceneViewController}
+                gameObject={selectedObject!}
+              />;
+            })}
+
+            {/* Add new component */}
+            <select
+              ref={addNewComponentElement}
+              name="add-new-component"
+              className="w-full p-3"
+              onChange={(e) => onAddNewComponent(e.target.value as ComponentDefinitionType)}
+              value=""
+            >
+              <option value=""> -- Add new component -- </option>
+              <option value={ComponentDefinitionType.Mesh}>Mesh</option>
+              <option value={ComponentDefinitionType.Script}>Script</option>
+              <option value={ComponentDefinitionType.Camera}>Camera</option>
+              <option value={ComponentDefinitionType.DirectionalLight}>Directional Light</option>
+              <option value={ComponentDefinitionType.PointLight}>Point Light</option>
+            </select>
+          </>
+        )}
       </div>
     </>
   );

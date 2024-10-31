@@ -4,7 +4,6 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { observer } from "mobx-react-lite";
 
 import { useLibrary } from "@lib/index";
-import Condition from "@app/components/util/condition";
 import Spinner from "@app/components/spinner";
 
 const IndexPage: FunctionComponent = observer(() => {
@@ -13,21 +12,13 @@ const IndexPage: FunctionComponent = observer(() => {
   return (
     <div className="p-3 h-full bg-gradient-to-b from-[blue] to-black text-white">
       <h1 className="text-h1 italic mb-3 font-serif text-retro-shadow">Fantasy Console</h1>
-      <Condition if={ProjectController.hasLoadedProject}
-        then={() => (
-          <ToolsMenu />
-        )}
-        else={() => (
-          <Condition if={ProjectController.isLoadingProject}
-            then={() => (
-              <Spinner inverted={true} message="Loading project..." />
-            )}
-            else={() => (
-              <ProjectSelect />
-            )}
-          />
-        )}
-      />
+      {ProjectController.hasLoadedProject ? (
+        <ToolsMenu />
+      ) : ProjectController.isLoadingProject ? (
+        <Spinner inverted={true} message="Loading project..." />
+      ) : (
+        <ProjectSelect />
+      )}
     </div>
   );
 });
@@ -39,7 +30,7 @@ const ToolsMenu: FunctionComponent = () => {
   return (
     <>
       <h2 className="text-h2 italic mb-3 font-serif text-retro-shadow">{currentProject.manifest.projectName}</h2>
-      <div className="grid sm:grid-cols-3 md:grid-cols-4 gap-3 py-3">
+      <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 py-3">
         <AppTile href="/composer" label="Composer" description="Create, edit and arrange objects and scenes. Test your game." />
         <AppTile href="/player" label="Player" description="Play game cartridges." />
         <AppTile label="Soon&trade;" />
@@ -108,7 +99,7 @@ const AppTile: FunctionComponent<AppTileProps> = ({ href, label, description }: 
   // Common styles between both buttons
   return (
     <Tile className="flex text-center justify-center items-center p-5 bg-white no-underline
-      text-black min-h-32 select-none
+      text-black min-h-32 select-none sm:max-w-[200px]
       //_Inactive_styles
       [&:not(:active)]:retro-shadow [&:not(:active)]:mb-1 [&:not(:active)]:mr-1
       //_Active_styles
