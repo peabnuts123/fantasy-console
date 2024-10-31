@@ -16,7 +16,6 @@ import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 import '@babylonjs/core/Culling/ray'; // @NOTE needed for mesh picking - contains side effects
 
 import { GameObjectComponent } from '@fantasy-console/core/src/world';
-import { World } from '@fantasy-console/core/src/modules/World';
 import {
   Transform as TransformRuntime,
   GameObject as GameObjectRuntime,
@@ -155,7 +154,6 @@ export class SceneViewController {
 
     for (let sceneObject of this.scene.objects) {
       const gameObject = await this.createGameObject(sceneObject);
-      World.addObject(gameObject);
     }
   }
 
