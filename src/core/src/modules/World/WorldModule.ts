@@ -44,12 +44,10 @@ export class WorldModule implements IModule {
    */
   public destroyObject(gameObject: GameObject) {
     const index = this.gameObjects.indexOf(gameObject);
-    if (index === -1) {
-      console.error(`[World] (destroyObject) Attempted to destroy object that does not exist in the world: ${gameObject.name}`);
-    } else {
-      gameObject.onDestroy();
+    if (index !== -1) {
       this.gameObjects.splice(index, 1);
     }
+    gameObject.onDestroy();
   }
 
   public query<TResult>(queryFn: QueryFn<WorldQuery, TResult>): TResult;
@@ -79,4 +77,8 @@ export class WorldModule implements IModule {
   }
 }
 
+/**
+ * The game world, containing all the current {@link GameObject}s
+ * and everything loaded in the game.
+ */
 export const World = new WorldModule();

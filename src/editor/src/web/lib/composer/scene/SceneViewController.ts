@@ -15,6 +15,8 @@ import { DirectionalLight as DirectionalLightBabylon } from '@babylonjs/core/Lig
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 import '@babylonjs/core/Culling/ray'; // @NOTE needed for mesh picking - contains side effects
 
+import { GameObjectComponent } from '@fantasy-console/core/src/world';
+import { World } from '@fantasy-console/core/src/modules/World';
 import {
   Transform as TransformRuntime,
   GameObject as GameObjectRuntime,
@@ -24,7 +26,6 @@ import {
 import { AssetData } from '@fantasy-console/runtime/src/cartridge';
 import { SceneDefinition } from '@fantasy-console/runtime/src/cartridge/archive';
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
-import { GameObjectComponent } from '@fantasy-console/core/src/world';
 import { toColor3Babylon } from '@fantasy-console/runtime/src/util';
 
 import { SceneManifest } from '@lib/project/definition/scene';
@@ -143,7 +144,7 @@ export class SceneViewController {
 
   private async createScene() {
     /* Scene clear color */
-    this.babylonScene!.clearColor =  toColor3Babylon(this.scene.config.clearColor).toColor4();
+    this.babylonScene!.clearColor = toColor3Babylon(this.scene.config.clearColor).toColor4();
 
     /* Set up global ambient lighting */
     const ambientLight = new HemisphericLightBabylon("__ambient", new Vector3Babylon(0, 0, 0), this.babylonScene);
@@ -153,7 +154,8 @@ export class SceneViewController {
     ambientLight.specular = Color3Babylon.Black();
 
     for (let sceneObject of this.scene.objects) {
-      await this.createGameObject(sceneObject);
+      const gameObject = await this.createGameObject(sceneObject);
+      World.addObject(gameObject);
     }
   }
 

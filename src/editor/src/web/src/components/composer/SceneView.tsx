@@ -1,6 +1,6 @@
-import type { FunctionComponent } from "react";
+import type { FunctionComponent, MouseEvent } from "react";
 import { useEffect, useRef, useState } from "react";
-import { ChevronRightIcon, ChevronDownIcon, ArrowTurnDownRightIcon, ArrowsPointingOutIcon, ArrowPathIcon, ArrowsPointingInIcon } from '@heroicons/react/24/solid'
+import { ChevronRightIcon, ChevronDownIcon, ArrowTurnDownRightIcon, ArrowsPointingOutIcon, ArrowPathIcon, ArrowsPointingInIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { observer } from "mobx-react-lite";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import cn from 'classnames';
@@ -8,7 +8,7 @@ import cn from 'classnames';
 import type { SceneViewController } from "@lib/composer/scene";
 import { CurrentSelectionTool } from "@lib/composer/scene/SelectionManager";
 import type { GameObjectData } from "@lib/composer/data";
-import { CreateBlankGameObjectMutation } from "@lib/mutation/scene/mutations";
+import { CreateBlankGameObjectMutation, DeleteGameObjectMutation } from "@lib/mutation/scene/mutations";
 
 import Condition from "@app/components/util/condition";
 import { Inspector } from "./Inspector";
@@ -35,6 +35,9 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
   const createNewObject = (parent: GameObjectData | undefined = undefined) => {
     controller.mutator.apply(new CreateBlankGameObjectMutation(parent));
   }
+  const deleteObject = (gameObjectData: GameObjectData) => {
+    controller.mutator.apply(new DeleteGameObjectMutation(gameObjectData));
+  };
 
   const showContextMenu = async (e: React.MouseEvent) => {
     // @NOTE Skip context menu in browser
@@ -69,7 +72,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
         <div className="p-3 bg-slate-300 h-full" onContextMenu={showContextMenu}>
           <button className="button" onClick={() => createNewObject()}>New Object</button>
           {controller.scene.objects.map((gameObject, index) => (
-            <SceneHierarchyObject key={index} gameObject={gameObject} controller={controller} contextActions={{ createNewObject }} />
+            <SceneHierarchyObject key={index} gameObject={gameObject} controller={controller} contextActions={{ createNewObject, deleteObject }} />
           ))}
         </div>
       </Panel>
@@ -109,6 +112,7 @@ interface SceneHierarchyObjectProps {
   gameObject: GameObjectData;
   contextActions: {
     createNewObject: (parent?: GameObjectData | undefined) => void;
+    deleteObject: (gameObject: GameObjectData) => void;
   };
   indentLevel?: number;
 }
@@ -143,6 +147,12 @@ const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = obser
           contextActions.createNewObject(gameObject);
         },
       }),
+      MenuItem.new({
+        text: 'Delete object',
+        action: () => {
+          contextActions.deleteObject(gameObject);
+        },
+      }),
       // MenuItem.new({
       //   text: 'Delete',
       //   action: async () => {
@@ -172,34 +182,48 @@ const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = obser
     await menu.popup();
   }
 
+  const onClickDelete = (e: MouseEvent) => {
+    e.stopPropagation();
+    contextActions.deleteObject(gameObject);
+  }
+
   return (
     <>
       <div
         style={{ paddingLeft: `${indentLevel * 10}px` }}
-        className={cn("cursor-pointer hover:bg-slate-400", { '!bg-blue-400': isSelected })}
+        className={cn("w-full cursor-pointer flex flex-row")}
         onClick={() => controller.selectionManager.select(gameObject)}
         onContextMenu={showContextMenu}
       >
-        <Condition if={hasChildren}
-          then={() =>
-            <span onClick={() => setIsCollapsed(!isCollapsed)}>
-              <Condition if={!isCollapsed}
-                then={() => <ChevronDownIcon className="icon" />}
-                else={() => <ChevronRightIcon className="icon" />}
-              />
-            </span>
-          }
-          else={() => <ArrowTurnDownRightIcon className="icon opacity-20" />}
-        />
-        {gameObject.name}
+        <button className={cn("grow text-left hover:bg-blue-300 focus:bg-blue-300", { '!bg-blue-400': isSelected })}>
+          <span className="mr-1">
+            {hasChildren ? (
+              <span onClick={() => setIsCollapsed(!isCollapsed)}>
+                {isCollapsed ? (
+                  <ChevronRightIcon className="icon" />
+                ) : (
+                  <ChevronDownIcon className="icon" />
+                )}
+              </span>
+            ) : (
+              <ArrowTurnDownRightIcon className="icon opacity-20" />
+            )}
+          </span>
+          {gameObject.name}
+        </button>
+
+        {isSelected && (
+          <button className="bg-blue-400 hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-600 px-2" onClick={onClickDelete}>
+            <TrashIcon className="icon w-4" />
+          </button>
+        )}
       </div>
-      <Condition if={hasChildren && !isCollapsed}
-        then={() =>
-          gameObject.children.map((gameObject, index) => (
-            <SceneHierarchyObject key={index} gameObject={gameObject} indentLevel={indentLevel + 1} controller={controller} contextActions={contextActions} />
-          ))
-        }
-      />
+
+      {hasChildren && !isCollapsed && (
+        gameObject.children.map((gameObject, index) => (
+          <SceneHierarchyObject key={index} gameObject={gameObject} indentLevel={indentLevel + 1} controller={controller} contextActions={contextActions} />
+        ))
+      )}
     </>
   )
 });

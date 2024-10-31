@@ -43,7 +43,9 @@ export function findGameObjectInChildren(id: string, parentObject: GameObjectDef
  * console.log(path); // Prints `["objects", 1, "children", 2, "transform", "position"]
  * ```
  */
-export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: string, scene: SceneDefinition, pathSelector: ResolvePathSelector<GameObjectDefinition, TPathTarget>): MutationPath<TPathTarget> {
+export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: string, scene: SceneDefinition, pathSelector: ResolvePathSelector<GameObjectDefinition, TPathTarget>): MutationPath<TPathTarget>;
+export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: string, scene: SceneDefinition): MutationPath<TPathTarget>;
+export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: string, scene: SceneDefinition, pathSelector?: ResolvePathSelector<GameObjectDefinition, TPathTarget>): MutationPath<TPathTarget> {
   let target: [GameObjectDefinition, MutationPath<TPathTarget>] | undefined = undefined;
 
   for (let i = 0; i < scene.objects.length; i++) {
@@ -70,7 +72,11 @@ export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: str
 
   // @NOTE No need for the actual game object at this time, but left it in anyways 🤷‍♀️
   const [_, mutationPath] = target;
-  const relativePath = resolvePath(pathSelector);
+  let relativePath: MutationPath<TPathTarget> = [];
+  if (pathSelector !== undefined) {
+    relativePath = resolvePath(pathSelector);
+  }
+
 
   const debug_result = mutationPath.concat(relativePath);
   console.log(`[resolvePathForSceneObjectMutation] Resolved path: ${debug_result.map((x) => typeof (x) === 'number' ? `[${x}]` : `.${x}`).join('')}`);

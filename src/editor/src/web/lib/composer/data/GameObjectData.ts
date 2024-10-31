@@ -97,4 +97,27 @@ export class GameObjectData {
 
     return undefined;
   }
+
+  /**
+   * Find the parent of a GameObject in this GameObject's children.
+   * @param gameObjectId The ID of the GameObject whose parent is to be found.
+   * @returns The parent GameObjectData if found, otherwise undefined.
+   */
+  public findGameObjectParentInChildren(gameObjectId: string): GameObjectData | undefined {
+    // Iterate children objects
+    for (const childObject of this.children) {
+      if (childObject.id === gameObjectId) {
+        // Found object as direct child - this object is the parent
+        return this;
+      } else {
+        // Look for object as descendent of child
+        const childResult = childObject.findGameObjectParentInChildren(gameObjectId);
+        if (childResult !== undefined) {
+          return childResult;
+        }
+      }
+    }
+
+    return undefined;
+  }
 }
