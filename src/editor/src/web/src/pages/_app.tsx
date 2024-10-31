@@ -15,7 +15,7 @@ __hackNextJsServerSideRenderingForTauri();
 
 /* Mock Tauri IPC if not running in Tauri */
 if (typeof window !== "undefined") {
-  if ((window as any).__TAURI_IPC__) {
+  if ((window as any).__TAURI__) {
     console.log(`Running in Tauri`);
   } else {
     console.log(`Running in browser`);
@@ -97,9 +97,14 @@ function __hackNextJsServerSideRenderingForTauri() {
       navigator: {
         userAgent: "",
       },
-      __TAURI_METADATA__: {
-        __currentWindow: {
-          label: "",
+      __TAURI_INTERNALS__: {
+        metadata: {
+          currentWindow: {
+            label: "",
+          },
+          currentWebview: {
+            label: "",
+          }
         }
       }
     };

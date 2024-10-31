@@ -6,7 +6,7 @@ import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 import { AssetDb } from "@fantasy-console/runtime/src/cartridge";
 
 import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
-import * as path from '@lib/tauri/path';
+import * as path from "@tauri-apps/api/path";
 import { ProjectDefinition, ProjectManifest } from "./definition";
 
 export class ProjectController {

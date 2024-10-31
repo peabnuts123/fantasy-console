@@ -7,9 +7,14 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[[bin]]
-name = "fantasy-console-editor" # @NOTE must match package name for Tauri to work
-path = "src/main.rs"
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique, such that it won't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "fantasy_console_editor_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+
 
 # @TODO (one day)
 # [[bin]]
@@ -17,23 +22,21 @@ path = "src/main.rs"
 # path = "src/cli.rs"
 
 [build-dependencies]
-tauri-build = { version = "1", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = [ "window-close", "window-create", "dialog-save", "path-all", "protocol-asset", "dialog-open", "fs-write-file", "fs-read-dir", "fs-read-file", "shell-open"] }
-tauri-plugin-fs-watch = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+tauri = { version = "2", features = [ "protocol-asset"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 zip = "2.1.1"
 walkdir = "2.5.0"
-swc = "0.283.0"
-swc_common = "0.37.2"
-swc_ecma_parser = "0.149.0"
-swc_ecma_ast = "0.118.0"
-swc_ecma_transforms_typescript = "0.195.1"
-swc_ecma_visit = "0.104.3"
-swc_ecma_transforms_module = "0.187.0"
-
-[features]
-# This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
-custom-protocol = ["tauri/custom-protocol"]
+swc = "3.0.1"
+swc_common = "2.0.1"
+swc_ecma_parser = "3.0.0"
+swc_ecma_ast = "2.0.0"
+swc_ecma_transforms_typescript = "3.0.0"
+swc_ecma_visit = "2.0.0"
+swc_ecma_transforms_module = "3.0.0"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-shell = "2"

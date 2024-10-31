@@ -2,8 +2,8 @@ import type { FunctionComponent } from "react";
 import { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
-import { save } from '@tauri-apps/api/dialog';
-import { writeBinaryFile } from '@tauri-apps/api/fs';
+import { save } from '@tauri-apps/plugin-dialog';
+import { writeFile } from '@tauri-apps/plugin-fs';
 import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon } from '@heroicons/react/24/solid'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { DndProvider } from 'react-dnd'
@@ -50,7 +50,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
     });
     if (!savePath) return;
 
-    await writeBinaryFile(savePath, bytes);
+    await writeFile(savePath, bytes);
   };
 
   const debug_playProject = async () => {

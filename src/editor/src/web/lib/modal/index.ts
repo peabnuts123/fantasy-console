@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { WebviewWindow } from "@tauri-apps/api/window";
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { emit } from '@tauri-apps/api/event';
-import { getCurrent } from '@tauri-apps/api/window';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 /* Constants */
 const LocalStoragePrefix = `__polyzone__modal-data`;
@@ -114,7 +114,7 @@ export class ModalInstance<TData> {
 
   public constructor(data: TData) {
     this.data = data;
-    this.currentWindow = getCurrent();
+    this.currentWindow = getCurrentWebviewWindow();
   }
 
   public async close<TResult>(result: TResult) {

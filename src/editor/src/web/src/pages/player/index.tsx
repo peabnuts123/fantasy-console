@@ -1,7 +1,7 @@
 import type { FunctionComponent } from "react";
 import { useState } from "react";
-import { open } from '@tauri-apps/api/dialog';
-import { readBinaryFile } from '@tauri-apps/api/fs';
+import { open } from '@tauri-apps/plugin-dialog';
+import { readFile } from '@tauri-apps/plugin-fs';
 import Link from "next/link";
 import { ArrowLeftEndOnRectangleIcon, FolderIcon } from '@heroicons/react/24/solid'
 
@@ -22,7 +22,7 @@ const PlayerPage: FunctionComponent<Props> = ({ }) => {
     }) as string | null;
     if (selected === null) return;
 
-    const bytes = await readBinaryFile(selected);
+    const bytes = await readFile(selected);
     setCartridge(bytes);
   };
 

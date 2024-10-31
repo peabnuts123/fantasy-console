@@ -1,6 +1,6 @@
 import type { FunctionComponent, HTMLAttributes, PropsWithChildren } from "react";
 import Link from 'next/link';
-import { open } from '@tauri-apps/api/dialog';
+import { open } from '@tauri-apps/plugin-dialog';
 import { observer } from "mobx-react-lite";
 
 import { useLibrary } from "@lib/index";

@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 
 import { AssetType, CartridgeArchiveManifest } from '@fantasy-console/runtime/src/cartridge';
 

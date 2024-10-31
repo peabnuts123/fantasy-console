@@ -8,7 +8,6 @@
   ],
   "rust-analyzer.linkedProjects": [
     "src/editor/src/app/Cargo.toml",
-    "src/editor/src/cli/Cargo.toml",
   ],
   "files.associations": {
     "*.pzproj": "jsonc",
