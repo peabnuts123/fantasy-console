@@ -32,8 +32,8 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
   }, [controller]);
 
   // Functions
-  const createNewObject = () => {
-    controller.mutator.apply(new CreateBlankGameObjectMutation());
+  const createNewObject = (parent: GameObjectData | undefined = undefined) => {
+    controller.mutator.apply(new CreateBlankGameObjectMutation(parent));
   }
 
   const showContextMenu = async (e: React.MouseEvent) => {
@@ -67,7 +67,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
           <h2 className="text-lg">{controller.scene.path}</h2>
         </div>
         <div className="p-3 bg-slate-300 h-full" onContextMenu={showContextMenu}>
-          <button className="button" onClick={createNewObject}>New Object</button>
+          <button className="button" onClick={() => createNewObject()}>New Object</button>
           {controller.scene.objects.map((gameObject, index) => (
             <SceneHierarchyObject key={index} gameObject={gameObject} controller={controller} contextActions={{ createNewObject }} />
           ))}
@@ -108,7 +108,7 @@ interface SceneHierarchyObjectProps {
   controller: SceneViewController;
   gameObject: GameObjectData;
   contextActions: {
-    createNewObject: () => void;
+    createNewObject: (parent?: GameObjectData | undefined) => void;
   };
   indentLevel?: number;
 }
@@ -135,6 +135,12 @@ const SceneHierarchyObject: FunctionComponent<SceneHierarchyObjectProps> = obser
         text: 'Create new object',
         action: () => {
           contextActions.createNewObject();
+        },
+      }),
+      MenuItem.new({
+        text: 'Create new child object',
+        action: () => {
+          contextActions.createNewObject(gameObject);
         },
       }),
       // MenuItem.new({
