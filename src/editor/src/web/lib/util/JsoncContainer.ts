@@ -1,8 +1,11 @@
 import { modify, JSONPath, ModificationOptions, applyEdits, parse } from 'jsonc-parser';
+import { makeAutoObservable } from 'mobx';
 
 const DefaultOptions: ModificationOptions = {
   formattingOptions: {},
 }
+
+const LogMutationDiffs = false;
 
 /**
  * A container for more easily manipulating JSONC documents.
@@ -13,7 +16,8 @@ export class JsoncContainer<TRawType extends object> {
 
   public constructor(jsonc: string) {
     this._text = jsonc;
-    this.currentValue = this.parse();
+    this.currentValue = parse(jsonc);
+    makeAutoObservable(this);
   }
 
   public mutate<TValue>(pathSelector: ResolvePathSelector<TRawType, TValue>, value: TValue extends undefined ? never : TValue, options?: ModificationOptions): void;
@@ -39,30 +43,28 @@ export class JsoncContainer<TRawType extends object> {
       path = resolvePath(pathOrSelector);
     }
 
-    // console.log(`[JsoncContainer] (mutate) Before: `, this.text);
+    if (LogMutationDiffs) console.log(`[JsoncContainer] (mutate) Before: `, this.text);
 
     let edits = modify(this.text, path, value, options);
     this.text = applyEdits(this.text, edits);
-    // console.log(`[JsoncContainer] (mutate) After: `, this.text);
+    if (LogMutationDiffs) console.log(`[JsoncContainer] (mutate) After: `, this.text);
   }
 
   public delete(path: JSONPath) {
+    if (LogMutationDiffs) console.log(`[JsoncContainer] (delete) Before: `, this.text);
     let edits = modify(this.text, path, undefined, DefaultOptions);
     this.text = applyEdits(this.text, edits);
+    if (LogMutationDiffs) console.log(`[JsoncContainer] (delete) After: `, this.text);
   }
 
   public toString(): string {
     return this.text;
   }
 
-  public parse(): TRawType {
-    return parse(this.text) as TRawType;
-  }
-
   private get text(): string { return this._text; }
   private set text(value: string) {
     this._text = value;
-    this.currentValue = this.parse();
+    this.currentValue = parse(value);
   }
 
   public get value(): TRawType { return this.currentValue; }

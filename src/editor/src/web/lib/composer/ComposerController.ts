@@ -82,7 +82,7 @@ export class ComposerController {
         if (this._currentScene !== undefined && sceneManifest.path === this._currentScene.scene.path) {
           // Load current scene from memory
           // @NOTE This is kind of @DEBUG because we are suppose to have multiple scenes open
-          return this._currentScene.sceneJson.parse();
+          return this._currentScene.sceneDefinition;
         } else {
           // @TODO can this be a method on ProjectController instead?
           const [sceneDefinition] = await SceneViewController.loadSceneDefinition(sceneManifest, this.projectController.fileSystem);

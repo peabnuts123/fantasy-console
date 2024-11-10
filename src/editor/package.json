@@ -27,8 +27,6 @@
     "mobx-react-lite": "^4.0.7",
     "next": "14.2.5",
     "react": "^18",
-    "react-dnd": "^16.0.1",
-    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18",
     "react-resizable-panels": "^2.1.0",
     "uuid": "^10.0.0"

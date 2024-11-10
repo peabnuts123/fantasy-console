@@ -1,6 +1,5 @@
-import { ConnectDragPreview, ConnectDragSource, ConnectDropTarget, useDrag, useDrop } from "react-dnd";
 import { AssetData, AssetDataOfType, AssetType } from "@fantasy-console/runtime/src/cartridge";
-import { LegacyRef } from "react";
+import { useDrag, useDrop } from "@lib/util/drag-and-drop";
 
 export interface AssetDragState {
   isDragging: boolean;
@@ -14,49 +13,22 @@ export interface AssetDragData<TAssetData extends AssetData> {
   assetData: TAssetData;
 }
 
-export function useAssetDrag<TAssetData extends AssetData>(asset: TAssetData) {
-  return makeDnDResultMoreUseful(
-    useDrag<AssetDragData<TAssetData>, {}, AssetDragState>(() => {
-      return {
-        type: asset.type,
-        item: (_monitor) => {
-          return {
-            assetData: asset,
-          };
-        },
-        options: { dropEffect: 'link' },
-        collect: (monitor) => ({
-          isDragging: monitor.isDragging()
-        }),
-      };
-    })
-  );
+export function useAssetDrag<TAssetData extends AssetData, TElement extends HTMLElement = HTMLDivElement>(asset: TAssetData) {
+  return useDrag<AssetDragData<TAssetData>, TElement>({
+    type: asset.type,
+    data: {
+      assetData: asset,
+    },
+    dropEffect: 'link',
+  });
 }
 
-export function useAssetDrop<TAssetType extends AssetType, TDropResult>(
+export function useAssetDrop<TAssetType extends AssetType, TElement extends HTMLElement = HTMLDivElement>(
   acceptedAssetType: TAssetType,
-  onDrop: (data: AssetDragData<AssetDataOfType<TAssetType>>) => TDropResult
+  onDrop: (data: AssetDragData<AssetDataOfType<TAssetType>>) => void
 ) {
-  return makeDnDResultMoreUseful(
-    useDrop<AssetDragData<AssetDataOfType<TAssetType>>, TDropResult, AssetDropState>(() => ({
-      accept: acceptedAssetType,
-      drop: (data, _monitor) => {
-        return onDrop(data);
-      },
-      collect: monitor => ({
-        isDragOverTarget: !!monitor.isOver(),
-      }),
-    }))
-  );
-}
-
-function makeDnDResultMoreUseful<TResult>(
-  dndResult: (
-    [TResult, ConnectDragSource, ConnectDragPreview] |  // @NOTE useDrag result
-    [TResult, ConnectDropTarget]                        // @NOTE useDrop result
-  )
-): [TResult, LegacyRef<any>] {
-  return [dndResult[0], (e) => {
-    dndResult[1](e);
-  }]
+  return useDrop<AssetDragData<AssetDataOfType<TAssetType>>, {}, TElement>({
+    accepts: acceptedAssetType,
+    onDrop,
+  });
 }

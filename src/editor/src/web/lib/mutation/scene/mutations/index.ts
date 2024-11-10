@@ -6,6 +6,7 @@ export * from './SetGameObjectLightComponentColorMutation';
 export * from './SetGameObjectLightComponentIntensityMutation';
 export * from './SetGameObjectMeshComponentAssetMutation';
 export * from './SetGameObjectNameMutation';
+export * from './SetGameObjectParentMutation';
 export * from './SetGameObjectPositionMutation';
 export * from './SetGameObjectRotationMutation';
 export * from './SetGameObjectScaleMutation';

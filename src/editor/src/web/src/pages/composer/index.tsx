@@ -6,11 +6,10 @@ import { save } from '@tauri-apps/plugin-dialog';
 import { writeFile } from '@tauri-apps/plugin-fs';
 import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon } from '@heroicons/react/24/solid'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { DndProvider } from 'react-dnd'
-import { HTML5Backend } from 'react-dnd-html5-backend'
 
 import { useLibrary } from "@lib/index";
 import type { SceneManifest } from "@lib/project/definition/scene";
+import { DragAndDropDataProvider } from '@lib/util/drag-and-drop'
 import SceneView from "@app/components/composer/SceneView";
 import Player from "@app/components/player";
 import { AssetList } from "@app/components/composer/AssetList";
@@ -62,7 +61,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DragAndDropDataProvider>
       {/* Header */}
       <header className="flex items-center w-full justify-between py-1 px-2">
         {/* Exit */}
@@ -114,7 +113,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
           <Player cartridge={tempCartridge!} />
         </>
       )}
-    </DndProvider>
+    </DragAndDropDataProvider>
   )
 });
 

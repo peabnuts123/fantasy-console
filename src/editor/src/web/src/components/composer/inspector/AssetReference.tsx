@@ -35,7 +35,7 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
     const hasAsset = asset !== undefined;
 
     // Drag and drop hook
-    const [{ isDragOverTarget }, DropTarget] = useAssetDrop(assetType,
+    const [{ isDragOverThisZone }, DropTarget] = useAssetDrop<TAssetType, HTMLButtonElement>(assetType,
       /* @NOTE On drop */
       ({ assetData, }) => onAssetChange(assetData)
     );
@@ -87,7 +87,7 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
           <button
             ref={DropTarget}
             className={cn("w-full p-2 bg-white overflow-scroll whitespace-nowrap cursor-pointer text-left overflow-ellipsis", {
-              "!bg-blue-300": isDragOverTarget,
+              "!bg-blue-300": isDragOverThisZone,
               'italic': !hasAsset,
             })}
             onClick={onClickAssetButton}

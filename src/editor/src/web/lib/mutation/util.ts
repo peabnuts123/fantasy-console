@@ -44,7 +44,7 @@ export function findGameObjectInChildren(id: string, parentObject: GameObjectDef
  * ```
  */
 export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: string, scene: SceneDefinition, pathSelector: ResolvePathSelector<GameObjectDefinition, TPathTarget>): MutationPath<TPathTarget>;
-export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: string, scene: SceneDefinition): MutationPath<TPathTarget>;
+export function resolvePathForSceneObjectMutation(gameObjectId: string, scene: SceneDefinition): MutationPath<GameObjectDefinition>;
 export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: string, scene: SceneDefinition, pathSelector?: ResolvePathSelector<GameObjectDefinition, TPathTarget>): MutationPath<TPathTarget> {
   let target: [GameObjectDefinition, MutationPath<TPathTarget>] | undefined = undefined;
 
@@ -81,4 +81,17 @@ export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: str
   const debug_result = mutationPath.concat(relativePath);
   console.log(`[resolvePathForSceneObjectMutation] Resolved path: ${debug_result.map((x) => typeof (x) === 'number' ? `[${x}]` : `.${x}`).join('')}`);
   return debug_result;
+}
+
+/**
+ * Read the real value of a path from a given scene.
+ * @param path The path from which to read within the scene.
+ * @param scene Scene from which to read the value.
+ */
+export function readPathInScene<TPathTarget>(path: MutationPath<TPathTarget>, scene: SceneDefinition): TPathTarget {
+  let currentValue: any = scene;
+  for (const pathSegment of path) {
+    currentValue = currentValue[pathSegment as keyof typeof currentValue];
+  }
+  return currentValue;
 }
