@@ -57,15 +57,8 @@ export class ComposerController {
     })
   }
 
-  public get hasLoadedScene() {
-    return this._currentScene !== undefined;
-  }
 
-  public get currentScene(): SceneViewController {
-    if (this._currentScene === undefined) {
-      throw new Error(`No scene is currently loaded`);
-    }
-
+  public get currentScene(): SceneViewController | undefined {
     return this._currentScene;
   }
 

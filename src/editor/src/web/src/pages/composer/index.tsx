@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeFile } from '@tauri-apps/plugin-fs';
-import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon } from '@heroicons/react/24/solid'
+import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon, PlusIcon } from '@heroicons/react/24/solid'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 import { useLibrary } from "@lib/index";
@@ -13,6 +13,7 @@ import { DragAndDropDataProvider } from '@lib/util/drag-and-drop'
 import SceneView from "@app/components/composer/SceneView";
 import Player from "@app/components/player";
 import { AssetList } from "@app/components/composer/AssetList";
+import { TabBar, TabProvider } from "@app/components/tabs";
 
 
 interface Props { }
@@ -25,6 +26,9 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
 
   // Computed State
   const isPlaying = tempCartridge !== undefined;
+
+  // @TODO we aren't doing this any more... this is debug
+  const currentSceneController = ComposerController.currentScene;
 
   useEffect(() => {
     ComposerController.onEnter();
@@ -79,34 +83,63 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
       </header>
 
       {!isPlaying ? (
-        /* Editing scene (not playing) */
-        <PanelGroup direction="vertical">
-          <Panel defaultSize={75} minSize={25}>
-            {ComposerController.hasLoadedScene ? (
-              /* Scene loaded */
-              <SceneView controller={ComposerController.currentScene} />
-            ) : (
-              /* No scene loaded */
-              <div className="flex flex-col justify-center items-center h-full">
-                <h1 className="text-h2">No scene loaded</h1>
-                <p>Select a scene to load</p>
-                <ul className="flex flex-col items-center">
-                  {ProjectController.currentProject.scenes.map((sceneManifest) => (
-                    <button
-                      key={sceneManifest.hash}
-                      onClick={() => loadScene(sceneManifest)}
-                      className="button"
-                    >{sceneManifest.path}</button>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </Panel>
-          <PanelResizeHandle className="drag-separator" />
-          <Panel minSize={10}>
-            <AssetList />
-          </Panel>
-        </PanelGroup>
+        <TabProvider defaultTabId={ComposerController.currentScene?.scene.path ?? ""}>
+          <TabBar tabs={[
+            {
+              type: 'page',
+              tabId: currentSceneController?.scene.path ?? '',
+              label: currentSceneController?.scene.path ?? "",
+            },
+            {
+              type: 'page',
+              tabId: 'scenes/another.pzscene',
+              label: "scenes/another.pzscene",
+            },
+            {
+              type: 'action',
+              // label: '+',
+              innerContent: (
+                <>
+                  <PlusIcon className="icon w-4" />
+                </>
+              ),
+              onClick() {
+                console.log(`Open another scene`);
+              }
+            }
+          ]} />
+
+          {/* Editing scene (not playing) */}
+          <PanelGroup direction="vertical">
+            <Panel defaultSize={75} minSize={25}>
+              {currentSceneController ? (
+                /* Scene loaded */
+                <>
+                  <SceneView controller={currentSceneController} />
+                </>
+              ) : (
+                /* No scene loaded */
+                <div className="flex flex-col justify-center items-center h-full">
+                  <h1 className="text-h2">No scene loaded</h1>
+                  <p>Select a scene to load</p>
+                  <ul className="flex flex-col items-center">
+                    {ProjectController.currentProject.scenes.map((sceneManifest) => (
+                      <button
+                        key={sceneManifest.hash}
+                        onClick={() => loadScene(sceneManifest)}
+                        className="button"
+                      >{sceneManifest.path}</button>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </Panel>
+            <PanelResizeHandle className="drag-separator" />
+            <Panel minSize={10}>
+              <AssetList />
+            </Panel>
+          </PanelGroup>
+        </TabProvider>
       ) : (
         /* Playing scene */
         <>
@@ -116,7 +149,5 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
     </DragAndDropDataProvider>
   )
 });
-
-
 
 export default ComposerPage;
