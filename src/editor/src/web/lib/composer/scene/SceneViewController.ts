@@ -44,13 +44,13 @@ export class SceneViewController {
   private readonly projectController: ProjectController;
   private readonly _mutator: SceneViewMutator;
 
-  // @TODO different classes for the "states" of SceneViewController or something? So that not everything is nullable
-  private engine?: Engine = undefined;
-  private babylonScene?: BabylonScene = undefined;
-  private assetCache: Map<AssetData, AssetContainer>;
-  private _selectionManager?: SelectionManager = undefined;
+  private readonly _canvas: HTMLCanvasElement;
+  private readonly engine: Engine;
+  private readonly babylonScene: BabylonScene;
+  private readonly assetCache: Map<AssetData, AssetContainer>;
+  private readonly _selectionManager: SelectionManager;
 
-  private babylonToWorldSelectionCache: ComposerSelectionCache;
+  private readonly babylonToWorldSelectionCache: ComposerSelectionCache;
 
   public constructor(scene: SceneData, sceneJson: JsoncContainer<SceneDefinition>, projectController: ProjectController) {
     this._scene = scene;
@@ -59,91 +59,91 @@ export class SceneViewController {
     this.assetCache = new Map();
     this.babylonToWorldSelectionCache = new ComposerSelectionCache();
     this._mutator = new SceneViewMutator(this, projectController);
-    this.reset();
+
+    this._canvas = document.createElement('canvas');
+    this.canvas.classList.add('w-full', 'h-full');
+
+    this.engine = new Engine(this.canvas, true, {}, true);
+    this.babylonScene = new BabylonScene(this.engine);
+    this._selectionManager = new SelectionManager(this.babylonScene, this.mutator);
 
     // @NOTE Class properties MUST have a value explicitly assigned
     // by this point otherwise mobx won't pick them up.
     makeAutoObservable(this);
+
+    // Build scene
+    void this.buildScene();
   }
 
-  private reset() {
-    this.engine = undefined;
-    this.babylonScene = undefined;
-    this.assetCache = new Map();
-  }
+  private async buildScene() {
+    // @DEBUG Random camera constants
+    const camera = new FreeCameraBabylon("main", new Vector3Babylon(6, 2, -1), this.babylonScene);
+    camera.setTarget(Vector3Babylon.Zero());
+    camera.attachControl(this.canvas, true);
+    camera.speed = 0.3;
+    camera.minZ = 0.1;
 
-  public startBabylonView(canvas: HTMLCanvasElement) {
-    /* Scene */
-    const engine = this.engine = new Engine(canvas, true, {}, true);
-    const scene = this.babylonScene = new BabylonScene(this.engine);
-    const selectionManager = this._selectionManager = new SelectionManager(scene, this.mutator);
+    /* @NOTE WASD+Shift+Space */
+    camera.keysUp.push(87);
+    camera.keysLeft.push(65);
+    camera.keysRight.push(68);
+    camera.keysDown.push(83);
+    camera.keysUpward.push(32);
+    camera.keysDownward.push(16);
 
+    await this.createScene()
 
-    /* Lifecycle */
-    const resizeObserver = new ResizeObserver((entries) => {
-      const newSize = entries[0].contentRect;
-      this.engine!.setSize(newSize.width * devicePixelRatio, newSize.height * devicePixelRatio, true);
-    });
-    resizeObserver.observe(canvas);
+    await this.babylonScene.whenReadyAsync()
 
-    // Build scene (async)
-    void (async () => {
-      // @DEBUG Random camera constants
-      const camera = new FreeCameraBabylon("main", new Vector3Babylon(6, 2, -1), this.babylonScene);
-      camera.setTarget(Vector3Babylon.Zero());
-      camera.attachControl(canvas, true);
-      camera.speed = 0.3;
-      camera.minZ = 0.1;
-      /* @NOTE WASD+Shift+Space */
-      camera.keysUp.push(87);
-      camera.keysLeft.push(65);
-      camera.keysRight.push(68);
-      camera.keysDown.push(83);
-      camera.keysUpward.push(32);
-      camera.keysDownward.push(16);
+    this.babylonScene.onPointerObservable.add((pointerInfo) => {
+      if (pointerInfo.type === PointerEventTypes.POINTERTAP) {
+        if (!pointerInfo.pickInfo?.hit) {
+          this.selectionManager.deselectAll();
+        } else if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh !== null) {
+          // Resolve GameObjectData from reverse lookup cache
+          let pickedGameObject = this.babylonToWorldSelectionCache.get(pointerInfo.pickInfo.pickedMesh);
 
-      await this.createScene()
-
-      await scene.whenReadyAsync()
-
-      scene.onPointerObservable.add((pointerInfo) => {
-        if (pointerInfo.type === PointerEventTypes.POINTERTAP) {
-          if (!pointerInfo.pickInfo?.hit) {
-            selectionManager.deselectAll();
-          } else if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh !== null) {
-            // Resolve GameObjectData from reverse lookup cache
-            let pickedGameObject = this.babylonToWorldSelectionCache.get(pointerInfo.pickInfo.pickedMesh);
-
-            if (pickedGameObject === undefined) {
-              console.error(`Picked mesh but found no corresponding GameObject in cache. Has it been populated or updated? Picked mesh:`, pointerInfo.pickInfo.pickedMesh);
-            } else {
-              selectionManager.select(pickedGameObject);
-            }
+          if (pickedGameObject === undefined) {
+            console.error(`Picked mesh but found no corresponding GameObject in cache. Has it been populated or updated? Picked mesh:`, pointerInfo.pickInfo.pickedMesh);
+          } else {
+            this.selectionManager.select(pickedGameObject);
           }
         }
-      });
+      }
+    });
+  }
 
-      engine.runRenderLoop(() => {
-        scene.render();
-      });
-    })();
+  public startBabylonView() {
+    const renderLoop = () => {
+      this.babylonScene.render();
+    };
+    this.engine.runRenderLoop(renderLoop);
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      const newSize = entries[0].contentRect;
+      this.engine.setSize(newSize.width * devicePixelRatio, newSize.height * devicePixelRatio, true);
+    });
+    resizeObserver.observe(this.canvas as unknown as Element); // @TODO FUCK YOU REACT!!!!!!
 
     /* Teardown - when scene view is unloaded */
     const onDestroyView = () => {
-      console.log(`[SceneViewController] (onDestroyView) Goodbye!`);
-      // @TODO destroy GameObjects once we sort out what the abstraction difference between this and Runtime is
-      scene.dispose();
-      scene.onPointerObservable.clear();
-      engine.dispose();
-      this.reset();
-      resizeObserver.unobserve(canvas);
-    }
+      resizeObserver.unobserve(this.canvas as unknown as Element); // @TODO FUCK YOU REACT!!!!!!
+      this.engine.stopRenderLoop(renderLoop);
+    };
     return onDestroyView;
+  }
+
+  public destroy() {
+    this.assetCache.forEach((asset) => asset.dispose());
+    this.selectionManager.destroy();
+    this.babylonScene.onPointerObservable.clear();
+    this.babylonScene.dispose();
+    this.engine.dispose();
   }
 
   private async createScene() {
     /* Scene clear color */
-    this.babylonScene!.clearColor = toColor3Babylon(this.scene.config.clearColor).toColor4();
+    this.babylonScene.clearColor = toColor3Babylon(this.scene.config.clearColor).toColor4();
 
     /* Set up global ambient lighting */
     const ambientLight = new HemisphericLightBabylon("__ambient", new Vector3Babylon(0, 0, 0), this.babylonScene);
@@ -158,7 +158,7 @@ export class SceneViewController {
   }
 
   public setCurrentTool(tool: CurrentSelectionTool) {
-    this.selectionManager!.currentTool = tool;
+    this.selectionManager.currentTool = tool;
   }
 
   public addToSelectionCache(gameObjectData: GameObjectData, component: ISelectableObject) {
@@ -282,6 +282,10 @@ export class SceneViewController {
     return new SceneViewController(new SceneData(sceneDefinition, projectController.assetDb), new JsoncContainer<SceneDefinition>(sceneJson), projectController);
   }
 
+  public get canvas(): HTMLCanvasElement {
+    return this._canvas;
+  }
+
   public get scene(): SceneData {
     return this._scene;
   }
@@ -299,7 +303,7 @@ export class SceneViewController {
   }
 
   public get selectedObject(): GameObjectData | undefined {
-    return this.selectionManager?.selectedObject;
+    return this.selectionManager.selectedObject;
   }
 
   public get selectionManager(): SelectionManager {

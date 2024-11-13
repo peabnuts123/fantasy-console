@@ -25,6 +25,7 @@ export enum CurrentSelectionTool {
 }
 
 export class SelectionManager {
+  private readonly babylonScene: BabylonScene;
   private readonly gizmoManager: GizmoManager;
   private readonly moveGizmo: PositionGizmo;
   private readonly rotateGizmo: RotationGizmo;
@@ -40,7 +41,7 @@ export class SelectionManager {
   private currentScaleMutation: SetGameObjectScaleMutation | undefined = undefined;
 
   public constructor(scene: BabylonScene, mutator: SceneViewMutator) {
-
+    this.babylonScene = scene;
     const utilityLayer = new UtilityLayerRenderer(scene);
     this.gizmoManager = new GizmoManager(scene, 2, utilityLayer);
     this.gizmoManager.usePointerToAttachGizmos = false;
@@ -146,7 +147,7 @@ export class SelectionManager {
 
       // Construct a new dummy transform target if we need one and it doesn't exist
       if (this.fakeTransformTarget === undefined) {
-        this.fakeTransformTarget = new TransformNode("SelectionManager_fakeTransformTarget");
+        this.fakeTransformTarget = new TransformNode("SelectionManager_fakeTransformTarget", this.babylonScene);
       }
 
       // Ensure fake transform target's local coordinates match the local coordinates of the
@@ -155,7 +156,7 @@ export class SelectionManager {
         const realParent = realTransformTarget.parent as TransformNode;
         if (this.fakeTransformTarget.parent === null) {
           // Creating a new fake transform parent
-          const fakeParent = new TransformNode(`SelectionManager_fakeTransformParent`);
+          const fakeParent = new TransformNode(`SelectionManager_fakeTransformParent`, this.babylonScene);
           fakeParent.position = realParent.absolutePosition.clone();
           fakeParent.rotationQuaternion = realParent.absoluteRotationQuaternion.clone();
           this.fakeTransformTarget.parent = fakeParent;
@@ -197,9 +198,18 @@ export class SelectionManager {
       }
     } else {
       // Destroy dummy transform target if we've deselected
+      this.fakeTransformTarget?.parent?.dispose();
       this.fakeTransformTarget?.dispose();
       this.fakeTransformTarget = undefined;
     }
+  }
+
+  public destroy() {
+    this.moveGizmo.dispose();
+    this.rotateGizmo.dispose();
+    this.scaleGizmo.dispose();
+    this.boundingBoxGizmo.dispose();
+    this.gizmoManager.dispose();
   }
 
   // Selected object

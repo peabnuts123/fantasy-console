@@ -91,6 +91,9 @@ export class ComposerController {
       throw new Error(`Could not load scene for tab - no tab exists with ID '${tabId}'`);
     }
 
+    // Unload scene
+    this.currentlyOpenTabs[tabIndex].sceneViewController?.destroy();
+
     runInAction(() => {
       this.currentlyOpenTabs.splice(tabIndex, 1);
     });

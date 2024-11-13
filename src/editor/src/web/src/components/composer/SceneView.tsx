@@ -1,5 +1,5 @@
 import type { FunctionComponent } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { ArrowsPointingOutIcon, ArrowPathIcon, ArrowsPointingInIcon } from '@heroicons/react/24/solid'
 import { observer } from "mobx-react-lite";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -18,23 +18,24 @@ interface Props {
 
 const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) => {
   // Refs
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasParentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (canvasParentRef.current) {
+      canvasParentRef.current.appendChild(controller.canvas);
+    }
 
-    return controller.startBabylonView(canvas);
-  }, [controller]);
+    return controller.startBabylonView();
+  }, []);
 
   return (
-    <>
-      <div className="p-2 pt-0 bg-white flex flex-row">
+    <div className="h-full flex flex-col">
+      <div className="p-2 pt-0 bg-white flex flex-row shrink-0">
         <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Move)}><ArrowsPointingOutIcon className="icon mr-1" /> Move</button>
         <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Rotate)}><ArrowPathIcon className="icon mr-1" /> Rotate</button>
         <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Scale)}><ArrowsPointingInIcon className="icon mr-1" /> Scale</button>
       </div>
-      <PanelGroup direction="horizontal" className="h-full select-none">
+      <PanelGroup direction="horizontal" className="grow select-none">
         <Panel defaultSize={20} minSize={10}>
           {/* Hierarchy */}
           <Hierarchy controller={controller} />
@@ -43,16 +44,13 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
         <Panel className="flex flex-col h-full">
           {/* Viewport */}
           <div className="grow relative">
-            <div className="absolute inset-0">
+            <div className="absolute inset-0" ref={canvasParentRef}>
               {/*
                 @NOTE ye-olde absolute position hacks
                 Babylon HATES to be in a flex-grow element,
                   it causes it to expand the size of the canvas element every frame.
               */}
-              <canvas
-                ref={canvasRef}
-                className="w-full h-full"
-              />
+              {/* @NOTE Canvas element is inserted here */}
             </div>
           </div>
         </Panel>
@@ -62,7 +60,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
           <Inspector sceneViewController={controller} />
         </Panel>
       </PanelGroup>
-    </>
+    </div>
   );
 });
 
