@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { invoke } from '@tauri-apps/api/core'
+import { v4 as uuid } from 'uuid';
 
 import { AssetType, CartridgeArchiveManifest } from '@fantasy-console/runtime/src/cartridge';
 
@@ -14,10 +15,15 @@ export interface CreateCartridgeCmdArgs {
   scriptPaths: string[];
 }
 
+export interface TabData {
+  id: string;
+  label: string;
+  sceneViewController?: SceneViewController;
+}
+
 
 export class ComposerController {
-  private _currentScene: SceneViewController | undefined = undefined; // @NOTE explicit `undefined` for mobx
-
+  private _tabData: TabData[] = [];
   private _stopWatchingFs?: Function = undefined;
 
   private readonly projectController: ProjectController;
@@ -27,7 +33,10 @@ export class ComposerController {
     // by this point otherwise mobx won't pick them up.
     makeAutoObservable(this);
 
-    this.projectController = projectController;
+    this.projectController = projectController; // @NOTE explicitly not observed by mobx
+
+    // Open 1 blank tab
+    this.openNewTab();
   }
 
   public async onEnter(): Promise<void> {
@@ -48,18 +57,47 @@ export class ComposerController {
     }
   }
 
-  public async loadScene(sceneManifest: SceneManifest) {
-    // @TODO this abstract probably doesn't make sense any more
-    //  - @TODO What about it ^?
-    const scene = await SceneViewController.loadFromManifest(sceneManifest, this.projectController);
-    runInAction(() => {
-      this._currentScene = scene;
-    })
+  public async loadSceneForTab(tabId: string, sceneManifest: SceneManifest) {
+    for (const tab of this.currentlyOpenTabs) {
+      if (tab.id === tabId) {
+        const sceneViewController = await SceneViewController.loadFromManifest(sceneManifest, this.projectController);
+        runInAction(() => {
+          tab.label = sceneViewController.scene.path;
+          tab.sceneViewController = sceneViewController;
+        });
+        return;
+      }
+    }
+
+    throw new Error(`Could not load scene for tab - no tab exists with ID '${tabId}'`);
   }
 
+  public openNewTab() {
+    const newTabData: TabData = {
+      id: uuid(),
+      label: "No scene loaded",
+    };
 
-  public get currentScene(): SceneViewController | undefined {
-    return this._currentScene;
+    runInAction(() => {
+      this.currentlyOpenTabs.push(newTabData);
+    });
+
+    return newTabData;
+  }
+
+  public closeTab(tabId: string) {
+    const tabIndex = this.currentlyOpenTabs.findIndex((tab) => tab.id === tabId);
+    if (tabIndex === -1) {
+      throw new Error(`Could not load scene for tab - no tab exists with ID '${tabId}'`);
+    }
+
+    runInAction(() => {
+      this.currentlyOpenTabs.splice(tabIndex, 1);
+    });
+  }
+
+  public get currentlyOpenTabs(): TabData[] {
+    return this._tabData;
   }
 
   public async debug_buildCartridge(): Promise<Uint8Array> {
@@ -72,10 +110,12 @@ export class ComposerController {
     // Load scene definitions
     const scenes = await Promise.all(
       this.projectController.currentProject.scenes.map(async (sceneManifest) => {
-        if (this._currentScene !== undefined && sceneManifest.path === this._currentScene.scene.path) {
+        // Load any scenes currently open from memory
+        // @TODO is this just a Chrome @DEBUG thing?
+        const openTab = this.currentlyOpenTabs.find((tab) => tab.sceneViewController?.scene.path === sceneManifest.path);
+        if (openTab !== undefined) {
           // Load current scene from memory
-          // @NOTE This is kind of @DEBUG because we are suppose to have multiple scenes open
-          return this._currentScene.sceneDefinition;
+          return openTab.sceneViewController!.sceneDefinition;
         } else {
           // @TODO can this be a method on ProjectController instead?
           const [sceneDefinition] = await SceneViewController.loadSceneDefinition(sceneManifest, this.projectController.fileSystem);

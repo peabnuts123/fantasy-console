@@ -5,7 +5,7 @@ import cn from 'classnames';
 export type TabState = ReturnType<typeof createTabState>;
 
 const createTabState = (defaultTabId: string) => {
-  const [currentTabPageId, setCurrentTabPageId] = useState<string>(defaultTabId);
+  const [currentTabPageId, setCurrentTabPageId] = useState<string | undefined>(defaultTabId);
 
   // Update the current tab if the default tabId changes
   // Useful for dynamic tab sets. Might be debug, not sure.
@@ -23,28 +23,28 @@ const createTabState = (defaultTabId: string) => {
   }
 };
 
-interface TabButtonCommonProps {
+export interface TabButtonCommonProps {
   /** Text to display in the tab button. Mutually exclusive with `innerContent` */
   label?: string;
   /** JSX content to display in the tab button. Mutually exclusive with `label` */
   innerContent?: ReactNode;
 }
 
-interface TabPageButtonProps extends TabButtonCommonProps {
+export interface TabPageButtonProps extends TabButtonCommonProps {
   /** Type of tab button */
   type: 'page';
   /** Id of the tab page associated with this button */
   tabId: string;
 }
 
-interface TabActionButtonProps extends TabButtonCommonProps {
+export interface TabActionButtonProps extends TabButtonCommonProps {
   /** Type of tab button */
   type: 'action',
   /** Callback for when this button is clicked */
   onClick: () => void;
 }
 
-type TabButtonProps = TabPageButtonProps | TabActionButtonProps;
+export type TabButtonProps = TabPageButtonProps | TabActionButtonProps;
 
 /**
  * An individual tab button. You probably want to use {@link TabBar} unless you are doing

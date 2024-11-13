@@ -29,7 +29,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
 
   return (
     <>
-      <div className="p-2 pt-0 bg-white flex flex-row shrink-0">
+      <div className="p-2 pt-0 bg-white flex flex-row">
         <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Move)}><ArrowsPointingOutIcon className="icon mr-1" /> Move</button>
         <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Rotate)}><ArrowPathIcon className="icon mr-1" /> Rotate</button>
         <button className="button" onClick={() => controller.setCurrentTool(CurrentSelectionTool.Scale)}><ArrowsPointingInIcon className="icon mr-1" /> Scale</button>
@@ -45,10 +45,10 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
           <div className="grow relative">
             <div className="absolute inset-0">
               {/*
-              @NOTE ye-olde absolute position hacks
-              Babylon HATES to be in a flex-grow element,
-                it causes it to expand the size of the canvas element every frame.
-            */}
+                @NOTE ye-olde absolute position hacks
+                Babylon HATES to be in a flex-grow element,
+                  it causes it to expand the size of the canvas element every frame.
+              */}
               <canvas
                 ref={canvasRef}
                 className="w-full h-full"

@@ -1,24 +1,24 @@
 import type { FunctionComponent } from "react";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeFile } from '@tauri-apps/plugin-fs';
-import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon, PlusIcon } from '@heroicons/react/24/solid'
+import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 import { useLibrary } from "@lib/index";
-import type { SceneManifest } from "@lib/project/definition/scene";
 import { DragAndDropDataProvider } from '@lib/util/drag-and-drop'
 import SceneView from "@app/components/composer/SceneView";
 import Player from "@app/components/player";
 import { AssetList } from "@app/components/composer/AssetList";
-import { TabBar, TabProvider } from "@app/components/tabs";
+import { TabBar, TabButtonProps, TabPage, TabProvider, useTabState } from "@app/components/tabs";
 
 
 interface Props { }
 
 const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
+  // Hooks
   const { ComposerController, ProjectController } = useLibrary();
 
   // State
@@ -26,9 +26,6 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
 
   // Computed State
   const isPlaying = tempCartridge !== undefined;
-
-  // @TODO we aren't doing this any more... this is debug
-  const currentSceneController = ComposerController.currentScene;
 
   useEffect(() => {
     ComposerController.onEnter();
@@ -38,10 +35,6 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   });
 
   // Functions
-  const loadScene = async (scene: SceneManifest) => {
-    await ComposerController.loadScene(scene);
-  };
-
   const debug_exportScene = async () => {
     const bytes = await ComposerController.debug_buildCartridge();
     const savePath = await save({
@@ -83,39 +76,111 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
       </header>
 
       {!isPlaying ? (
-        <TabProvider defaultTabId={ComposerController.currentScene?.scene.path ?? ""}>
-          <TabBar tabs={[
-            {
-              type: 'page',
-              tabId: currentSceneController?.scene.path ?? '',
-              label: currentSceneController?.scene.path ?? "",
-            },
-            {
-              type: 'page',
-              tabId: 'scenes/another.pzscene',
-              label: "scenes/another.pzscene",
-            },
-            {
-              type: 'action',
-              // label: '+',
-              innerContent: (
-                <>
-                  <PlusIcon className="icon w-4" />
-                </>
-              ),
-              onClick() {
-                console.log(`Open another scene`);
-              }
-            }
-          ]} />
+        <TabProvider defaultTabId={ComposerController.currentlyOpenTabs[0]?.id}>
+          <Editor />
+        </TabProvider>
+      ) : (
+        /* Playing scene */
+        <>
+          <Player cartridge={tempCartridge!} />
+        </>
+      )
+      }
+    </DragAndDropDataProvider >
+  )
+});
 
-          {/* Editing scene (not playing) */}
-          <PanelGroup direction="vertical">
-            <Panel defaultSize={75} minSize={25}>
-              {currentSceneController ? (
+const Editor: FunctionComponent = observer(() => {
+  // Hooks
+  const { ComposerController, ProjectController } = useLibrary();
+  const TabState = useTabState();
+
+  // Computed state
+  const noTabsOpen = ComposerController.currentlyOpenTabs.length === 0;
+
+  // Functions
+  const createNewTab = () => {
+    const newTabData = ComposerController.openNewTab();
+
+    setTimeout(() =>
+      TabState.setCurrentTabPageId(newTabData.id)
+    );
+  }
+
+  const closeTab = (tabId: string) => {
+    // Take note of some things before closing the tab
+    const isClosingCurrentlyActiveTab = TabState.currentTabPageId === tabId;
+    let oldTabIndex = ComposerController.currentlyOpenTabs.findIndex((tab) => tab.id === tabId);
+
+    ComposerController.closeTab(tabId);
+
+    if (ComposerController.currentlyOpenTabs.length === 0) {
+      // If there's no tabs left - clear out the active tab
+      TabState.setCurrentTabPageId(undefined);
+    } else if (isClosingCurrentlyActiveTab) {
+      // Switch to the next tab if you're closing this tab (do nothing otherwise)
+
+      // Clamp `oldTabIndex` to valid range
+      if (oldTabIndex >= ComposerController.currentlyOpenTabs.length) {
+        oldTabIndex = ComposerController.currentlyOpenTabs.length - 1;
+      }
+      const nextTab = ComposerController.currentlyOpenTabs[oldTabIndex];
+      setTimeout(() => {
+        TabState.setCurrentTabPageId(nextTab.id);
+      });
+    }
+  }
+
+  return (
+    <>
+      <TabBar tabs={[
+        ...ComposerController.currentlyOpenTabs.map((tab) => ({
+          type: 'page',
+          tabId: tab.id,
+          innerContent: (
+            <>
+              <span className="mr-1">{tab.label}</span>
+
+              <div
+                role="button"
+                tabIndex={0}
+                className="hover:bg-fuchsia-200 p-1 inline-flex justify-center items-center"
+                onClick={() => closeTab(tab.id)}
+              >
+                <TrashIcon className="icon w-4" />
+              </div>
+            </>
+          ),
+        }) satisfies TabButtonProps as TabButtonProps),
+        {
+          type: 'action',
+          innerContent: (
+            <>
+              <PlusIcon className="icon w-4" />
+            </>
+          ),
+          onClick: createNewTab,
+        }
+      ]} />
+
+
+
+      {/* Editing scene (not playing) */}
+      <PanelGroup direction="vertical">
+        <Panel defaultSize={75} minSize={25}>
+          {noTabsOpen && (
+            <div className="flex flex-col justify-center items-center h-full">
+              <h1 className="text-h2">No open tabs!</h1>
+              <p>Would you like to do something about it? 🙃</p>
+            </div>
+          )}
+
+          {ComposerController.currentlyOpenTabs.map((tab) => (
+            <TabPage tabId={tab.id} key={tab.id}>
+              {tab.sceneViewController ? (
                 /* Scene loaded */
                 <>
-                  <SceneView controller={currentSceneController} />
+                  <SceneView controller={tab.sceneViewController} />
                 </>
               ) : (
                 /* No scene loaded */
@@ -126,27 +191,22 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
                     {ProjectController.currentProject.scenes.map((sceneManifest) => (
                       <button
                         key={sceneManifest.hash}
-                        onClick={() => loadScene(sceneManifest)}
+                        onClick={() => ComposerController.loadSceneForTab(tab.id, sceneManifest)}
                         className="button"
                       >{sceneManifest.path}</button>
                     ))}
                   </ul>
                 </div>
               )}
-            </Panel>
-            <PanelResizeHandle className="drag-separator" />
-            <Panel minSize={10}>
-              <AssetList />
-            </Panel>
-          </PanelGroup>
-        </TabProvider>
-      ) : (
-        /* Playing scene */
-        <>
-          <Player cartridge={tempCartridge!} />
-        </>
-      )}
-    </DragAndDropDataProvider>
+            </TabPage>
+          ))}
+        </Panel>
+        <PanelResizeHandle className="drag-separator" />
+        <Panel minSize={10}>
+          <AssetList />
+        </Panel>
+      </PanelGroup>
+    </>
   )
 });
 
