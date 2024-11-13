@@ -9,7 +9,7 @@ import { useLibrary } from "@lib/index";
 import { showModal } from '@lib/modal';
 import { useAssetDrop } from "@app/interactions/assets";
 import { AssetReferenceModalAssetReference, AssetReferenceModalData, AssetReferenceResultPayload } from "@app/pages/modal/asset-reference";
-import { getIconForAssetType } from "../AssetList";
+import { getIconForAssetType } from "../AssetsAndScenes/AssetList";
 
 interface Props<TAssetType extends AssetType> {
   label: string;

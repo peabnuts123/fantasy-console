@@ -11,7 +11,7 @@ import { useLibrary } from "@lib/index";
 import { DragAndDropDataProvider } from '@lib/util/drag-and-drop'
 import SceneView from "@app/components/composer/SceneView";
 import Player from "@app/components/player";
-import { AssetList } from "@app/components/composer/AssetList";
+import { AssetsAndScenes } from "@app/components/composer/AssetsAndScenes";
 import { TabBar, TabButtonProps, TabPage, TabProvider, useTabState } from "@app/components/tabs";
 
 
@@ -203,7 +203,7 @@ const Editor: FunctionComponent = observer(() => {
         </Panel>
         <PanelResizeHandle className="drag-separator" />
         <Panel minSize={10}>
-          <AssetList />
+          <AssetsAndScenes />
         </Panel>
       </PanelGroup>
     </>

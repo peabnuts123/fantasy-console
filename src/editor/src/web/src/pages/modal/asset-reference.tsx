@@ -3,9 +3,10 @@ import { FolderIcon } from '@heroicons/react/24/outline'
 import cn from 'classnames';
 
 import { AssetType } from "@fantasy-console/runtime/src/cartridge";
+import { createDirView } from "@fantasy-console/runtime/src/util";
 
 import { useModal } from '@lib/modal';
-import { AssetListItemCommon, getIconForAssetType } from "@app/components/composer/AssetList";
+import { AssetListItemCommon, getIconForAssetType } from "@app/components/composer/AssetsAndScenes/AssetList";
 
 /** Result payload for when the modal is closed by selected an asset */
 interface AssetReferenceSelectedResultPayload {
@@ -51,6 +52,23 @@ const AssetReferenceModal: FunctionComponent = ({ }) => {
   const assets = modal.data.assets;
   const isAnyAssetSelected = selectedAssetId !== undefined;
 
+  const currentDirectoryAssetView = createDirView(
+    assets,
+    currentDirectory,
+    (asset) => asset.path,
+    (asset) => ({
+      id: asset.id,
+      type: 'file',
+      name: asset.name,
+      data: asset,
+    } satisfies AssetReferenceModalVirtualFile<AssetType> as AssetReferenceModalVirtualFile<AssetType>),
+    (directoryName, asset) => ({
+      id: asset.id,
+      type: 'directory',
+      name: directoryName,
+    } satisfies AssetReferenceModalVirtualDirectory as AssetReferenceModalVirtualDirectory)
+  );
+
   const onClickSelect = async () => {
     await modal.close({
       selected: true,
@@ -87,7 +105,7 @@ const AssetReferenceModal: FunctionComponent = ({ }) => {
               </div>
             )}
             {/* Assets in the current folder */}
-            {dir(assets, currentDirectory).map((asset) => {
+            {currentDirectoryAssetView.map((asset) => {
               if (asset.type === 'file') {
                 return (
                   <AssetReferenceModalListFileItem
@@ -176,56 +194,6 @@ interface AssetReferenceModalVirtualFile<TAssetType extends AssetType> extends A
 }
 interface AssetReferenceModalVirtualDirectory extends AssetReferenceModalVirtualNodeBase {
   type: 'directory';
-}
-
-/*
- * Like AssetDb.dir, but different
- */
-function dir<TAssetType extends AssetType>(assets: AssetReferenceModalAssetReference<TAssetType>[], cwd: string[]): AssetReferenceModalVirtualNode<TAssetType>[] {
-  // Find all assets that are at this node or below
-  const assetsMatchingPrefix = assets.filter((asset) => {
-    for (let i = 0; i < cwd.length; i++) {
-      if (asset.path[i] != cwd[i]) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-
-  // Map nodes into files and directories that are inside this path
-  let files: AssetReferenceModalVirtualFile<TAssetType>[] = [];
-  let directories: AssetReferenceModalVirtualDirectory[] = [];
-
-  assetsMatchingPrefix.forEach((asset) => {
-    let assetPath = asset.path.slice(cwd.length);
-
-    if (assetPath.length === 0) {
-      // Asset is a file in the directory
-      files.push({
-        id: asset.id,
-        type: 'file',
-        name: asset.name,
-        data: asset,
-      });
-    } else {
-      // Asset is in a subdirectory
-      const subDirectoryName = assetPath[0];
-      // Check if we already know about this directory first
-      if (!directories.some((directory) => directory.name === subDirectoryName)) {
-        directories.push({
-          id: asset.id,
-          type: 'directory',
-          name: subDirectoryName,
-        });
-      }
-    }
-  });
-
-  return [
-    ...directories,
-    ...files,
-  ];
 }
 
 export default AssetReferenceModal;
