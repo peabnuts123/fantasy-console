@@ -71,29 +71,6 @@ export class AssetDb {
   }
 
   /**
-   * List files and directories within a given path inside the asset db.
-   * @param pathList Path to show as a list of path segments.
-   */
-  public dir(pathList: string[]): AssetDbVirtualNode[] {
-    return createDirView(
-      this.assets,
-      pathList,
-      (asset) => asset.pathList,
-      (asset) => ({
-        id: asset.id,
-        type: 'file',
-        name: asset.baseName,
-        data: asset,
-      } satisfies AssetDbVirtualFile as AssetDbVirtualFile),
-      (directoryName, asset) => ({
-        id: asset.id,
-        type: 'directory',
-        name: directoryName,
-      } satisfies AssetDbVirtualDirectory as AssetDbVirtualDirectory),
-    )
-  }
-
-  /**
    * Resolve the type of asset.
    * @param asset
    */

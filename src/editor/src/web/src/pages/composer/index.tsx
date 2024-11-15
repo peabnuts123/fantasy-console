@@ -144,7 +144,7 @@ const Editor: FunctionComponent = observer(() => {
               <div
                 role="button"
                 tabIndex={0}
-                className="hover:bg-fuchsia-200 p-1 inline-flex justify-center items-center"
+                className="hover:bg-pink-400 p-1 inline-flex justify-center items-center"
                 onClick={() => closeTab(tab.id)}
               >
                 <TrashIcon className="icon w-4" />

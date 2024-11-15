@@ -1,6 +1,7 @@
 import { SceneViewController } from "@lib/composer/scene";
 import type { FunctionComponent } from "react";
 import { Menu, MenuItem } from "@tauri-apps/api/menu";
+import { PlusIcon } from '@heroicons/react/24/outline'
 import { observer } from "mobx-react-lite";
 
 import { CreateBlankGameObjectMutation, DeleteGameObjectMutation } from "@lib/mutation/scene/mutations";
@@ -51,7 +52,7 @@ export const Hierarchy: FunctionComponent<Props> = observer(({ controller }) => 
         <h2 className="text-lg">{controller.scene.path}</h2>
       </div>
       <div className="p-3 bg-slate-300 h-full flex flex-col" onContextMenu={showContextMenu}>
-        <button className="button" onClick={() => createNewObject()}>New Object</button>
+        <button className="button" onClick={() => createNewObject()}><PlusIcon className="icon mr-1" /> New object</button>
         {controller.scene.objects.map((gameObject, index) => (
           <HierarchyObject
             key={gameObject.id}

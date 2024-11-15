@@ -6,7 +6,8 @@ import { AssetType } from "@fantasy-console/runtime/src/cartridge";
 import { createDirView } from "@fantasy-console/runtime/src/util";
 
 import { useModal } from '@lib/modal';
-import { AssetListItemCommon, getIconForAssetType } from "@app/components/composer/AssetsAndScenes/AssetList";
+import { getIconForAssetType } from "@app/components/composer/AssetsAndScenes/AssetList";
+import { ListItemCommon } from "@app/components/composer/AssetsAndScenes";
 
 /** Result payload for when the modal is closed by selected an asset */
 interface AssetReferenceSelectedResultPayload {
@@ -39,7 +40,7 @@ export interface AssetReferenceModalData<TAssetType extends AssetType> {
   @NOTE a lot of similarities with AssetList.
   But they are just kind of awkwardly different, and it's probably better
   to just have 2 copies of this code rather than try make some epic abstraction.
-  A lot of re-use is happening with <AssetListItemCommon /> anyway.
+  A lot of re-use is happening with <ListItemCommon /> anyway.
  */
 
 const AssetReferenceModal: FunctionComponent = ({ }) => {
@@ -150,8 +151,8 @@ export const AssetReferenceModalListFileItem: FunctionComponent<AssetReferenceMo
   let AssetIcon = getIconForAssetType(asset.data.type);
   const isSelected = asset.id === selectedAssetId;
   return (
-    <AssetListItemCommon
-      asset={asset}
+    <ListItemCommon
+      label={asset.name}
       Icon={AssetIcon}
       classNames={cn("cursor-grab", { '!bg-blue-300': isSelected })}
       onClick={() => onSelectAsset(asset.id)}
@@ -169,8 +170,8 @@ export interface AssetReferenceModalListDirectoryItemProps {
 }
 export const AssetReferenceModalListDirectoryItem: FunctionComponent<AssetReferenceModalListDirectoryItemProps> = ({ asset, currentDirectory, setCurrentDirectory }) => {
   return (
-    <AssetListItemCommon
-      asset={asset}
+    <ListItemCommon
+      label={asset.name}
       Icon={FolderIcon}
       classNames="cursor-pointer focus:bg-blue-100 active:bg-blue-200"
       onClick={() => {

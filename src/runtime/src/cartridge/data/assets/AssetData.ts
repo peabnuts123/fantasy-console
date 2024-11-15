@@ -1,5 +1,5 @@
 import type Resolver from "@fantasy-console/runtime/src/Resolver";
-import { getFileExtension } from "@fantasy-console/runtime/src/util";
+import { baseName, getFileExtension, toPathList } from "@fantasy-console/runtime/src/util";
 
 import { AssetType } from "./AssetType";
 
@@ -73,17 +73,14 @@ export abstract class BaseAssetData {
    * excluding the file's base name itself.
    */
   public get pathList(): string[] {
-    const pathSegments = this.path.split(/\/+/g);
-    // Drop the basename from the path
-    pathSegments.pop();
-    return pathSegments;
+    return toPathList(this.path);
   }
 
   /**
    * The filename of the asset. e.g. `sprite.png`
    */
   public get baseName(): string {
-    return this.path.split(/\/+/g).pop()!;
+    return baseName(this.path);
   }
 
   public abstract get type(): AssetType;
