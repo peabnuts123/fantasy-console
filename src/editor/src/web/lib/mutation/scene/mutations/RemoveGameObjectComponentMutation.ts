@@ -1,8 +1,9 @@
+import { GameObjectComponent } from "@fantasy-console/core";
 import { CameraComponentData, GameObjectData, IComposerComponentData, MeshComponentData, ScriptComponentData } from "@lib/composer/data";
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
 import { isSelectableObject } from "@lib/composer/scene/components";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
-import { GameObjectComponent } from "@fantasy-console/core";
+import { ISceneMutation } from "../ISceneMutation";
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 
 // Constants
 /** Certain components aren't instantiated in the composer and need to be ignored */
@@ -21,7 +22,7 @@ export class RemoveGameObjectComponentMutation implements ISceneMutation {
     this.componentToRemove = componentToRemove;
   }
 
-  apply({ SceneViewController }: SceneMutationArguments): void {
+  apply({ SceneViewController }: SceneViewMutationArguments): void {
     // 1. Update data
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentToRemoveDataIndex = gameObjectData.components.findIndex((component) => component.id === this.componentToRemove.id);
@@ -55,7 +56,7 @@ export class RemoveGameObjectComponentMutation implements ISceneMutation {
     SceneViewController.sceneJson.delete(mutationPath);
   }
 
-  undo(args: SceneMutationArguments): void {
+  undo(args: SceneViewMutationArguments): void {
     throw new Error("Method not implemented.");
   }
 

@@ -3,7 +3,8 @@ import { v4 as uuid } from 'uuid';
 import { GameObjectDefinition } from "@fantasy-console/runtime/src/cartridge";
 
 import { GameObjectData, loadObjectDefinition } from "@lib/composer/data";
-import { ISceneMutation, SceneMutationArguments } from '../ISceneMutation';
+import { ISceneMutation } from '../ISceneMutation';
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { resolvePathForSceneObjectMutation } from '@lib/mutation/util';
 import { toVector3Core } from '@fantasy-console/runtime/src/util';
 
@@ -15,7 +16,7 @@ export class CreateBlankGameObjectMutation implements ISceneMutation {
     this.parentGameObjectId = parent?.id;
   }
 
-  apply({ SceneViewController, ProjectController }: SceneMutationArguments): void {
+  apply({ SceneViewController, ProjectController }: SceneViewMutationArguments): void {
     // Create new object
     let newObjectDefinition: GameObjectDefinition = {
       id: uuid(),
@@ -66,7 +67,7 @@ export class CreateBlankGameObjectMutation implements ISceneMutation {
     }
   }
 
-  undo({ }: SceneMutationArguments): void {
+  undo({ }: SceneViewMutationArguments): void {
     throw new Error("Method not implemented.");
   }
 

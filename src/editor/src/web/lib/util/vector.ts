@@ -14,12 +14,13 @@ export class ObservableVector3 extends Vector3 {
       super(sourceOrX, y!, z!);
     }
 
-    makeObservable(this, {
-      // @NOTE type laundering because we need to observe private field
+    // @NOTE List of private property names, so that MobX can reference them
+    type PrivateProperties = '_x' | '_y' | '_z'; // @TODO Do I need to annotate all the functions? `override` or something?
+    makeObservable<ObservableVector3, PrivateProperties>(this, {
       _x: observable,
       _y: observable,
       _z: observable,
-    } as any);
+    });
   }
 
   public override add(value: AnyVector): ObservableVector3 {

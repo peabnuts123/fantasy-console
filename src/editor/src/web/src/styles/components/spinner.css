@@ -2,7 +2,7 @@
 /* License: https://github.com/tobiasahlin/SpinKit/blob/master/LICENSE */
 
 .spinner__container {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
 }
@@ -29,6 +29,8 @@
     animation: sk-stretchdelay var(--duration) infinite ease-in-out;
   }
 
+  /* .rect1 { } */
+
   .rect2 {
     animation-delay: calc(-1 * var(--duration) - 0.1s);
   }
@@ -50,6 +52,18 @@
   .rect {
     background-color: var(--spinner-color-inverted);
   }
+}
+
+.spinner.spinner--small {
+  width: 24px;
+  height: 24px;
+}
+.spinner.spinner--small .rect1,
+.spinner.spinner--small .rect5 {
+  display: none
+}
+.spinner.spinner--small .rect {
+  width: 2px;
 }
 
 @keyframes sk-stretchdelay {

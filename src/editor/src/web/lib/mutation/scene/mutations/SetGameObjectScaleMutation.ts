@@ -3,7 +3,8 @@ import { Vector3 } from "@fantasy-console/core/src/util";
 
 import { GameObjectData } from "@lib/composer/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
+import { ISceneMutation } from "../ISceneMutation";
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
 interface SetGameObjectScaleMutationDeltaUpdateArgs {
@@ -33,13 +34,13 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
     this.scale = gameObject.transform.scale.clone();
   }
 
-  begin(_args: SceneMutationArguments): void {
+  begin(_args: SceneViewMutationArguments): void {
     // - Store undo values
     this.configScale = this.gameObject.transform.scale;
     this.sceneScale = this.gameObject.sceneInstance!.transform.scale;
   }
 
-  update({ SceneViewController }: SceneMutationArguments, updateArgs: SetGameObjectScaleMutationUpdateArgs): void {
+  update({ SceneViewController }: SceneViewMutationArguments, updateArgs: SetGameObjectScaleMutationUpdateArgs): void {
     if ('scaleDelta' in updateArgs) {
       const { scaleDelta } = updateArgs;
       this.scale.multiplySelf(scaleDelta);
@@ -61,7 +62,7 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
     }
   }
 
-  apply({ SceneViewController }: SceneMutationArguments): void {
+  apply({ SceneViewController }: SceneViewMutationArguments): void {
     // - 3. Update JSONC
     const updatedValue: ArchiveVector3 = {
       x: this.scale.x,
@@ -72,7 +73,7 @@ export class SetGameObjectScaleMutation implements ISceneMutation, IContinuousSc
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
-  undo(args: SceneMutationArguments): void {
+  undo(args: SceneViewMutationArguments): void {
     // @TODO
     // - Apply undo values
     throw new Error("Method not implemented.");

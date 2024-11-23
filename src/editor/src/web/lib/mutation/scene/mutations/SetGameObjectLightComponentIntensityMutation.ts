@@ -5,7 +5,8 @@ import { DirectionalLightComponentDefinition, PointLightComponentDefinition } fr
 
 import { DirectionalLightComponentData, GameObjectData, IComposerComponentData, PointLightComponentData } from "@lib/composer/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
+import { ISceneMutation } from "../ISceneMutation";
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
 export interface SetGameObjectLightComponentIntensityMutationUpdateArgs {
@@ -41,7 +42,7 @@ export class SetGameObjectLightComponentIntensityMutation implements ISceneMutat
     this.componentId = component.id;
   }
 
-  public begin({ SceneViewController }: SceneMutationArguments): void {
+  public begin({ SceneViewController }: SceneViewMutationArguments): void {
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentData = gameObjectData.getComponent(this.componentId, LightComponentDataTypes);
     const gameObject = gameObjectData.sceneInstance!;
@@ -52,7 +53,7 @@ export class SetGameObjectLightComponentIntensityMutation implements ISceneMutat
     this.sceneIntensity = component.intensity;
   }
 
-  public update({ SceneViewController }: SceneMutationArguments, { intensity }: SetGameObjectLightComponentIntensityMutationUpdateArgs): void {
+  public update({ SceneViewController }: SceneViewMutationArguments, { intensity }: SetGameObjectLightComponentIntensityMutationUpdateArgs): void {
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentData = gameObjectData.getComponent(this.componentId, LightComponentDataTypes);
     const gameObject = gameObjectData.sceneInstance!;
@@ -65,7 +66,7 @@ export class SetGameObjectLightComponentIntensityMutation implements ISceneMutat
     component.intensity = intensity;
   }
 
-  public apply({ SceneViewController }: SceneMutationArguments): void {
+  public apply({ SceneViewController }: SceneViewMutationArguments): void {
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentIndex = gameObjectData.components.findIndex((component) => component.id === this.componentId);
 
@@ -79,7 +80,7 @@ export class SetGameObjectLightComponentIntensityMutation implements ISceneMutat
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
-  public undo(args: SceneMutationArguments): void {
+  public undo(args: SceneViewMutationArguments): void {
     // @TODO
     // - Apply undo values
     throw new Error("Method not implemented.");

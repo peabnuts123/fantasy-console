@@ -58,7 +58,18 @@ export class SceneViewController {
     this.projectController = projectController;
     this.assetCache = new Map();
     this.babylonToWorldSelectionCache = new ComposerSelectionCache();
-    this._mutator = new SceneViewMutator(this, projectController);
+    this._mutator = new SceneViewMutator(
+      this,
+      projectController,
+      (sceneViewController) => {
+        const sceneDefinitionJson = sceneViewController.sceneJson.toString();
+        const sceneDefinitionBytes = new TextEncoder().encode(sceneDefinitionJson);
+        return projectController.fileSystem.writeFile(
+          sceneViewController.scene.path,
+          sceneDefinitionBytes,
+        );
+      }
+    );
 
     this._canvas = document.createElement('canvas');
     this.canvas.classList.add('w-full', 'h-full');

@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { invoke } from '@tauri-apps/api/core'
 import { v4 as uuid } from 'uuid';
 
-import { AssetType, CartridgeArchiveManifest } from '@fantasy-console/runtime/src/cartridge';
+import { AssetType, CartridgeArchiveManifest, SceneDefinition } from '@fantasy-console/runtime/src/cartridge';
 
 import { ProjectController } from '@lib/project/ProjectController';
 import { SceneManifest } from '@lib/project/definition';
@@ -103,12 +103,13 @@ export class ComposerController {
     return this._tabData;
   }
 
-  public async debug_buildCartridge(): Promise<Uint8Array> {
-    /*
-      @TODO
-      Is there a way we can do this from Rust, so that we
-      could do this from a CLI?
-    */
+  // Kind of a debug method with a bit of a mashup of concerns
+  /*
+    @TODO
+    Is there a way we can do this from Rust, so that we
+    could do this from a CLI?
+  */
+  public async debug_buildCartridge(sceneEntryPointOverride: SceneDefinition | undefined = undefined): Promise<Uint8Array> {
 
     // Load scene definitions
     const scenes = await Promise.all(
@@ -126,6 +127,17 @@ export class ComposerController {
         }
       })
     );
+
+    // Move `overrideEntryPoint` to be the first scene in the list
+    if (sceneEntryPointOverride !== undefined) {
+      const overrideIndex = scenes.indexOf(sceneEntryPointOverride);
+      if (overrideIndex === -1) {
+        throw new Error(`Cannot build cartridge. Cannot set entrypoint to SceneDefinition with ID '${sceneEntryPointOverride.id}' - it isn't one of the current project's scenes`);
+      }
+
+      scenes.splice(overrideIndex, 1);
+      scenes.unshift(sceneEntryPointOverride);
+    }
 
     // Build cartridge manifest
     const manifest: CartridgeArchiveManifest = {

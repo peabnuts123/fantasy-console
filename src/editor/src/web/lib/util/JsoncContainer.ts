@@ -2,7 +2,11 @@ import { modify, JSONPath, ModificationOptions, applyEdits, parse } from 'jsonc-
 import { makeAutoObservable } from 'mobx';
 
 const DefaultOptions: ModificationOptions = {
-  formattingOptions: {},
+  formattingOptions: {
+    keepLines: true,
+    insertSpaces: true,
+    tabSize: 2,
+  },
 }
 
 const LogMutationDiffs = false;

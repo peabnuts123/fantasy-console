@@ -1,6 +1,7 @@
 import { GameObjectData } from "@lib/composer/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
+import { ISceneMutation } from "../ISceneMutation";
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
 export interface SetGameObjectNameMutationUpdateArgs {
@@ -24,13 +25,13 @@ export class SetGameObjectNameMutation implements ISceneMutation, IContinuousSce
     this.name = gameObject.name;
   }
 
-  public begin(_args: SceneMutationArguments): void {
+  public begin(_args: SceneViewMutationArguments): void {
     // - Store undo values
     this.configName = this.gameObject.name;
     this.sceneName = this.gameObject.sceneInstance!.name;
   }
 
-  public update({ }: SceneMutationArguments, { name }: SetGameObjectNameMutationUpdateArgs): void {
+  public update({ }: SceneViewMutationArguments, { name }: SetGameObjectNameMutationUpdateArgs): void {
     this.name = name;
     // - 1. Data
     this.gameObject.name = name;
@@ -38,14 +39,14 @@ export class SetGameObjectNameMutation implements ISceneMutation, IContinuousSce
     this.gameObject.sceneInstance!.name = name;
   }
 
-  public apply({ SceneViewController }: SceneMutationArguments): void {
+  public apply({ SceneViewController }: SceneViewMutationArguments): void {
     // - 3. JSONC
     const updatedValue = this.name;
     const mutationPath = resolvePathForSceneObjectMutation(this.gameObject.id, SceneViewController.sceneDefinition, (gameObject) => gameObject.name);
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
-  public undo(args: SceneMutationArguments): void {
+  public undo(args: SceneViewMutationArguments): void {
     // @TODO
     // - Apply undo values
     throw new Error("Method not implemented.");

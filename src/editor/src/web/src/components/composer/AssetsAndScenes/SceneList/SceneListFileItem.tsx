@@ -1,10 +1,10 @@
 import { FunctionComponent } from "react";
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline'
-import { TrashIcon } from '@heroicons/react/24/solid'
 import { observer } from "mobx-react-lite";
 
-import { ListItemCommon } from '../ListItemCommon';
+import { baseName } from "@fantasy-console/runtime/src/util";
 import { SceneManifest } from "@lib/project/definition";
+import { ListItemCommon } from '../ListItemCommon';
 
 
 export interface SceneListVirtualFile {
@@ -18,14 +18,16 @@ export interface SceneListFileItemProps {
 }
 
 export const SceneListFileItem: FunctionComponent<SceneListFileItemProps> = observer(({ file }) => {
+  const sceneName = baseName(file.scene.path);
+
   return (
     <ListItemCommon
-      label={file.scene.path}
+      label={sceneName}
       /* @TODO Delete maybe, one day, when autoload is done? */
       // innerContent={
       //   <div className="grow flex flex-row justify-between">
       //     {/* Label */}
-      //     <span>{file.scene.path}</span>
+      //     <span>{sceneName}</span>
 
       //     {/* Button(s) */}
       //     <div className="hidden group-hover/listitem:block">

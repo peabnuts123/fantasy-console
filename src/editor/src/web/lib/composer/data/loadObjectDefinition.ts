@@ -47,7 +47,7 @@ export function loadObjectDefinition(objectDefinition: GameObjectDefinition, ass
         break;
       }
       default: {
-        throw new Error(`Unknown component type: ${componentDefinition.type}`);
+        throw new Error(`Unknown component type: ${(componentDefinition as { type: string }).type}`);
       }
     }
   }

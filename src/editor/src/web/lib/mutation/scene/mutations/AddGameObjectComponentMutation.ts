@@ -1,5 +1,6 @@
 import { GameObjectData, IComposerComponentData } from "@lib/composer/data";
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
+import { ISceneMutation } from "../ISceneMutation";
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { isSelectableObject } from "@lib/composer/scene/components";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 
@@ -13,7 +14,7 @@ export class AddGameObjectComponentMutation implements ISceneMutation {
     this.newComponent = newComponent;
   }
 
-  apply({ SceneViewController }: SceneMutationArguments): void {
+  apply({ SceneViewController }: SceneViewMutationArguments): void {
     // 1. Update data
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     gameObjectData.components.push(this.newComponent);
@@ -39,7 +40,7 @@ export class AddGameObjectComponentMutation implements ISceneMutation {
     SceneViewController.sceneJson.mutate(mutationPath, newComponentDefinition, { isArrayInsertion: true });
   }
 
-  undo(args: SceneMutationArguments): void {
+  undo(args: SceneViewMutationArguments): void {
     throw new Error("Method not implemented.");
   }
 

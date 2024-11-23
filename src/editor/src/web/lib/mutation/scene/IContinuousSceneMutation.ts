@@ -1,5 +1,6 @@
 import { IContinuousMutation } from "../IContinuousMutation";
-import { ISceneMutation, SceneMutationArguments } from "./ISceneMutation";
+import { ISceneMutation } from "./ISceneMutation";
+import { SceneViewMutationArguments } from "./SceneViewMutationArguments";
 
-export interface IContinuousSceneMutation<TUpdateArgs> extends ISceneMutation, IContinuousMutation<SceneMutationArguments, TUpdateArgs> {
+export interface IContinuousSceneMutation<TUpdateArgs> extends ISceneMutation, IContinuousMutation<SceneViewMutationArguments, TUpdateArgs> {
 }

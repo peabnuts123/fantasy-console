@@ -1,5 +1,6 @@
 import { GameObjectData } from "@lib/composer/data";
-import { ISceneMutation, SceneMutationArguments } from '../ISceneMutation';
+import { ISceneMutation } from '../ISceneMutation';
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 
 export class DeleteGameObjectMutation implements ISceneMutation {
@@ -12,7 +13,7 @@ export class DeleteGameObjectMutation implements ISceneMutation {
     this.gameObjectName = gameObject.name;
   }
 
-  apply({ SceneViewController }: SceneMutationArguments): void {
+  apply({ SceneViewController }: SceneViewMutationArguments): void {
     // Find object's parent - we're going to remove the object from the parent's children
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const gameObjectParentData = SceneViewController.scene.getGameObjectParent(this.gameObjectId);
@@ -42,7 +43,7 @@ export class DeleteGameObjectMutation implements ISceneMutation {
     SceneViewController.sceneJson.delete(mutationPath);
   }
 
-  undo({ }: SceneMutationArguments): void {
+  undo({ }: SceneViewMutationArguments): void {
     throw new Error("Method not implemented.");
   }
 

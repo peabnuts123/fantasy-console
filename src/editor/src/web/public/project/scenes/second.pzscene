@@ -19,6 +19,22 @@
   },
   "objects": [
     {
+      "id": "3107d880-4127-4618-8b95-72d9d7875450",
+      "name": "Main Camera",
+      "transform": {
+        "position": { "x": 0, "y": 0, "z": -5 },
+        "rotation": { "x": 0, "y": 0, "z": 0 },
+        "scale": { "x": 1, "y": 1, "z": 1 },
+      },
+      "children": [],
+      "components": [
+        {
+          "id": "69f8697d-92d6-4224-a8d7-f545158d90ae",
+          "type": "camera",
+        }
+      ]
+    },
+    {
       "id": "8c3c9d34-d20a-4f33-aa5f-2fa4b1a9aec4",
       "name": "Sun",
       "transform": {

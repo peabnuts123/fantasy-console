@@ -5,6 +5,7 @@ export interface ProjectManifest {
   projectName: string;
 }
 
+// @TODO Do we need a `ProjectData`?
 export interface ProjectDefinition {
   manifest: ProjectManifest,
   assets: AssetDefinition[];

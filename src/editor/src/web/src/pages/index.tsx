@@ -15,7 +15,9 @@ const IndexPage: FunctionComponent = observer(() => {
       {ProjectController.hasLoadedProject ? (
         <ToolsMenu />
       ) : ProjectController.isLoadingProject ? (
-        <Spinner inverted={true} message="Loading project..." />
+        <div className="flex justify-center items-center h-full">
+          <Spinner inverted={true} message="Loading project..." />
+        </div>
       ) : (
         <ProjectSelect />
       )}

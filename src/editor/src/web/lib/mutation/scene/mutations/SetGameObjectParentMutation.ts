@@ -5,7 +5,8 @@ import { GameObjectData } from "@lib/composer/data";
 import { readPathInScene, resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import { MutationPath, resolvePath } from "@lib/util/JsoncContainer";
 
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
+import { ISceneMutation } from "../ISceneMutation";
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 
 interface SetGameObjectParentMutationArgs {
   gameObject: GameObjectData;
@@ -52,7 +53,7 @@ export class SetGameObjectParentMutation implements ISceneMutation {
     }
   }
 
-  public apply({ SceneViewController }: SceneMutationArguments): void {
+  public apply({ SceneViewController }: SceneViewMutationArguments): void {
     // 1A. Update data
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const newParentData = this.newParentId !== undefined ? SceneViewController.scene.getGameObject(this.newParentId) : undefined;
@@ -187,7 +188,7 @@ export class SetGameObjectParentMutation implements ISceneMutation {
     SceneViewController.sceneJson.mutate(newJsonPath, currentDefinitionValue, { isArrayInsertion: true });
   }
 
-  public undo(args: SceneMutationArguments): void {
+  public undo(args: SceneViewMutationArguments): void {
     throw new Error("Method not implemented.");
   }
 

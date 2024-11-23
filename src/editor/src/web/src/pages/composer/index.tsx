@@ -1,5 +1,5 @@
 import type { FunctionComponent } from "react";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { save } from '@tauri-apps/plugin-dialog';
@@ -13,13 +13,28 @@ import SceneView from "@app/components/composer/SceneView";
 import Player from "@app/components/player";
 import { AssetsAndScenes } from "@app/components/composer/AssetsAndScenes";
 import { TabBar, TabButtonProps, TabPage, TabProvider, useTabState } from "@app/components/tabs";
+import { StatusBar } from "@app/components/composer/StatusBar";
 
 
 interface Props { }
 
+const ComposerPageWrapper: FunctionComponent<Props> = observer(({ }) => {
+  // Hooks
+  const { ComposerController } = useLibrary();
+
+  return (
+    <DragAndDropDataProvider>
+      <TabProvider defaultTabId={ComposerController.currentlyOpenTabs[0]?.id}>
+        <ComposerPage />
+      </TabProvider>
+    </DragAndDropDataProvider >
+  )
+});
+
 const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   // Hooks
   const { ComposerController, ProjectController } = useLibrary();
+  const TabState = useTabState();
 
   // State
   const [tempCartridge, setTempCartridge] = useState<Uint8Array | undefined>(undefined);
@@ -36,6 +51,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
 
   // Functions
   const debug_exportScene = async () => {
+
     const bytes = await ComposerController.debug_buildCartridge();
     const savePath = await save({
       filters: [{
@@ -49,7 +65,8 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   };
 
   const debug_playProject = async () => {
-    const bytes = await ComposerController.debug_buildCartridge();
+    const currentlyFocusedTab = ComposerController.currentlyOpenTabs.find((tab) => tab.id === TabState.currentTabPageId)
+    const bytes = await ComposerController.debug_buildCartridge(currentlyFocusedTab?.sceneViewController?.sceneDefinition);
     setTempCartridge(bytes);
   };
 
@@ -58,7 +75,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   };
 
   return (
-    <DragAndDropDataProvider>
+    <>
       {/* Header */}
       <header className="flex items-center w-full justify-between py-1 px-2">
         {/* Exit */}
@@ -76,18 +93,15 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
       </header>
 
       {!isPlaying ? (
-        <TabProvider defaultTabId={ComposerController.currentlyOpenTabs[0]?.id}>
-          <Editor />
-        </TabProvider>
+        <Editor />
       ) : (
         /* Playing scene */
         <>
           <Player cartridge={tempCartridge!} />
         </>
-      )
-      }
-    </DragAndDropDataProvider >
-  )
+      )}
+    </>
+  );
 });
 
 const Editor: FunctionComponent = observer(() => {
@@ -163,9 +177,6 @@ const Editor: FunctionComponent = observer(() => {
         }
       ]} />
 
-
-
-      {/* Editing scene (not playing) */}
       <PanelGroup direction="vertical">
         <Panel defaultSize={75} minSize={25}>
           {noTabsOpen && (
@@ -190,7 +201,7 @@ const Editor: FunctionComponent = observer(() => {
                   <ul className="flex flex-col items-center">
                     {ProjectController.currentProject.scenes.map((sceneManifest) => (
                       <button
-                        key={sceneManifest.hash}
+                        key={sceneManifest.path}
                         onClick={() => ComposerController.loadSceneForTab(tab.id, sceneManifest)}
                         className="button"
                       >{sceneManifest.path}</button>
@@ -206,8 +217,10 @@ const Editor: FunctionComponent = observer(() => {
           <AssetsAndScenes />
         </Panel>
       </PanelGroup>
+
+      <StatusBar />
     </>
   )
 });
 
-export default ComposerPage;
+export default ComposerPageWrapper;

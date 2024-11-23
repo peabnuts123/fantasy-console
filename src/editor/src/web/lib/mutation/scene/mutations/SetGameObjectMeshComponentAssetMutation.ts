@@ -5,7 +5,8 @@ import type { MeshAssetData, MeshComponentDefinition } from "@fantasy-console/ru
 import { GameObjectData, MeshComponentData } from "@lib/composer/data";
 import { MeshComponent } from "@lib/composer/scene";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
+import { ISceneMutation } from "../ISceneMutation";
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 
 export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
   // Mutation parameters
@@ -19,7 +20,7 @@ export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
     this.meshAsset = meshAsset;
   }
 
-  apply({ SceneViewController }: SceneMutationArguments): void {
+  apply({ SceneViewController }: SceneViewMutationArguments): void {
     // 1. Update data
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentData = gameObjectData.getComponent(this.componentId, MeshComponentData);
@@ -65,7 +66,7 @@ export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
 
   }
-  undo(args: SceneMutationArguments): void {
+  undo(args: SceneViewMutationArguments): void {
     throw new Error("Method not implemented.");
   }
 

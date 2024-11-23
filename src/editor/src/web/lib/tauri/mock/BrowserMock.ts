@@ -29,7 +29,7 @@ type ParsedTauriCommand = TauriPluginCommand | TauriPlainCommand;
 export class BrowserMock {
   public handle(cmd: string, args: any): any | Promise<any> {
     const parsed = this.parseCommand(cmd);
-    console.log(`[DEBUG] [BrowserMock] (handle) parsed: `, parsed, args);
+    // console.log(`[DEBUG] [BrowserMock] (handle) parsed: `, parsed, args);
 
     if (parsed.isPlugin) {
       switch (parsed.plugin) {

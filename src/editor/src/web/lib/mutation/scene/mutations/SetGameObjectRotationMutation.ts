@@ -3,7 +3,8 @@ import { Vector3 } from "@fantasy-console/core/src/util";
 
 import { GameObjectData } from "@lib/composer/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
+import { ISceneMutation } from "../ISceneMutation";
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
 export interface SetGameObjectRotationMutationUpdateArgs {
@@ -28,13 +29,13 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
     this.rotation = gameObject.transform.rotation;
   }
 
-  begin(_args: SceneMutationArguments): void {
+  begin(_args: SceneViewMutationArguments): void {
     // - Store undo values
     this.configRotation = this.gameObject.transform.rotation;
     this.sceneRotation = this.gameObject.sceneInstance!.transform.rotation;
   }
 
-  update({ SceneViewController }: SceneMutationArguments, { rotation, resetGizmo }: SetGameObjectRotationMutationUpdateArgs): void {
+  update({ SceneViewController }: SceneViewMutationArguments, { rotation, resetGizmo }: SetGameObjectRotationMutationUpdateArgs): void {
     this.rotation = rotation;
     // - 1. Update Data
     this.gameObject.transform.rotation = rotation;
@@ -45,7 +46,7 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
     }
   }
 
-  apply({ SceneViewController }: SceneMutationArguments): void {
+  apply({ SceneViewController }: SceneViewMutationArguments): void {
     // - 3. Update JSONC
     const updatedValue: ArchiveVector3 = {
       x: this.rotation.x,
@@ -56,7 +57,7 @@ export class SetGameObjectRotationMutation implements ISceneMutation, IContinuou
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
-  undo(args: SceneMutationArguments): void {
+  undo(args: SceneViewMutationArguments): void {
     // @TODO
     // - Apply undo values
     throw new Error("Method not implemented.");

@@ -3,7 +3,8 @@ import { Vector3 } from "@fantasy-console/core/src/util";
 
 import { GameObjectData } from "@lib/composer/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
-import { ISceneMutation, SceneMutationArguments } from "../ISceneMutation";
+import { ISceneMutation } from "../ISceneMutation";
+import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { IContinuousSceneMutation } from "../IContinuousSceneMutation";
 
 export interface SetGameObjectPositionMutationUpdateArgs {
@@ -28,13 +29,13 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     this.position = gameObject.transform.position;
   }
 
-  public begin(_args: SceneMutationArguments): void {
+  public begin(_args: SceneViewMutationArguments): void {
     // - Store undo values
     this.configPosition = this.gameObject.transform.position;
     this.scenePosition = this.gameObject.sceneInstance!.transform.position;
   }
 
-  public update({ SceneViewController }: SceneMutationArguments, { position, resetGizmo }: SetGameObjectPositionMutationUpdateArgs): void {
+  public update({ SceneViewController }: SceneViewMutationArguments, { position, resetGizmo }: SetGameObjectPositionMutationUpdateArgs): void {
     this.position = position;
     // - 1. Update data
     this.gameObject.transform.position = position;
@@ -45,7 +46,7 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     }
   }
 
-  public apply({ SceneViewController }: SceneMutationArguments): void {
+  public apply({ SceneViewController }: SceneViewMutationArguments): void {
     // - 3. Update JSONC
     const updatedValue: Vector3Archive = {
       x: this.position.x,
@@ -56,7 +57,7 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
-  public undo(args: SceneMutationArguments): void {
+  public undo(args: SceneViewMutationArguments): void {
     // @TODO
     // - Apply undo values
     throw new Error("Method not implemented.");
