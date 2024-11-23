@@ -1,11 +1,10 @@
 import type { FunctionComponent } from 'react';
-import { useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import '@app/styles/index.css';
-import type { Library } from '@lib/index';
 import { createLibrary, LibraryContext } from '@lib/index';
 import { mockTauri } from '@lib/tauri/mock'; // @TODO Exclude from production build
 import { isRunningInTauri } from '@lib/tauri';
@@ -26,7 +25,7 @@ if (typeof window !== "undefined") {
 const App: FunctionComponent<AppProps> = ({ Component }) => {
   const Router = useRouter();
 
-  const [library] = useState<Library>(createLibrary());
+  const library = useMemo(createLibrary, []);
 
   const { ProjectController } = library;
 
@@ -46,6 +45,11 @@ const App: FunctionComponent<AppProps> = ({ Component }) => {
       void Router.push('/');
     }
   }
+
+  useEffect(() => {
+    // Add teardown code (to handle things like browser refresh)
+    window.addEventListener('pagehide', library.onPageUnload);
+  }, []);
 
   return <>
     <Head>

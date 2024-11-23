@@ -33,7 +33,7 @@ const ComposerPageWrapper: FunctionComponent<Props> = observer(({ }) => {
 
 const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
   // Hooks
-  const { ComposerController, ProjectController } = useLibrary();
+  const { ComposerController } = useLibrary();
   const TabState = useTabState();
 
   // State

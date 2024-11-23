@@ -1,7 +1,9 @@
 import type * as TauriFs from '@tauri-apps/plugin-fs';
 
-import { MockHandlerWith2Args, MockHandlerWith3Args, MockHandlerWithRestArg, throwUnhandled } from "../util";
+import { MockHandlerWith2Args, MockHandlerWith3Args, throwUnhandled } from "../util";
 import { Paths } from '../config';
+import { DebouncedWatchOptions, WatchEvent } from '@tauri-apps/plugin-fs';
+import { Channel } from '@tauri-apps/api/core';
 
 export class TauriPluginFsMockModule {
   public static handle(action: string, args: any) {
@@ -10,6 +12,8 @@ export class TauriPluginFsMockModule {
         return this.readFile(args);
       case 'write_file':
         return this.writeFile(args);
+      case 'watch':
+        return this.watch(args);
       default:
         throw throwUnhandled(`[TauriPluginFsMockModule] (handle) Unimplemented action. (action='${action}') args: `, args);
     }
@@ -37,5 +41,10 @@ export class TauriPluginFsMockModule {
 
   private static writeFile: MockHandlerWith3Args<'path', 'content', 'options', typeof TauriFs.writeFile> = () => {
     console.warn(`TauriPluginFsMockModule (writeFile) Tauri is mocked - no file actually written`);
+  }
+
+  private static watch({ }: { paths: (string | URL)[], options: DebouncedWatchOptions, onEvent: Channel<WatchEvent> }) {
+    console.warn(`TauriPluginFsMockModule (watch) Tauri is mocked - file system will not be observed`);
+    return () => { /* unwatch() */ };
   }
 }

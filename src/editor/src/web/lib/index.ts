@@ -6,15 +6,20 @@ import { ProjectController } from "./project/ProjectController";
 export interface Library {
   ProjectController: ProjectController;
   ComposerController: ComposerController;
+  onPageUnload: () => void;
 }
 
 export function createLibrary(): Library {
   // Poor-man's dependency injection
   const projectController = new ProjectController();
-  const composer = new ComposerController(projectController);
+  const composerController = new ComposerController(projectController);
   return {
     ProjectController: projectController,
-    ComposerController: composer,
+    ComposerController: composerController,
+    onPageUnload() {
+      projectController.onDestroy();
+      composerController.onDestroy();
+    },
   };
 }
 

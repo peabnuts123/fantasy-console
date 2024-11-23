@@ -24,7 +24,6 @@ export interface TabData {
 
 export class ComposerController {
   private _tabData: TabData[] = [];
-  private _stopWatchingFs?: Function = undefined;
 
   private readonly projectController: ProjectController;
 
@@ -40,21 +39,11 @@ export class ComposerController {
   }
 
   public async onEnter(): Promise<void> {
-    // @TODO bring this back (when we've made project load at the top level)
-    // Start watching project for file changes on disk
-    // console.log(`[Composer] (loadProject) Watching '${this.projectController.currentProjectRoot}' for changes...`);
-    // this._stopWatchingFs = await watchImmediate(this.projectController.currentProjectRoot, (event) => {
-    //   console.log(`FSEvent: `, event);
-    // }, {
-    //   recursive: true,
-    // });
+    // @TODO remove?
   }
 
   public onExit() {
-    if (this._stopWatchingFs) {
-      this._stopWatchingFs();
-      this._stopWatchingFs = undefined;
-    }
+    // @TODO remove?
   }
 
   public async loadSceneForTab(tabId: string, sceneManifest: SceneManifest) {
@@ -99,8 +88,9 @@ export class ComposerController {
     });
   }
 
-  public get currentlyOpenTabs(): TabData[] {
-    return this._tabData;
+  /** Called when the app is unloaded (e.g. page refresh) */
+  public onDestroy(): void {
+    /* No-op */
   }
 
   // Kind of a debug method with a bit of a mashup of concerns
@@ -175,5 +165,9 @@ export class ComposerController {
     } satisfies CreateCartridgeCmdArgs)
 
     return new Uint8Array(createCartridgeResult);
+  }
+
+  public get currentlyOpenTabs(): TabData[] {
+    return this._tabData;
   }
 }
