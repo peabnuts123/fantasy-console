@@ -25,7 +25,7 @@ const IndexPage: FunctionComponent = observer(() => {
   );
 });
 
-const ToolsMenu: FunctionComponent = () => {
+const ToolsMenu: FunctionComponent = observer(() => {
   const { ProjectController } = useLibrary();
   const { currentProject } = ProjectController;
 
@@ -42,7 +42,7 @@ const ToolsMenu: FunctionComponent = () => {
       </div>
     </>
   );
-}
+});
 
 const ProjectSelect: FunctionComponent = () => {
   const { ProjectController } = useLibrary();

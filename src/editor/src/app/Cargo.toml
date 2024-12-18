@@ -15,7 +15,6 @@ name = "fantasy_console_editor_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 
-
 # @TODO (one day)
 # [[bin]]
 # name = "fantasy-console-cli"
@@ -25,18 +24,26 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [ "protocol-asset"] }
+debounce = "0.2.2"
+ignore = "0.4.23"
+ignore-files = "3.0.2"
+log = "0.4.22"
+notify = "7.0.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-zip = "2.1.1"
-walkdir = "2.5.0"
 swc = "3.0.1"
 swc_common = "2.0.1"
-swc_ecma_parser = "3.0.0"
 swc_ecma_ast = "2.0.0"
+swc_ecma_parser = "3.0.0"
+swc_ecma_transforms_module = "3.0.0"
 swc_ecma_transforms_typescript = "3.0.0"
 swc_ecma_visit = "2.0.0"
-swc_ecma_transforms_module = "3.0.0"
+tauri = { version = "2", features = ["protocol-asset"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = { version = "2.0.0", features = ["watch"] }
 tauri-plugin-shell = "2"
+tokio = "1.42.0"
+twox-hash = { version = "2.0.1", features = ["xxhash3_64", "std"] }
+uuid = { version = "1.11.0", features = ["v4"] }
+walkdir = "2.5.0"
+zip = "2.1.1"

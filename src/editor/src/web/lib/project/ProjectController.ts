@@ -2,13 +2,28 @@ import { makeAutoObservable, runInAction } from "mobx";
 
 import Resolver from '@fantasy-console/runtime/src/Resolver';
 import { AssetDb } from "@fantasy-console/runtime/src/cartridge";
-import { watch, exists, UnwatchFn } from "@tauri-apps/plugin-fs";
+import { UnwatchFn } from "@tauri-apps/plugin-fs";
 import * as path from "@tauri-apps/api/path";
 
 import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
 import { JsoncContainer } from "@lib/util/JsoncContainer";
 import { ProjectMutator } from "@lib/mutation/project/ProjectMutator";
 import { ProjectDefinition, ProjectManifest } from "./definition";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
+
+interface RawProjectAsset {
+  id: string;
+  path: string;
+  hash: string;
+}
+
+export interface WatchProjectAssetsCommandArgs {
+  projectRoot: string;
+  projectAssets: RawProjectAsset[];
+}
+
+export type ProjectAssetUpdateEvent = any;
 
 export class ProjectController {
   private _isLoadingProject: boolean = false;
@@ -64,19 +79,23 @@ export class ProjectController {
     });
 
     // Start watching project for file changes on disk
-    // @TODO stop watching when unload the project
-    // @TODO Exclude certain dirs like node_modules
-    this._stopWatchingFs = await watch(projectDirRoot, (event) => {
-      // @TODO @DEBUG REMOVE
-      console.log(`[Watch] FSEvent: `, event);
-      event.paths.forEach(async (path) => {
-        const extant = await exists(path);
-        console.log(`\t${String(extant)}: ${path}`);
-      })
-    }, {
-      recursive: true,
-      delayMs: 500,
-    });
+    const watchProjectAssetsResult = await invoke<string>('watch_project_assets', {
+      projectRoot: projectDirRoot,
+      projectAssets: project.assets.map((asset) => ({
+        id: asset.id,
+        path: asset.path,
+        hash: asset.hash,
+      })),
+    } satisfies WatchProjectAssetsCommandArgs);
+
+    this._stopWatchingFs = await listen('on_project_assets_updated', (e) => {
+      this.onProjectAssetsUpdated(e.payload as ProjectAssetUpdateEvent[]);
+    })
+    console.log(`[WatchProjectAssets] Result: `, watchProjectAssetsResult);
+  }
+
+  public onProjectAssetsUpdated(updates: ProjectAssetUpdateEvent[]) {
+    console.log(`[ProjectController] (onProjectAssetsUpdated)`, updates);
   }
 
   public onDestroy() {

@@ -1,6 +1,7 @@
 import { unzip, zip } from 'fflate';
 
 import type { CreateCartridgeCmdArgs } from "@lib/composer/ComposerController";
+import type { WatchProjectAssetsCommandArgs } from '@lib/project/ProjectController';
 
 import { Paths } from "../config";
 import { promisify, throwUnhandled } from '../util';
@@ -28,7 +29,11 @@ export class PolyZoneMockModule {
       const resultBytes = await zipAsync(cartridgeData);
       return resultBytes;
     } else {
-      throw throwUnhandled(`[PolyZoneMockModule] (mockCreateCartridge) Failed fetching mock cartridge: `, result);
+      throw throwUnhandled(`[PolyZoneMockModule] (create_cartridge) Failed fetching mock cartridge: `, result);
     }
+  }
+
+  public static async mockWatchProjectAssets({ }: WatchProjectAssetsCommandArgs): Promise<void> {
+    console.warn(`[PolyZoneMockModule] (watch_project_assets) Tauri is mocked - project assets will not be watched`);
   }
 }

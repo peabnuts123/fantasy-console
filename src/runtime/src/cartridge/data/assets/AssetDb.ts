@@ -25,6 +25,9 @@ export interface AssetDbVirtualDirectory extends AssetDbVirtualNodeBase {
   type: 'directory';
 }
 
+// @NOTE Keep in sync with Rust backend
+// See: src/editor/src/app/src/filesystem.rs
+// @TODO Could we get this data from the rust backend
 const AssetTypeMap: Record<AssetType, string[]> = {
   [AssetType.Mesh]: ['.obj', '.fbx', '.gltf', '.glb', '.stl'],
   [AssetType.MeshSupplementary]: ['.mtl'],

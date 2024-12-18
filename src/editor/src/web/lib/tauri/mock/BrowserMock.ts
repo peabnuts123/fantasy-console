@@ -54,6 +54,8 @@ export class BrowserMock {
       switch (parsed.command) {
         case 'create_cartridge':
           return PolyZoneMockModule.mockCreateCartridge(args);
+        case 'watch_project_assets':
+          return PolyZoneMockModule.mockWatchProjectAssets(args);
         default:
           throw throwUnhandled(`[BrowserMock] (handle) Unimplemented module. (module='${parsed.command}') args: `, args);
       }
