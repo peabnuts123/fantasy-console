@@ -52,10 +52,13 @@ export class BrowserMock {
       }
     } else {
       switch (parsed.command) {
+        // @TODO Consider making this more like an array of things that "might" handle the command (return bool)
         case 'create_cartridge':
-          return PolyZoneMockModule.mockCreateCartridge(args);
-        case 'watch_project_assets':
-          return PolyZoneMockModule.mockWatchProjectAssets(args);
+        case 'start_watching_project_assets':
+        case 'stop_watching_project_assets':
+        case 'load_project':
+        case 'unload_project':
+          return PolyZoneMockModule.handle(parsed.command, args);
         default:
           throw throwUnhandled(`[BrowserMock] (handle) Unimplemented module. (module='${parsed.command}') args: `, args);
       }
@@ -63,7 +66,7 @@ export class BrowserMock {
   }
 
   private parseCommand(cmd: string): ParsedTauriCommand {
-    // plugin:dialog|open
+    // `cmd` looks like: "plugin:dialog|open"
     const match = /^plugin:(\w+)\|(\w+)$/.exec(cmd);
     if (match !== null) {
       return {

@@ -7,6 +7,7 @@ import { AssetType, CartridgeArchiveManifest, SceneDefinition } from '@fantasy-c
 import { ProjectController } from '@lib/project/ProjectController';
 import { SceneManifest } from '@lib/project/definition';
 import { SceneViewController } from './scene/SceneViewController';
+import { TauriCommands } from '@lib/util/TauriCommands';
 
 export interface CreateCartridgeCmdArgs {
   manifestFileBytes: string;
@@ -153,7 +154,7 @@ export class ComposerController {
     };
 
     // Compile cartridge file
-    const createCartridgeResult = await invoke<number[]>('create_cartridge', {
+    const createCartridgeResult = await invoke<number[]>(TauriCommands.CreateCartridge, {
       manifestFileBytes: JSON.stringify(manifest),
       projectRootPath: this.projectController.currentProjectRoot,
       assetPaths: this.projectController.assetDb.assets

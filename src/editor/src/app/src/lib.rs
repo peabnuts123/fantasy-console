@@ -1,21 +1,43 @@
 mod build;
 mod filesystem;
+mod polyzone;
 
 use std::path::PathBuf;
 
 use build::build;
-use filesystem::{FsWatcherState, ProjectAsset, RawProjectAsset};
-use tauri::AppHandle;
+use filesystem::RawProjectAsset;
+use polyzone::PolyZoneApp;
+use tauri::Manager;
+use tauri::async_runtime::Mutex;
+
+type PolyZoneAppState<'a> = tauri::State<'a, Mutex<PolyZoneApp>>;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .setup(|app| {
+            app.manage(
+                Mutex::new(
+                    PolyZoneApp::new(app.handle().clone())
+                )
+            );
+            Ok(())
+        })
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(
+            tauri_plugin_log::Builder::new()
+            .level(log::LevelFilter::Info)
+            .level_for("fantasy_console_editor_lib", log::LevelFilter::Debug)
+            .build()
+        )
         .invoke_handler(tauri::generate_handler![
             create_cartridge,
-            watch_project_assets,
+            load_project,
+            unload_project,
+            start_watching_project_assets,
+            stop_watching_project_assets,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -39,28 +61,41 @@ fn create_cartridge(
 }
 
 #[tauri::command]
-async fn watch_project_assets(
+async fn load_project(
+    poly_zone_app: PolyZoneAppState::<'_>,
     project_root: &str,
-    project_assets: Vec<RawProjectAsset>,
-    app: AppHandle
-) -> Result<String, &str> {
-    // Convert raw types into meaningful types
+) -> Result<(), ()> {
     let project_root = PathBuf::from(project_root);
-    let project_assets: Vec<ProjectAsset> = project_assets.iter().map(|asset| {
-        ProjectAsset::new(&asset)
-    }).collect();
 
-    // Construct shared state for file watcher
-    let state = FsWatcherState::new(
-        app,
-        project_root.clone(),
-        project_assets,
-    ).await;
+    let mut poly_zone_app = poly_zone_app.lock().await;
+    poly_zone_app.load_project(project_root);
 
-    // Watch files in background thread
-    tauri::async_runtime::spawn(async move {
-        filesystem::watch_project_assets(state).await;
-    });
+    Ok(())
+}
 
-    Ok(format!("Watching assets in project root: {:?}", project_root))
+#[tauri::command]
+async fn unload_project(poly_zone_app: PolyZoneAppState::<'_>) -> Result<(), ()> {
+    let mut poly_zone_app = poly_zone_app.lock().await;
+    poly_zone_app.unload_project().await;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn start_watching_project_assets(
+    poly_zone_app: PolyZoneAppState<'_>,
+    project_assets: Vec<RawProjectAsset>,
+) -> Result<String, &str> {
+    let mut poly_zone_app = poly_zone_app.lock().await;
+    poly_zone_app.start_watching_assets(project_assets).await;
+
+    Ok(format!("Watching assets in project root: {:?}", poly_zone_app.project_root))
+}
+
+#[tauri::command]
+async fn stop_watching_project_assets(poly_zone_app: PolyZoneAppState::<'_>) -> Result<(), ()>{
+    let mut poly_zone_app = poly_zone_app.lock().await;
+    poly_zone_app.stop_watching_assets().await;
+
+    Ok(())
 }

@@ -35,7 +35,7 @@ export abstract class BaseAssetData {
    * @NOTE This property is NOT for fetching the actual data.
    * See {@link babylonFetchUrl} instead.
    */
-  public readonly path: string;
+  public path: string;
   /**
    * Protocol scheme for identifying which resolver handler should resolve this asset.
    * @see {@link Resolver}

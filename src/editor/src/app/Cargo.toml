@@ -41,8 +41,10 @@ swc_ecma_visit = "2.0.0"
 tauri = { version = "2", features = ["protocol-asset"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = { version = "2.0.0", features = ["watch"] }
+tauri-plugin-log = "2"
 tauri-plugin-shell = "2"
 tokio = "1.42.0"
+tokio-util = "0.7.13"
 twox-hash = { version = "2.0.1", features = ["xxhash3_64", "std"] }
 uuid = { version = "1.11.0", features = ["v4"] }
 walkdir = "2.5.0"

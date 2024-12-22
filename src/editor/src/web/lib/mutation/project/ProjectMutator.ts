@@ -16,7 +16,7 @@ export class ProjectMutator extends Mutator<ProjectMutationArguments> {
     };
   }
 
-  protected override persistChanges(): Promise<void> {
+  public override persistChanges(): Promise<void> {
     const projectFileJson = this.projectController.currentProjectJson.toString();
     const projectFileBytes = new TextEncoder().encode(projectFileJson);
     return this.projectController.fileSystem.writeFile(

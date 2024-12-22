@@ -39,7 +39,7 @@ const AssetTypeMap: Record<AssetType, string[]> = {
 
 export class AssetDb {
   public readonly assets: AssetData[];
-  private readonly fileSystem: IFileSystem;
+  public readonly fileSystem: IFileSystem;
 
   public constructor(assetDefinitions: AssetDefinition[], fileSystem: IFileSystem) {
     this.fileSystem = fileSystem;

@@ -1,4 +1,3 @@
-import { writeFile } from '@tauri-apps/plugin-fs';
 import { v4 as uuid } from 'uuid';
 
 import { ComponentDefinitionType, SceneDefinition } from '@fantasy-console/runtime/src/cartridge';

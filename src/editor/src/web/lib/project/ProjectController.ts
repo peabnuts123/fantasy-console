@@ -2,7 +2,6 @@ import { makeAutoObservable, runInAction } from "mobx";
 
 import Resolver from '@fantasy-console/runtime/src/Resolver';
 import { AssetDb } from "@fantasy-console/runtime/src/cartridge";
-import { UnwatchFn } from "@tauri-apps/plugin-fs";
 import * as path from "@tauri-apps/api/path";
 
 import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
@@ -10,31 +9,22 @@ import { JsoncContainer } from "@lib/util/JsoncContainer";
 import { ProjectMutator } from "@lib/mutation/project/ProjectMutator";
 import { ProjectDefinition, ProjectManifest } from "./definition";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { TauriCommands } from "@lib/util/TauriCommands";
+import { ProjectAssetsWatcher } from "./ProjectAssetsWatcher";
 
-interface RawProjectAsset {
-  id: string;
-  path: string;
-  hash: string;
-}
-
-export interface WatchProjectAssetsCommandArgs {
+export interface LoadProjectCommandArgs {
   projectRoot: string;
-  projectAssets: RawProjectAsset[];
 }
-
-export type ProjectAssetUpdateEvent = any;
 
 export class ProjectController {
   private _isLoadingProject: boolean = false;
-  private _currentProject: ProjectDefinition | undefined = undefined;
   private _currentProjectJson: JsoncContainer<ProjectDefinition> | undefined = undefined;
   private readonly _mutator: ProjectMutator;
   private _currentProjectRoot: string | undefined = undefined;
   private _currentProjectFileName: string | undefined = undefined;
   private _assetDb?: AssetDb = undefined;
   private _fileSystem: TauriFileSystem | undefined = undefined;
-  private _stopWatchingFs: UnwatchFn | undefined = undefined;
+  private assetsWatcher: ProjectAssetsWatcher | undefined = undefined;
 
   public constructor() {
     this._mutator = new ProjectMutator(this);
@@ -60,6 +50,9 @@ export class ProjectController {
     // Bind file system to babylon resolver
     Resolver.registerFileSystem(fileSystem);
 
+    // Notify backend that project is loaded
+    await invoke(TauriCommands.LoadProject, { projectRoot: projectDirRoot } satisfies LoadProjectCommandArgs);
+
     const projectFile = await fileSystem.readFile(projectFileName);
     // @TODO also do we need some kind of ProjectData?
     const projectJson = new JsoncContainer<ProjectDefinition>(projectFile.textContent);
@@ -73,29 +66,13 @@ export class ProjectController {
 
     runInAction(() => {
       this._currentProjectJson = projectJson;
-      this._currentProject = project;
       this._assetDb = assetDb;
       this._isLoadingProject = false
     });
 
-    // Start watching project for file changes on disk
-    const watchProjectAssetsResult = await invoke<string>('watch_project_assets', {
-      projectRoot: projectDirRoot,
-      projectAssets: project.assets.map((asset) => ({
-        id: asset.id,
-        path: asset.path,
-        hash: asset.hash,
-      })),
-    } satisfies WatchProjectAssetsCommandArgs);
-
-    this._stopWatchingFs = await listen('on_project_assets_updated', (e) => {
-      this.onProjectAssetsUpdated(e.payload as ProjectAssetUpdateEvent[]);
-    })
-    console.log(`[WatchProjectAssets] Result: `, watchProjectAssetsResult);
-  }
-
-  public onProjectAssetsUpdated(updates: ProjectAssetUpdateEvent[]) {
-    console.log(`[ProjectController] (onProjectAssetsUpdated)`, updates);
+    // Start asset watcher
+    this.assetsWatcher = new ProjectAssetsWatcher(this);
+    await this.assetsWatcher.watch(project);
   }
 
   public onDestroy() {
@@ -103,9 +80,10 @@ export class ProjectController {
     // Generally sends a request to Tauri backend which is received but logs some
     // warnings when the response is sent back after the page has reloaded.
     // See: https://github.com/tauri-apps/tauri/issues/10266
-    if (this._stopWatchingFs) {
-      this._stopWatchingFs();
+    if (this.hasLoadedProject) {
+      invoke(TauriCommands.UnloadProject);
     }
+    this.assetsWatcher?.onDestroy();
   }
 
   public get isLoadingProject() {
@@ -113,14 +91,14 @@ export class ProjectController {
   }
 
   public get hasLoadedProject() {
-    return this._currentProject !== undefined;
+    return this._currentProjectJson !== undefined;
   }
 
   public get currentProject(): ProjectDefinition {
-    if (this._currentProject === undefined) {
+    if (this._currentProjectJson === undefined) {
       throw new ProjectNotLoadedError();
     }
-    return this._currentProject;
+    return this._currentProjectJson.value;
   }
   public get currentProjectJson(): JsoncContainer<ProjectDefinition> {
     if (this._currentProjectJson === undefined) {
@@ -129,7 +107,7 @@ export class ProjectController {
     return this._currentProjectJson;
   }
   public get currentProjectManifest(): ProjectManifest {
-    if (this._currentProject === undefined) {
+    if (!this.hasLoadedProject) {
       throw new ProjectNotLoadedError();
     }
     return this.currentProject.manifest;

@@ -7,162 +7,162 @@
     {
       "id": "4bed3ede-8532-40bd-b247-d21319375dfc",
       "path": "models/ball.mtl",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "97d30317f0ae87ee",
     },
     {
       "id": "dba91ca4-6ab9-4336-ac9b-b758e59e881e",
       "path": "models/ball.obj",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "6fff0c0fa4973e1a",
     },
     {
       "id": "9b38b1c4-2b70-4d46-b969-fe4e1382014b",
       "path": "models/burgerCheese.mtl",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "f79fe79a5ae498d7",
     },
     {
       "id": "59e2bfad-f6f0-471a-a0a4-7b25b76152dc",
       "path": "models/burgerCheese.obj",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "2ab85a700b1ae118",
     },
     {
       "id": "b4a36730-18cc-487e-b00b-d3881ed1eb99",
       "path": "models/detailDumpster_closed.mtl",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "b41326349a3f7d49",
     },
     {
       "id": "a0bfe951-b0e3-449c-a9ef-37734a81a6e6",
       "path": "models/detailDumpster_closed.obj",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "295301d39938d025",
     },
     {
       "id": "c8d495af-3ff4-49ca-ad1b-c794aaf813c1",
       "path": "models/scene.mtl",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "29dcf80ae57cc4b0",
     },
     {
       "id": "6e77e14a-0d3c-4472-a9b1-71a13a888b9b",
       "path": "models/scene.obj",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "d2c0723e6c59060e",
     },
     {
       "id": "5077f008-68cf-46b5-90f2-314dc0d3b508",
       "path": "textures/asphalt.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "4692568422baf3cc",
     },
     {
       "id": "e565ac63-6c97-4bd1-94d9-5cf318f58577",
       "path": "textures/bars.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "67f1d3b15b3ab786",
     },
     {
       "id": "28dc1397-3f67-4f91-9a82-9f555b7a3308",
       "path": "textures/clock texture.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "15e700d17714a7a6",
     },
     {
       "id": "02f2b77c-950b-4756-8b43-6e694743f10f",
       "path": "textures/concrete.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "6326c320fee71cb4",
     },
     {
       "id": "e8dd265c-035e-447f-bd0b-ea295b3d41e7",
       "path": "textures/concreteSmooth.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "a1534dfe2d5856ab",
     },
     {
       "id": "1d0c647c-7825-4b6f-b3fe-da4601b23f0c",
       "path": "textures/dirt.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "6a4e915539588460",
     },
     {
       "id": "b4256ba4-c7a5-4fd0-846b-7fed7113cb59",
       "path": "textures/doors.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "fc21af27d3b58fed",
     },
     {
       "id": "ba3a722e-44a2-4e2c-ac7e-f87f2d2a6cdc",
       "path": "textures/grass.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "82af6900bb36713",
     },
     {
       "id": "9d6c6041-97c7-4fa2-a289-40d1c9c052b4",
       "path": "textures/metal.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "f34b11df08b02300",
     },
     {
       "id": "0d76192a-da29-4bef-8b67-2342ffcf4318",
       "path": "textures/picture on shelf texture.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "715bef792b9bf27b",
     },
     {
       "id": "e3d3446d-6bc6-4b9a-a801-b748bdffc5b8",
       "path": "textures/roof.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "79bb0c3551bb53c6",
     },
     {
       "id": "64b8a023-97eb-4f1f-8eaf-45bdee70dccf",
       "path": "textures/roof_plates.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "af0bddf019ed634f",
     },
     {
       "id": "aa185d8e-13ae-45de-bc41-1e892ced05cf",
       "path": "textures/signs.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "6a22607216b99c92",
     },
     {
       "id": "b9b7ca3b-3f47-400d-879c-e1a24be5a8d2",
       "path": "textures/stones.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "c696e045cd867067",
     },
     {
       "id": "f17a66a4-2d64-434d-ad6c-1e13bee4946c",
       "path": "textures/treeA.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "3382305739a0f368",
     },
     {
       "id": "807db9eb-8fc6-480a-b06d-50ac8eb74c5e",
       "path": "textures/treeB.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "499524197984854f",
     },
     {
       "id": "480efd7b-6a6d-4952-859c-9e13a8f73552",
       "path": "textures/truck.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "93701bfc98b44f4b",
     },
     {
       "id": "4e75fb2b-0f2b-4a45-b4f9-73ee2a888309",
       "path": "textures/truck_alien.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "44f5fad59c2a98e7",
     },
     {
       "id": "8e6c2083-572f-41f9-9fea-ca9af889091d",
       "path": "textures/wall.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "6904d65ded7f5365",
     },
     {
       "id": "5560727b-71eb-440c-bf76-a3e708d00c34",
       "path": "textures/wall_garage.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "cf320acc84e93bf9",
     },
     {
       "id": "7f1fdb0b-78be-4d59-8354-6e676481815d",
       "path": "textures/wall_lines.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "5049230aceb1fb43",
     },
     {
       "id": "ef90eadf-b096-475c-b2d0-37d160293485",
       "path": "textures/wall_metal.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "ecbf17f0fabf4020",
     },
     {
       "id": "c87ddc93-4247-44d4-9f60-d0625e186efa",
       "path": "textures/windows.png",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "acc4297620ed6e9b",
     },
     {
       "id": "58189dec-56a3-44db-b7a5-c8171abfb3aa",
       "path": "scripts/my-object.ts",
-      "hash": "b7a92a4372859283", // @NOTE fake xxhash
+      "hash": "ff6cd79b5e5c3c95",
     }
   ],
   "scenes": [

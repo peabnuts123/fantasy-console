@@ -1,7 +1,7 @@
 import { unzip, zip } from 'fflate';
 
 import type { CreateCartridgeCmdArgs } from "@lib/composer/ComposerController";
-import type { WatchProjectAssetsCommandArgs } from '@lib/project/ProjectController';
+import type { WatchProjectAssetsCommandArgs } from '@lib/project/ProjectAssetsWatcher';
 
 import { Paths } from "../config";
 import { promisify, throwUnhandled } from '../util';
@@ -10,6 +10,23 @@ const unzipAsync = promisify(unzip);
 const zipAsync = promisify(zip);
 
 export class PolyZoneMockModule {
+  public static handle(action: string, args: any) {
+    switch (action) {
+      case 'create_cartridge':
+        return this.mockCreateCartridge(args);
+      case 'start_watching_project_assets':
+        return this.mockStartWatchingProjectAssets(args);
+      case 'stop_watching_project_assets':
+        return this.mockStopWatchingProjectAssets(args);
+      case 'load_project':
+        return this.mockLoadProject(args);
+      case 'unload_project':
+        return this.mockUnloadProject(args);
+      default:
+        throw throwUnhandled(`[PolyZoneMockModule] (handle) Unimplemented action. (action='${action}') args: `, args);
+    }
+  }
+
   /**
    * @NOTE
    * Building a cartridge depends on Rust backend to fully function.
@@ -33,7 +50,19 @@ export class PolyZoneMockModule {
     }
   }
 
-  public static async mockWatchProjectAssets({ }: WatchProjectAssetsCommandArgs): Promise<void> {
-    console.warn(`[PolyZoneMockModule] (watch_project_assets) Tauri is mocked - project assets will not be watched`);
+  public static async mockLoadProject(_args: any) {
+    // @NOTE No-op.
+  }
+
+  public static async mockUnloadProject(_args: any) {
+    // @NOTE No-op.
+  }
+
+  public static async mockStartWatchingProjectAssets({ }: WatchProjectAssetsCommandArgs): Promise<void> {
+    console.warn(`[PolyZoneMockModule] (start_watching_project_assets) Tauri is mocked - project assets will not be watched`);
+  }
+
+  public static async mockStopWatchingProjectAssets({ }: WatchProjectAssetsCommandArgs): Promise<void> {
+    // @NOTE No-op.
   }
 }

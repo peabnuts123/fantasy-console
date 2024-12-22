@@ -1,12 +1,14 @@
 use debounce::EventDebouncer;
 use serde::{Deserialize, Serialize};
 use ignore_files::{IgnoreFile, IgnoreFilter};
-use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::{recommended_watcher, RecursiveMode, Watcher};
+use tauri::async_runtime::spawn;
 use tauri::{AppHandle, Emitter};
+use tokio::select;
+use tokio_util::sync::CancellationToken;
 use std::collections::HashMap;
 use std::hash::Hasher as _;
 use std::path::PathBuf;
-use std::sync::mpsc::channel;
 use std::{sync::Arc, time::Duration};
 use tokio::fs::File;
 use tokio::io::{AsyncReadExt as _, BufReader};
@@ -66,14 +68,19 @@ impl ProjectAsset {
 
 /// An event representing a change to the file system
 #[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 enum FsEvent {
     /// A new (previously-unknown) file has been added
-    Create { path: PathBuf, hash: String },
+    #[serde(rename_all = "camelCase")]
+    Create { asset_id: Uuid, path: PathBuf, hash: String },
     /// A previously-known file has been removed
+    #[serde(rename_all = "camelCase")]
     Delete { asset_id: Uuid },
     /// A known file's hash has changed
+    #[serde(rename_all = "camelCase")]
     Modify { asset_id: Uuid, new_hash: String },
     /// The result of a pair of Create + Delete events for files with the same hash
+    #[serde(rename_all = "camelCase")]
     Rename { asset_id: Uuid, new_path: PathBuf },
 }
 
@@ -101,25 +108,30 @@ impl FsWatcherState {
 
 /// Begin watching asset files within the project root for changes.
 /// Changes will be emitted back to the frontend.
-pub async fn watch_project_assets(state: FsWatcherState) {
-    println!("Watching {:?}", &state.project_root);
+pub async fn watch_project_assets(state: FsWatcherState, cancellation_token: CancellationToken) {
+    log::debug!("Watching {:?}", &state.project_root);
 
     // Run initial full reconciliation before watching
     let state = Arc::new(state);
     perform_full_reconciliation(state.clone()).await;
 
+    // Check if cancellation occurred immediately
+    if cancellation_token.is_cancelled() {
+        return;
+    }
+
     // Start watching the FS
-    if let Err(error) = watch_fs(state.clone()).await {
+    if let Err(error) = watch_fs(state.clone(), cancellation_token).await {
         // This only happens if watching the file system crashes / finishes
         // @TODO restart?
-        eprintln!("Error: {error:?}");
+        log::error!("[filesystem] (watch_project_assets) Error from watcher: {error:?}");
     }
 }
 
 /// Perform a full reconciliation of what assets are known in memory vs.
 /// what assets exist on disk. Any differences will be emitted as changes.
 async fn perform_full_reconciliation(state: Arc<FsWatcherState>) {
-    println!("Performing full reconciliation");
+    log::debug!("Performing full reconciliation");
 
     let timer = Instant::now();
 
@@ -198,33 +210,43 @@ async fn perform_full_reconciliation(state: Arc<FsWatcherState>) {
         // Any remaining new asset files are Create events
         for new_asset_file in new_asset_files {
             fs_events.push(FsEvent::Create {
+                asset_id: Uuid::new_v4(),
                 path: new_asset_file.path.clone(),
                 hash: new_asset_file.hash.clone(),
             });
         }
     }
 
-    println!(
+    log::debug!(
         "Full reconciliation: '{}' events. took '{}ms'",
         fs_events.len(),
         timer.elapsed().as_millis()
     );
 
-    on_fs_event(fs_events, state).await;
+    if fs_events.len() > 0 {
+        on_fs_event(fs_events, state).await;
+    }
 }
 
 /// Begin watching the filesystem for any changes.
 /// Any changes that are relevant to project asset files will
 /// trigger a full reconciliation.
-async fn watch_fs(state: Arc<FsWatcherState>) -> notify::Result<()> {
+async fn watch_fs(state: Arc<FsWatcherState>, cancellation_token: CancellationToken) -> notify::Result<()> {
     // Create a channel for `notify` to communicate on
     // `notify` will transmit events on this channel
     // We will wait and receive events from it
-    let (tx, rx) = channel();
+    let (tx, mut rx) = tauri::async_runtime::channel(32);
 
     // Watch project root folder using `notify`
-    println!("[FsWatcher] (watch_fs) Watching {:?}", &state.project_root);
-    let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
+    log::info!("[FsWatcher] (watch_fs) Watching {:?}", &state.project_root);
+    let mut watcher = recommended_watcher(move |event| {
+        log::debug!("[filesystem] (watch_fs) Forwarding notify event to tokio channel: {:?}", event);
+        let tx = tx.clone();
+        spawn(async move {
+            tx.send(event).await.unwrap();
+        });
+    })?;
+
     watcher.watch(&state.project_root, RecursiveMode::Recursive)?;
 
     // Event debouncing
@@ -238,54 +260,74 @@ async fn watch_fs(state: Arc<FsWatcherState>) -> notify::Result<()> {
         });
     });
 
-    for result in rx {
-        match result {
-            Ok(raw_event) => {
-                // @NOTE pessimism
-                let mut we_care_about_this_event = false;
+    loop {
+        // @NOTE Tokio wraps results with another layer of Result, so we must unwrap twice
+        select! {
+            outer_msg = rx.recv() => {
+                match outer_msg {
+                    Some(result) => {
+                        // @NOTE Result from notify
+                        match result {
+                            Ok(raw_event) => {
+                                log::debug!("[filesystem] (watch_fs) Received event: {:?}", raw_event);
 
-                // Validation
-                // @TODO At least 1 event path must any of the following:
-                //  - A prefix of any known file
-                //  - An extant file that matches the ignore filter AND is an asset type we care about
-                for path in raw_event.paths.iter() {
-                    if
-                        path.exists() &&
-                        !state.ignore_filter.match_path(path, path.is_dir()).is_ignore() &&
-                        is_supported_asset_type(path)
-                    {
-                        // An extant file that is not matched by the ignore filter AND is an asset type we care about
-                        // println!("Triggering full reconciliation. An extant file that is not matched by the ignore filter AND is an asset type we care about: {:?}", path);
-                        we_care_about_this_event = true;
-                        break;
-                    } else {
-                        let path_is_prefix_for_any_known_asset = {
-                            let state_assets = state.assets.lock().await;
-                            state_assets
-                                .iter()
-                                .any(|asset| asset.path.starts_with(path))
-                        };
-                        if path_is_prefix_for_any_known_asset {
-                            // Event path is a prefix of a known asset
-                            // println!("Triggering full reconciliation. Event path is a prefix of a known asset: {:?}", path);
-                            we_care_about_this_event = true;
-                            break;
-                        // } else {
-                        //     println!("Ignore presumed irrelevant event: {:?}", path);
+                                // @NOTE pessimism
+                                let mut we_care_about_this_event = false;
+
+                                // Validation
+                                // @TODO At least 1 event path must any of the following:
+                                //  - A prefix of any known file
+                                //  - An extant file that matches the ignore filter AND is an asset type we care about
+                                for path in raw_event.paths.iter() {
+                                    if
+                                        path.exists() &&
+                                        !state.ignore_filter.match_path(path, path.is_dir()).is_ignore() &&
+                                        is_supported_asset_type(path)
+                                    {
+                                        // An extant file that is not matched by the ignore filter AND is an asset type we care about
+                                        log::debug!("[filesystem] (watch_fs) Triggering full reconciliation. An extant file that is not matched by the ignore filter AND is an asset type we care about: {:?}", path);
+                                        we_care_about_this_event = true;
+                                        break;
+                                    } else {
+                                        let relative_path = PathBuf::from(path.strip_prefix(&state.project_root).unwrap());
+                                        let path_is_prefix_for_any_known_asset = {
+                                            let state_assets = state.assets.lock().await;
+                                            state_assets
+                                                .iter()
+                                                .any(|asset| asset.path.starts_with(&relative_path))
+                                        };
+                                        if path_is_prefix_for_any_known_asset {
+                                            // Event path is a prefix of a known asset
+                                            log::debug!("[filesystem] (watch_fs) Triggering full reconciliation. Event path is a prefix of a known asset: {:?}", relative_path);
+                                            we_care_about_this_event = true;
+                                            break;
+                                        } else {
+                                            log::debug!("[filesystem] (watch_fs) Ignore presumed irrelevant event: {:?}", relative_path);
+                                        }
+                                    }
+                                }
+
+                                if we_care_about_this_event {
+                                    log::debug!("[FsWatcher] (watch_fs) Triggering full reconciliation");
+                                    debouncer.put(());
+                                }
+                            }
+                            Err(error) => log::error!("[FsWatcher] (watch_fs) {error:?}"),
                         }
                     }
-                }
-
-                if we_care_about_this_event {
-                    println!("[FsWatcher] (watch_fs) Triggering full reconciliation");
-                    debouncer.put(());
+                    None => log::warn!("[filesystem] (watch_fs) Received None from notify - what does this mean?"),
                 }
             }
-            Err(error) => eprintln!("[FsWatcher] (watch_fs) {error:?}"),
+            // Listen for cancel / stop watching signal
+            _ = cancellation_token.cancelled() => {
+                log::debug!("[FsWatcher] (watch_fs) Stopping watcher");
+                watcher.unwatch(&state.project_root)?;
+                break;
+            }
         }
     }
 
-    // @NOTE We can't really reach here
+    // @NOTE We only reach here if the watcher is stopped
     Ok(())
 }
 
@@ -296,9 +338,9 @@ async fn on_fs_event(events: Vec<FsEvent>, state: Arc<FsWatcherState>) {
     // Apply modifications to asset list in memory
     for event in events.iter() {
         match event {
-            FsEvent::Create { path, hash } => {
+            FsEvent::Create { asset_id, path, hash } => {
                 let new_asset = ProjectAsset {
-                    id: Uuid::new_v4(),
+                    id: asset_id.clone(),
                     path: path.clone(),
                     hash: hash.clone(),
                 };
@@ -325,9 +367,9 @@ async fn on_fs_event(events: Vec<FsEvent>, state: Arc<FsWatcherState>) {
     }
 
     // @DEBUG Pretty-print fs
-    println!("Assets:");
+    log::debug!("Assets:");
     for asset in state_assets.iter() {
-        println!(
+        log::debug!(
             "{:?}",
             asset.path
         );
@@ -336,8 +378,8 @@ async fn on_fs_event(events: Vec<FsEvent>, state: Arc<FsWatcherState>) {
     // Emit data to JavaScript
     const EVENT_NAME: &str = "on_project_assets_updated";
     match state.app.emit(EVENT_NAME, events.clone()) {
-        Ok(_) => println!("[FsWatcher] (on_notify) Emitted event `{EVENT_NAME}`"),
-        Err(error) => eprintln!("[FsWatcher] (on_notify) Error emitting event `{EVENT_NAME}`: {error:?}"),
+        Ok(_) => log::debug!("[FsWatcher] (on_notify) Emitted event `{EVENT_NAME}`"),
+        Err(error) => log::error!("[FsWatcher] (on_notify) Error emitting event `{EVENT_NAME}`: {error:?}"),
     }
 }
 
@@ -459,18 +501,18 @@ pub async fn create_ignore_filter(root_path: &PathBuf) -> IgnoreFilter {
 
     // @TODO gracefully handle failure / partial failure
     if errors.len() > 0 {
-        eprintln!("Errors while reading ignore files:");
+        log::error!("Errors while reading ignore files:");
         for error in errors {
-            eprintln!("\t{error:?}");
+            log::error!("\t{error:?}");
         }
         panic!("Could not watch filesystem due to errors reading ignore files");
     }
 
     // @TODO @DEBUG Remove
     if all_ignore_files.len() > 0 {
-        println!("Found ignore files:");
+        log::debug!("Found ignore files:");
         for ignore_file in &all_ignore_files {
-            println!("\t{:?}", ignore_file.path);
+            log::debug!("\t{:?}", ignore_file.path);
         }
     }
 
