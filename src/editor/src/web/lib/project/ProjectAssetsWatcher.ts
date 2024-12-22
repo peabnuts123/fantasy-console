@@ -1,13 +1,15 @@
-import { UnwatchFn } from "@tauri-apps/plugin-fs";
-import { ProjectController } from "./ProjectController";
-import { TauriCommands } from "@lib/util/TauriCommands";
-import { invoke } from "@tauri-apps/api/core";
-import { AssetDefinition, ProjectDefinition } from "./definition";
-import { listen } from "@tauri-apps/api/event";
-import { TauriEvents } from "@lib/util/TauriEvents";
-import { AssetDb, createAssetData } from "@fantasy-console/runtime/src/cartridge/data";
-import { resolvePath } from "@lib/util/JsoncContainer";
 import { runInAction } from "mobx";
+import { UnwatchFn } from "@tauri-apps/plugin-fs";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
+
+import { TauriCommands } from "@lib/util/TauriCommands";
+import { TauriEvents } from "@lib/util/TauriEvents";
+import { resolvePath } from "@lib/util/JsoncContainer";
+import { AssetDefinition, ProjectDefinition } from "./definition";
+import { ProjectController } from "./ProjectController";
+import { createAssetData } from "./data/AssetData";
+import { AssetDb } from "./AssetDb";
 
 export interface RawProjectAsset {
   id: string;
@@ -105,10 +107,13 @@ export class ProjectAssetsWatcher {
       hash,
     };
     assetDb.assets.push(createAssetData(
-      newAssetDefinition.id,
       AssetDb.getAssetType(newAssetDefinition),
-      newAssetDefinition.path,
-      assetDb.fileSystem.resolverProtocol,
+      {
+        id: newAssetDefinition.id,
+        path: newAssetDefinition.path,
+        hash: newAssetDefinition.hash,
+        resolverProtocol: assetDb.fileSystem.resolverProtocol,
+      }
     ));
 
     // 2. Update JSON
@@ -136,10 +141,13 @@ export class ProjectAssetsWatcher {
 
   private applyModify({ modify: event }: ProjectAssetModifiedEvent) {
     const { assetId, newHash } = event;
+    const assetDb = this.projectController.assetDb;
 
     // 1. Update data
-    // @NOTE No-op. Hash is not used in-memory - it only exists on disk
-    console.log(`[ProjectAssetsWatcher] (applyModify) Asset modified: ${assetId}`);
+    const asset = assetDb.assets.find((asset) => asset.id === assetId);
+    if (asset === undefined) throw new Error(`Cannot apply 'Modify' event: No asset found in AssetDb with id: ${assetId}`);
+    console.log(`[ProjectAssetsWatcher] (applyModify) Asset modified: ${asset.path}`);
+    asset.hash = newHash;
 
     // 2. Update JSON
     const jsonIndex = this.projectController.currentProject.assets.findIndex((asset) => asset.id === assetId);

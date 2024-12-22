@@ -1,9 +1,10 @@
 import { makeAutoObservable } from "mobx";
 
 import { SceneDefinition } from "@fantasy-console/runtime/src/cartridge/archive";
-import { AssetDb, SceneDataConfiguration } from "@fantasy-console/runtime/src/cartridge";
+import { SceneDataConfiguration } from "@fantasy-console/runtime/src/cartridge";
 import { toColor3Core } from "@fantasy-console/runtime/src/util";
 
+import { AssetDb } from "@lib/project/AssetDb";
 import { loadObjectDefinition } from "./loadObjectDefinition";
 import { GameObjectData } from "./GameObjectData";
 

@@ -1,9 +1,10 @@
 
-import { AssetType, MeshAssetData } from "@fantasy-console/runtime/src/cartridge";
+import { AssetType } from "@fantasy-console/runtime/src/cartridge";
 import { observer } from "mobx-react-lite";
 
 import type { MeshComponentData } from "@lib/composer/data";
 import { SetGameObjectMeshComponentAssetMutation } from "@lib/mutation/scene/mutations";
+import type { MeshAssetData } from "@lib/project/data/AssetData";
 import { createAssetReferenceComponentOfType } from "../AssetReference";
 import type { InspectorComponent } from "./InspectorComponent";
 import { InspectorComponentBase } from "./InspectorComponentBase";

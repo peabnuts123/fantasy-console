@@ -22,7 +22,6 @@ import {
   DirectionalLightComponent as DirectionalLightComponentRuntime,
   PointLightComponent as PointLightComponentRuntime,
 } from '@fantasy-console/runtime/src/world';
-import { AssetData } from '@fantasy-console/runtime/src/cartridge';
 import { SceneDefinition } from '@fantasy-console/runtime/src/cartridge/archive';
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 import { toColor3Babylon } from '@fantasy-console/runtime/src/util';
@@ -31,6 +30,7 @@ import { SceneManifest } from '@lib/project/definition/scene';
 import { JsoncContainer } from '@lib/util/JsoncContainer';
 import { ProjectController } from '@lib/project/ProjectController';
 import { SceneViewMutator } from '@lib/mutation/scene/SceneViewMutator';
+import { AssetData } from '@lib/project/data/AssetData';
 import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from '../data/components';
 import { SceneData } from '../data/SceneData';
 import { GameObjectData } from '../data/GameObjectData';

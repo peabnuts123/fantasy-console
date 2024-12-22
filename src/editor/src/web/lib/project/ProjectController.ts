@@ -1,7 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
 import Resolver from '@fantasy-console/runtime/src/Resolver';
-import { AssetDb } from "@fantasy-console/runtime/src/cartridge";
 import * as path from "@tauri-apps/api/path";
 
 import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
@@ -11,6 +10,7 @@ import { ProjectDefinition, ProjectManifest } from "./definition";
 import { invoke } from "@tauri-apps/api/core";
 import { TauriCommands } from "@lib/util/TauriCommands";
 import { ProjectAssetsWatcher } from "./ProjectAssetsWatcher";
+import { AssetDb } from "./AssetDb";
 
 export interface LoadProjectCommandArgs {
   projectRoot: string;

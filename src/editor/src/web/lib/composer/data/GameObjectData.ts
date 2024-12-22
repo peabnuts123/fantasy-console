@@ -15,8 +15,6 @@ export class GameObjectData {
 
   // @TODO this is a bit cooked TBH. We should probably have a reference to World or SceneBabylon or something.
   //  I think this is only used by mutations
-  // @TODO is it cooked that we're using a Runtime GameObject for this? I can't see any reason why we should
-  //  other than "it happens to be the same"
   public sceneInstance: GameObjectRuntime | undefined = undefined;
 
   public constructor(id: string, name: string, transform: TransformData, components: IComposerComponentData[], children: GameObjectData[]) {

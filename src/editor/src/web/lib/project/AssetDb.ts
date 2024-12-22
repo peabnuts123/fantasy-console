@@ -1,24 +1,29 @@
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 
 import { ClassReference } from '@fantasy-console/core/src/util';
-import type { AssetDefinition } from '@fantasy-console/runtime/src/cartridge/archive'
 import { getFileExtension } from "@fantasy-console/runtime/src/util";
 import type { IFileSystem, VirtualFile } from '@fantasy-console/runtime/src/filesystem';
+import { AssetType, AssetTypeMap } from '@fantasy-console/runtime/src/cartridge/data';
 
-import { createAssetData } from './AssetData';
-import type { AssetData } from './AssetData';
-import { AssetType } from './AssetType';
+import { AssetData, createAssetData } from './data/AssetData';
+import { makeAutoObservable } from 'mobx';
+import { AssetDefinition } from './definition';
 
-// @NOTE Keep in sync with Rust backend
-// See: src/editor/src/app/src/filesystem.rs
-// @TODO Could we get this data from the rust backend
-export const AssetTypeMap: Record<AssetType, string[]> = {
-  [AssetType.Mesh]: ['.obj', '.fbx', '.gltf', '.glb', '.stl'],
-  [AssetType.MeshSupplementary]: ['.mtl'],
-  [AssetType.Script]: ['.ts', '.js'],
-  [AssetType.Sound]: ['.mp3', '.ogg', '.wav'],
-  [AssetType.Texture]: ['.png', '.jpg', '.jpeg', '.bmp', '.basis', '.dds'],
-  [AssetType.Unknown]: []
+
+export type AssetDbVirtualNode = AssetDbVirtualFile | AssetDbVirtualDirectory;
+
+export interface AssetDbVirtualNodeBase {
+  id: string;
+  name: string;
+}
+
+export interface AssetDbVirtualFile extends AssetDbVirtualNodeBase {
+  type: 'file';
+  data: AssetData;
+}
+
+export interface AssetDbVirtualDirectory extends AssetDbVirtualNodeBase {
+  type: 'directory';
 }
 
 export class AssetDb {
@@ -33,10 +38,13 @@ export class AssetDb {
         {
           id: assetDefinition.id,
           path: assetDefinition.path,
+          hash: assetDefinition.hash,
           resolverProtocol: fileSystem.resolverProtocol,
-        }
+        },
       );
     });
+
+    makeAutoObservable(this);
   }
 
   public getById<TAssetData extends AssetData>(

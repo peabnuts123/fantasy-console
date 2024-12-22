@@ -3,10 +3,11 @@ import { useState } from "react";
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { observer } from "mobx-react-lite";
 
-import { baseName, createDirView, toPathList } from "@fantasy-console/runtime/src/util";
+import { baseName, toPathList } from "@fantasy-console/runtime/src/util";
 
 import { useLibrary } from "@lib/index";
 import { CreateNewSceneMutation } from "@lib/mutation/project/mutations";
+import { createDirView } from "@lib/util/path";
 import { SceneListFileItem, SceneListVirtualFile } from './SceneListFileItem';
 import { SceneListDirectoryItem, SceneListVirtualDirectory } from './SceneListDirectoryItem';
 import { ListItemCommon } from "../ListItemCommon";

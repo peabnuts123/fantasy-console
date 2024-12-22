@@ -60,8 +60,6 @@ impl PolyZoneApp {
         ).await;
 
         // Watch files in background thread
-        // @RESUME
-        // @TODO make frontend not a mutation
         let cancellation_token = CancellationToken::new();
         let cancellation_token_clone = cancellation_token.clone();
         tauri::async_runtime::spawn(async move {

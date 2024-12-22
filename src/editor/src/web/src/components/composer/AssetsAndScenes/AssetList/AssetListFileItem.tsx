@@ -1,10 +1,11 @@
 import { FunctionComponent } from "react";
-import { AssetDbVirtualFile, AssetType } from "@fantasy-console/runtime/src/cartridge";
+import { AssetType } from "@fantasy-console/runtime/src/cartridge";
 import { DocumentIcon, DocumentTextIcon, PhotoIcon, CubeIcon } from '@heroicons/react/24/outline'
 import { observer } from "mobx-react-lite";
 
-import { ListItemCommon } from '../ListItemCommon';
 import { useAssetDrag } from "@app/interactions/assets";
+import type { AssetDbVirtualFile } from "@lib/project/AssetDb";
+import { ListItemCommon } from '../ListItemCommon';
 
 
 export interface AssetListFileItemProps {

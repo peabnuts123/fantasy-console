@@ -1,4 +1,5 @@
-import { AssetData, AssetDataOfType, AssetType } from "@fantasy-console/runtime/src/cartridge";
+import type { AssetType } from "@fantasy-console/runtime/src/cartridge";
+import type { AssetData, AssetDataOfType } from "@lib/project/data/AssetData";
 import { useDrag, useDrop } from "@lib/util/drag-and-drop";
 
 export interface AssetDragState {

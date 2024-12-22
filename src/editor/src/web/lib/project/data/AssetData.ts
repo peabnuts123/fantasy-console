@@ -1,7 +1,7 @@
+import { makeObservable, observable } from "mobx";
+import { AssetType } from "@fantasy-console/runtime/src/cartridge/data";
 import type Resolver from "@fantasy-console/runtime/src/Resolver";
 import { baseName, getFileExtension, toPathList } from "@fantasy-console/runtime/src/util";
-
-import { AssetType } from "./AssetType";
 
 export type AssetData = MeshAssetData | MeshSupplementaryAssetData | ScriptAssetData | SoundAssetData | TextureAssetData | UnknownAssetData;
 export type AssetDataOfType<TAssetType extends AssetType> = Extract<AssetData, { type: TAssetType }>;
@@ -9,9 +9,9 @@ export type AssetDataOfType<TAssetType extends AssetType> = Extract<AssetData, {
 export interface CreateAssetDataArgs {
   id: string;
   path: string;
+  hash: string;
   resolverProtocol: string;
 }
-
 export function createAssetData(type: AssetType, args: CreateAssetDataArgs) {
   switch (type) {
     case AssetType.Mesh:
@@ -43,15 +43,26 @@ export abstract class BaseAssetData {
    */
   public path: string;
   /**
+   * Hash of the asset's content.
+   */
+  public hash: string;
+  /**
    * Protocol scheme for identifying which resolver handler should resolve this asset.
    * @see {@link Resolver}
    */
   private readonly resolverProtocol: string;
 
-  public constructor({ id, path, resolverProtocol }: CreateAssetDataArgs) {
+  public constructor({ id, path, hash, resolverProtocol }: CreateAssetDataArgs) {
     this.id = id;
     this.path = path;
+    this.hash = hash;
     this.resolverProtocol = resolverProtocol;
+
+    makeObservable(this, {
+      id: observable,
+      path: observable,
+      hash: observable,
+    });
   }
 
   public toString(): string {

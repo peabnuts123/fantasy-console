@@ -3,9 +3,9 @@ import { FolderIcon } from '@heroicons/react/24/outline'
 import cn from 'classnames';
 
 import { AssetType } from "@fantasy-console/runtime/src/cartridge";
-import { createDirView } from "@fantasy-console/runtime/src/util";
 
 import { useModal } from '@lib/modal';
+import { createDirView } from "@lib/util/path";
 import { getIconForAssetType } from "@app/components/composer/AssetsAndScenes/AssetList";
 import { ListItemCommon } from "@app/components/composer/AssetsAndScenes";
 

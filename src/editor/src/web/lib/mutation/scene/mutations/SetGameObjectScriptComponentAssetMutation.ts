@@ -1,7 +1,8 @@
-import type { ScriptAssetData, ScriptComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
+import type { ScriptComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
 
 import { GameObjectData, ScriptComponentData } from "@lib/composer/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
+import type { ScriptAssetData } from "@lib/project/data/AssetData";
 import { ISceneMutation } from "../ISceneMutation";
 import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 

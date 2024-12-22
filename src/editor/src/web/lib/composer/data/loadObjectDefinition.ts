@@ -1,7 +1,8 @@
 import { CameraComponentDefinition, ComponentDefinitionType, DirectionalLightComponentDefinition, MeshComponentDefinition, PointLightComponentDefinition, GameObjectDefinition, ScriptComponentDefinition } from "@fantasy-console/runtime/src/cartridge/archive";
-import { AssetDb, MeshAssetData, ScriptAssetData } from "@fantasy-console/runtime/src/cartridge";
 import { toColor3Core, toVector3Core } from "@fantasy-console/runtime/src/util";
 
+import { AssetDb } from "@lib/project/AssetDb";
+import { MeshAssetData, ScriptAssetData } from "@lib/project/data/AssetData";
 import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from "./components";
 import { GameObjectData } from "./GameObjectData";
 import { TransformData } from "./TransformData";

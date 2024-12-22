@@ -240,7 +240,6 @@ async fn watch_fs(state: Arc<FsWatcherState>, cancellation_token: CancellationTo
     // Watch project root folder using `notify`
     log::info!("[FsWatcher] (watch_fs) Watching {:?}", &state.project_root);
     let mut watcher = recommended_watcher(move |event| {
-        log::debug!("[filesystem] (watch_fs) Forwarding notify event to tokio channel: {:?}", event);
         let tx = tx.clone();
         spawn(async move {
             tx.send(event).await.unwrap();

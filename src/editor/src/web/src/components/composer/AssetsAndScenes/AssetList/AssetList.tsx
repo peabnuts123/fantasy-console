@@ -5,8 +5,8 @@ import { observer } from "mobx-react-lite";
 import { useLibrary } from "@lib/index";
 import { AssetListFileItem } from "./AssetListFileItem";
 import { AssetListDirectoryItem } from "./AssetListDirectoryItem";
-import { createDirView } from "@fantasy-console/runtime/src/util";
-import { AssetDbVirtualDirectory, AssetDbVirtualFile } from "@fantasy-console/runtime/src/cartridge";
+import { AssetDbVirtualDirectory, AssetDbVirtualFile } from "@lib/project/AssetDb";
+import { createDirView } from "@lib/util/path";
 import { ListItemCommon } from "../ListItemCommon";
 
 export const AssetList: FunctionComponent = observer(({ }) => {

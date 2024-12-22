@@ -1,9 +1,10 @@
 import { makeAutoObservable } from "mobx";
 import { v4 as uuid } from 'uuid';
 
-import { ComponentDefinitionType, MeshComponentDefinition, type ComponentDefinition, type MeshAssetData } from "@fantasy-console/runtime/src/cartridge";
+import { ComponentDefinitionType, MeshComponentDefinition, type ComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
 
 import type { MeshComponent } from "@lib/composer/scene/components";
+import type { MeshAssetData } from "@lib/project/data/AssetData";
 import type { IComposerComponentData } from "./IComposerComponentData";
 
 export class MeshComponentData implements IComposerComponentData {

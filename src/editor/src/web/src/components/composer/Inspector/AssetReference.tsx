@@ -3,10 +3,11 @@ import cn from 'classnames';
 import { observer } from "mobx-react-lite";
 import { TrashIcon } from '@heroicons/react/24/solid'
 
-import { AssetDataOfType, AssetType } from "@fantasy-console/runtime/src/cartridge";
+import { AssetType } from "@fantasy-console/runtime/src/cartridge";
 
 import { useLibrary } from "@lib/index";
 import { showModal } from '@lib/modal';
+import { AssetDataOfType } from "@lib/project/data/AssetData";
 import { useAssetDrop } from "@app/interactions/assets";
 import { AssetReferenceModalAssetReference, AssetReferenceModalData, AssetReferenceResultPayload } from "@app/pages/modal/asset-reference";
 import { getIconForAssetType } from "../AssetsAndScenes/AssetList";
