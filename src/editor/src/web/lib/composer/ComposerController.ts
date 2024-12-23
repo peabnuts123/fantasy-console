@@ -2,12 +2,14 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { invoke } from '@tauri-apps/api/core'
 import { v4 as uuid } from 'uuid';
 
-import { AssetType, CartridgeArchiveManifest, SceneDefinition } from '@fantasy-console/runtime/src/cartridge';
+import { AssetType, CartridgeArchiveManifest } from '@fantasy-console/runtime/src/cartridge';
 
 import { ProjectController } from '@lib/project/ProjectController';
 import { SceneManifest } from '@lib/project/definition';
-import { SceneViewController } from './scene/SceneViewController';
+import { SceneDefinition, toRuntimeSceneDefinition } from '@lib/project/definition/scene/SceneDefinition';
 import { TauriCommands } from '@lib/util/TauriCommands';
+import { SceneViewController } from './scene/SceneViewController';
+import { SceneData } from './data/SceneData';
 
 export interface CreateCartridgeCmdArgs {
   manifestFileBytes: string;
@@ -50,7 +52,17 @@ export class ComposerController {
   public async loadSceneForTab(tabId: string, sceneManifest: SceneManifest) {
     for (const tab of this.currentlyOpenTabs) {
       if (tab.id === tabId) {
-        const sceneViewController = await SceneViewController.loadFromManifest(sceneManifest, this.projectController);
+        // Find scene definition in memory
+        const rawSceneData = this.projectController.currentProjectRawSceneData.find((rawSceneDatum) => rawSceneDatum.manifest.path === sceneManifest.path);
+        if (rawSceneData === undefined) throw new Error(`Could not load scene for tab - no scene exists with path '${sceneManifest.path}'`);
+        const runtimeSceneDefinition = toRuntimeSceneDefinition(rawSceneData.jsonc.value, rawSceneData.manifest.path);
+
+        const sceneViewController = new SceneViewController(
+          new SceneData(runtimeSceneDefinition, this.projectController.assetDb),
+          rawSceneData.jsonc,
+          this.projectController
+        );
+
         runInAction(() => {
           tab.label = sceneViewController.scene.path;
           tab.sceneViewController = sceneViewController;
@@ -100,34 +112,22 @@ export class ComposerController {
     Is there a way we can do this from Rust, so that we
     could do this from a CLI?
   */
-  public async debug_buildCartridge(sceneEntryPointOverride: SceneDefinition | undefined = undefined): Promise<Uint8Array> {
+  public async debug_buildCartridge(entryPointSceneIdOverride: string | undefined = undefined): Promise<Uint8Array> {
 
     // Load scene definitions
-    const scenes = await Promise.all(
-      this.projectController.currentProject.scenes.map(async (sceneManifest) => {
-        // Load any scenes currently open from memory
-        // @TODO is this just a Chrome @DEBUG thing?
-        const openTab = this.currentlyOpenTabs.find((tab) => tab.sceneViewController?.scene.path === sceneManifest.path);
-        if (openTab !== undefined) {
-          // Load current scene from memory
-          return openTab.sceneViewController!.sceneDefinition;
-        } else {
-          // @TODO can this be a method on ProjectController instead?
-          const [sceneDefinition] = await SceneViewController.loadSceneDefinition(sceneManifest, this.projectController.fileSystem);
-          return sceneDefinition;
-        }
-      })
+    const scenes = this.projectController.currentProjectRawSceneData.map((rawSceneDatum) =>
+      toRuntimeSceneDefinition(rawSceneDatum.jsonc.value, rawSceneDatum.manifest.path)
     );
 
     // Move `overrideEntryPoint` to be the first scene in the list
-    if (sceneEntryPointOverride !== undefined) {
-      const overrideIndex = scenes.indexOf(sceneEntryPointOverride);
+    if (entryPointSceneIdOverride !== undefined) {
+      const overrideIndex = scenes.findIndex((scene) => scene.id === entryPointSceneIdOverride);
       if (overrideIndex === -1) {
-        throw new Error(`Cannot build cartridge. Cannot set entrypoint to SceneDefinition with ID '${sceneEntryPointOverride.id}' - it isn't one of the current project's scenes`);
+        throw new Error(`Cannot build cartridge. Cannot set entrypoint to SceneDefinition with ID '${entryPointSceneIdOverride}' - it isn't one of the current project's scenes`);
       }
 
-      scenes.splice(overrideIndex, 1);
-      scenes.unshift(sceneEntryPointOverride);
+      const override = scenes.splice(overrideIndex, 1)[0];
+      scenes.unshift(override);
     }
 
     // Build cartridge manifest

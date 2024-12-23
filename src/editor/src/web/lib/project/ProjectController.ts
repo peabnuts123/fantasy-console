@@ -1,16 +1,18 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { invoke } from "@tauri-apps/api/core";
+import * as path from "@tauri-apps/api/path";
 
 import Resolver from '@fantasy-console/runtime/src/Resolver';
-import * as path from "@tauri-apps/api/path";
 
 import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
 import { JsoncContainer } from "@lib/util/JsoncContainer";
 import { ProjectMutator } from "@lib/mutation/project/ProjectMutator";
 import { ProjectDefinition, ProjectManifest } from "./definition";
-import { invoke } from "@tauri-apps/api/core";
 import { TauriCommands } from "@lib/util/TauriCommands";
 import { ProjectAssetsWatcher } from "./ProjectAssetsWatcher";
 import { AssetDb } from "./AssetDb";
+import { SceneDefinition } from "./definition/scene/SceneDefinition";
+import { RawSceneData } from "./data/RawSceneData";
 
 export interface LoadProjectCommandArgs {
   projectRoot: string;
@@ -19,6 +21,7 @@ export interface LoadProjectCommandArgs {
 export class ProjectController {
   private _isLoadingProject: boolean = false;
   private _currentProjectJson: JsoncContainer<ProjectDefinition> | undefined = undefined;
+  private _currentProjectRawSceneData: RawSceneData[] = [];
   private readonly _mutator: ProjectMutator;
   private _currentProjectRoot: string | undefined = undefined;
   private _currentProjectFileName: string | undefined = undefined;
@@ -70,6 +73,17 @@ export class ProjectController {
       this._isLoadingProject = false
     });
 
+    // Load scene definitions
+    for (const sceneManifest of project.scenes) {
+      const sceneFile = await fileSystem.readFile(sceneManifest.path);
+      const sceneJsonc = new JsoncContainer<SceneDefinition>(sceneFile.textContent);
+      const sceneDefinition = sceneJsonc.value;
+      this._currentProjectRawSceneData.push({
+        jsonc: sceneJsonc,
+        manifest: sceneManifest,
+      });
+    }
+
     // Start asset watcher
     this.assetsWatcher = new ProjectAssetsWatcher(this);
     await this.assetsWatcher.watch(project);
@@ -99,6 +113,12 @@ export class ProjectController {
       throw new ProjectNotLoadedError();
     }
     return this._currentProjectJson.value;
+  }
+  public get currentProjectRawSceneData(): RawSceneData[] {
+    if (!this.hasLoadedProject) {
+      throw new ProjectNotLoadedError();
+    }
+    return this._currentProjectRawSceneData;
   }
   public get currentProjectJson(): JsoncContainer<ProjectDefinition> {
     if (this._currentProjectJson === undefined) {

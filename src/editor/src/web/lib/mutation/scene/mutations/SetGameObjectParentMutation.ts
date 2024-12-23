@@ -1,10 +1,10 @@
-import { GameObjectDefinition, SceneDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { GameObjectDefinition } from "@fantasy-console/runtime/src/cartridge";
 import { toVector3Definition } from "@fantasy-console/runtime/src/util";
 
 import { GameObjectData } from "@lib/composer/data";
 import { readPathInScene, resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import { MutationPath, resolvePath } from "@lib/util/JsoncContainer";
-
+import { SceneDefinition } from "@lib/project/definition/scene/SceneDefinition";
 import { ISceneMutation } from "../ISceneMutation";
 import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 

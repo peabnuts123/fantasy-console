@@ -66,7 +66,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
 
   const debug_playProject = async () => {
     const currentlyFocusedTab = ComposerController.currentlyOpenTabs.find((tab) => tab.id === TabState.currentTabPageId)
-    const bytes = await ComposerController.debug_buildCartridge(currentlyFocusedTab?.sceneViewController?.sceneDefinition);
+    const bytes = await ComposerController.debug_buildCartridge(currentlyFocusedTab?.sceneViewController?.scene.id);
     setTempCartridge(bytes);
   };
 

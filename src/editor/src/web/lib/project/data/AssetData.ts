@@ -12,7 +12,7 @@ export interface CreateAssetDataArgs {
   hash: string;
   resolverProtocol: string;
 }
-export function createAssetData(type: AssetType, args: CreateAssetDataArgs) {
+export function createAssetData(type: AssetType, args: CreateAssetDataArgs): AssetData {
   switch (type) {
     case AssetType.Mesh:
       return new MeshAssetData(args);

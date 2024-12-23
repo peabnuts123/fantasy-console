@@ -1,7 +1,6 @@
 import { makeAutoObservable } from "mobx";
 
-import { SceneDefinition } from "@fantasy-console/runtime/src/cartridge/archive";
-import { SceneDataConfiguration } from "@fantasy-console/runtime/src/cartridge";
+import { SceneDataConfiguration, SceneDefinition as RuntimeSceneDefinition } from "@fantasy-console/runtime/src/cartridge";
 import { toColor3Core } from "@fantasy-console/runtime/src/util";
 
 import { AssetDb } from "@lib/project/AssetDb";
@@ -14,7 +13,7 @@ export class SceneData {
   public objects: GameObjectData[];
   public config: SceneDataConfiguration;
 
-  public constructor(sceneDefinition: SceneDefinition, assetDb: AssetDb) {
+  public constructor(sceneDefinition: RuntimeSceneDefinition, assetDb: AssetDb) {
     this.id = sceneDefinition.id;
 
     /* Path */

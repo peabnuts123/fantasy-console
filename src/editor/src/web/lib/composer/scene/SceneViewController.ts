@@ -22,7 +22,6 @@ import {
   DirectionalLightComponent as DirectionalLightComponentRuntime,
   PointLightComponent as PointLightComponentRuntime,
 } from '@fantasy-console/runtime/src/world';
-import { SceneDefinition } from '@fantasy-console/runtime/src/cartridge/archive';
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 import { toColor3Babylon } from '@fantasy-console/runtime/src/util';
 
@@ -31,6 +30,7 @@ import { JsoncContainer } from '@lib/util/JsoncContainer';
 import { ProjectController } from '@lib/project/ProjectController';
 import { SceneViewMutator } from '@lib/mutation/scene/SceneViewMutator';
 import { AssetData } from '@lib/project/data/AssetData';
+import { SceneDefinition } from '@lib/project/definition/scene/SceneDefinition';
 import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from '../data/components';
 import { SceneData } from '../data/SceneData';
 import { GameObjectData } from '../data/GameObjectData';
@@ -277,20 +277,6 @@ export class SceneViewController {
       this.assetCache.set(asset, assetContainer);
       return assetContainer;
     }
-  }
-
-  public static async loadSceneDefinition(sceneManifest: SceneManifest, fileSystem: IFileSystem): Promise<[SceneDefinition, string]> {
-    const sceneFile = await fileSystem.readFile(sceneManifest.path);
-    const sceneJson = sceneFile.textContent;
-    const sceneDefinition = Jsonc.parse(sceneJson) as SceneDefinition;
-    // @NOTE path property comes from manifest in the composer
-    sceneDefinition.path = sceneManifest.path;
-    return [sceneDefinition, sceneJson];
-  }
-
-  public static async loadFromManifest(sceneManifest: SceneManifest, projectController: ProjectController): Promise<SceneViewController> {
-    const [sceneDefinition, sceneJson] = await SceneViewController.loadSceneDefinition(sceneManifest, projectController.fileSystem);
-    return new SceneViewController(new SceneData(sceneDefinition, projectController.assetDb), new JsoncContainer<SceneDefinition>(sceneJson), projectController);
   }
 
   public get canvas(): HTMLCanvasElement {

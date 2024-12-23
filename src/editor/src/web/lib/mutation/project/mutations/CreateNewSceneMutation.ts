@@ -1,9 +1,10 @@
 import { v4 as uuid } from 'uuid';
 
-import { ComponentDefinitionType, SceneDefinition } from '@fantasy-console/runtime/src/cartridge';
+import { ComponentDefinitionType } from '@fantasy-console/runtime/src/cartridge';
 
 import { resolvePath } from '@lib/util/JsoncContainer';
 import { ProjectDefinition, SceneManifest } from '@lib/project/definition';
+import { SceneDefinition } from '@lib/project/definition/scene/SceneDefinition';
 import { IProjectMutation } from "../IProjectMutation";
 import { ProjectMutationArguments } from "../ProjectMutationArguments";
 
@@ -29,7 +30,7 @@ export class CreateNewSceneMutation implements IProjectMutation {
     ProjectController.currentProjectJson.mutate(jsonPath, newSceneManifest, { isArrayInsertion: true })
 
     // 3. Create new asset on disk
-    const newSceneDefinition: Omit<SceneDefinition, 'path'> = {
+    const newSceneDefinition: SceneDefinition = {
       id: uuid(),
       config: {
         clearColor: {
