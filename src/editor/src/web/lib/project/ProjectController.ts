@@ -9,7 +9,7 @@ import { JsoncContainer } from "@lib/util/JsoncContainer";
 import { ProjectMutator } from "@lib/mutation/project/ProjectMutator";
 import { ProjectDefinition, ProjectManifest } from "./definition";
 import { TauriCommands } from "@lib/util/TauriCommands";
-import { ProjectAssetsWatcher } from "./ProjectAssetsWatcher";
+import { ProjectAssetEvent, ProjectAssetsWatcher } from "./ProjectAssetsWatcher";
 import { AssetDb } from "./AssetDb";
 import { SceneDefinition } from "./definition/scene/SceneDefinition";
 import { RawSceneData } from "./data/RawSceneData";
@@ -86,7 +86,14 @@ export class ProjectController {
 
     // Start asset watcher
     this.assetsWatcher = new ProjectAssetsWatcher(this);
+    this.assetsWatcher.listen((event) => this.onAssetChange(event));
     await this.assetsWatcher.watch(project);
+
+  }
+
+  private onAssetChange(event: ProjectAssetEvent) {
+    // @TODO
+    console.log(`[ProjectController] (onAssetChange) `, event);
   }
 
   public onDestroy() {
