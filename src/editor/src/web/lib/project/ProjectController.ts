@@ -9,10 +9,11 @@ import { JsoncContainer } from "@lib/util/JsoncContainer";
 import { ProjectMutator } from "@lib/mutation/project/ProjectMutator";
 import { ProjectDefinition, ProjectManifest } from "./definition";
 import { TauriCommands } from "@lib/util/TauriCommands";
-import { ProjectAssetEvent, ProjectAssetsWatcher } from "./ProjectAssetsWatcher";
+import { ProjectAssetsWatcher } from "./ProjectAssetsWatcher";
 import { AssetDb } from "./AssetDb";
 import { SceneDefinition } from "./definition/scene/SceneDefinition";
 import { RawSceneData } from "./data/RawSceneData";
+import { ProblemScanner } from "./problems/ProblemScanner";
 
 export interface LoadProjectCommandArgs {
   projectRoot: string;
@@ -27,7 +28,8 @@ export class ProjectController {
   private _currentProjectFileName: string | undefined = undefined;
   private _assetDb?: AssetDb = undefined;
   private _fileSystem: TauriFileSystem | undefined = undefined;
-  private assetsWatcher: ProjectAssetsWatcher | undefined = undefined;
+  private _assetsWatcher: ProjectAssetsWatcher | undefined = undefined;
+  private problemScanner: ProblemScanner | undefined = undefined;
 
   public constructor() {
     this._mutator = new ProjectMutator(this);
@@ -85,15 +87,13 @@ export class ProjectController {
     }
 
     // Start asset watcher
-    this.assetsWatcher = new ProjectAssetsWatcher(this);
-    this.assetsWatcher.listen((event) => this.onAssetChange(event));
-    await this.assetsWatcher.watch(project);
+    this._assetsWatcher = new ProjectAssetsWatcher(this);
+    await this._assetsWatcher.watch(project);
 
-  }
-
-  private onAssetChange(event: ProjectAssetEvent) {
-    // @TODO
-    console.log(`[ProjectController] (onAssetChange) `, event);
+    // Start problem scanner
+    // @TODO just pass the watcher in directly (?)
+    this.problemScanner = new ProblemScanner(this);
+    // @TODO Run an initial scan for problems
   }
 
   public onDestroy() {
@@ -104,7 +104,8 @@ export class ProjectController {
     if (this.hasLoadedProject) {
       invoke(TauriCommands.UnloadProject);
     }
-    this.assetsWatcher?.onDestroy();
+    this._assetsWatcher?.onDestroy();
+    this.problemScanner?.onDestroy();
   }
 
   public get isLoadingProject() {
@@ -167,6 +168,13 @@ export class ProjectController {
       throw new ProjectNotLoadedError();
     }
     return this._fileSystem;
+  }
+
+  public get assetsWatcher(): ProjectAssetsWatcher {
+    if (this._assetsWatcher === undefined) {
+      throw new ProjectNotLoadedError();
+    }
+    return this._assetsWatcher;
   }
 }
 
