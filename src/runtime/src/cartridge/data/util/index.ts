@@ -1,4 +1,4 @@
-import { toVector3Core, toColor3Core } from '@fantasy-console/runtime/src/util';
+import { toVector3Core, toColor3Core, isDefined } from '@fantasy-console/runtime/src/util';
 
 import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition, GameObjectDefinition } from "../../archive";
 import { GameObjectData } from "../GameObjectData";
@@ -15,7 +15,7 @@ export function loadObjectDefinition(objectDefinition: GameObjectDefinition, ass
       case ComponentDefinitionType.Mesh: {
         const meshComponentDefinition = componentDefinition as MeshComponentDefinition;
         let meshAsset: MeshAssetData | undefined = undefined;
-        if (meshComponentDefinition.meshFileId !== null) {
+        if (isDefined(meshComponentDefinition.meshFileId)) {
           meshAsset = assetDb.getById(meshComponentDefinition.meshFileId, MeshAssetData);
         }
         components.push(new MeshComponentData(componentDefinition.id, meshAsset));
@@ -24,7 +24,7 @@ export function loadObjectDefinition(objectDefinition: GameObjectDefinition, ass
       case ComponentDefinitionType.Script: {
         const scriptComponentDefinition = componentDefinition as ScriptComponentDefinition;
         let scriptAsset: ScriptAssetData | undefined = undefined;
-        if (scriptComponentDefinition.scriptFileId !== null) {
+        if (isDefined(scriptComponentDefinition.scriptFileId)) {
           scriptAsset = assetDb.getById(scriptComponentDefinition.scriptFileId, ScriptAssetData);
         }
         components.push(new ScriptComponentData(componentDefinition.id, scriptAsset));

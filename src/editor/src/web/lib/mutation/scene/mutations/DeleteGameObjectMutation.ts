@@ -1,4 +1,4 @@
-import { GameObjectData } from "@lib/composer/data";
+import { GameObjectData } from "@lib/project/data";
 import { ISceneMutation } from '../ISceneMutation';
 import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";

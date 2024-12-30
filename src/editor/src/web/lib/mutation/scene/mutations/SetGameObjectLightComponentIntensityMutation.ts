@@ -3,7 +3,7 @@ import { GameObjectComponent } from "@fantasy-console/core/src/world";
 import { DirectionalLightComponent, PointLightComponent } from "@fantasy-console/runtime/src/world";
 import { DirectionalLightComponentDefinition, PointLightComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
 
-import { DirectionalLightComponentData, GameObjectData, IComposerComponentData, PointLightComponentData } from "@lib/composer/data";
+import { DirectionalLightComponentData, GameObjectData, IComposerComponentData, PointLightComponentData } from "@lib/project/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import { ISceneMutation } from "../ISceneMutation";
 import { SceneViewMutationArguments } from "../SceneViewMutationArguments";

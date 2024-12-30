@@ -15,7 +15,7 @@ import { toVector3Core } from "@fantasy-console/runtime/src/util";
 
 import { SetGameObjectPositionMutation, SetGameObjectRotationMutation, SetGameObjectScaleMutation } from "@lib/mutation/scene/mutations";
 import { SceneViewMutator } from "@lib/mutation/scene/SceneViewMutator";
-import { GameObjectData } from "@lib/composer/data";
+import { GameObjectData } from "@lib/project/data";
 
 
 export enum CurrentSelectionTool {

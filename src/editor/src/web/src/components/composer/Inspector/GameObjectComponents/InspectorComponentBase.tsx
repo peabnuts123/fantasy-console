@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { TrashIcon } from '@heroicons/react/24/solid'
 
 
-import type { IComposerComponentData } from "@lib/composer/data";
+import type { IComposerComponentData } from "@lib/project/data";
 import type { InspectorComponentProps } from "./InspectorComponent";
 import { RemoveGameObjectComponentMutation } from "@lib/mutation/scene/mutations";
 

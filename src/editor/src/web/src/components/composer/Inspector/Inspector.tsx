@@ -14,7 +14,7 @@ import type { SceneViewController } from "@lib/composer/scene";
 import { VectorInput } from "./VectorInput";
 import { TextInput } from "./TextInput";
 import { getInspectorFor } from "./GameObjectComponents";
-import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from "@lib/composer/data";
+import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from "@lib/project/data";
 
 
 

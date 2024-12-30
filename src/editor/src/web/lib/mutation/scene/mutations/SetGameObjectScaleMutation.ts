@@ -1,7 +1,7 @@
 import { Vector3Definition as ArchiveVector3 } from "@fantasy-console/runtime/src/cartridge/archive/util";
 import { Vector3 } from "@fantasy-console/core/src/util";
 
-import { GameObjectData } from "@lib/composer/data";
+import { GameObjectData } from "@lib/project/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import { ISceneMutation } from "../ISceneMutation";
 import { SceneViewMutationArguments } from "../SceneViewMutationArguments";

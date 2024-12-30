@@ -1,6 +1,6 @@
 import type { FunctionComponent } from "react";
 
-import type { GameObjectData, IComposerComponentData } from "@lib/composer/data";
+import type { GameObjectData, IComposerComponentData } from "@lib/project/data";
 import { SceneViewController } from "@lib/composer/scene";
 
 export interface InspectorComponentProps<TComponentType extends IComposerComponentData> {

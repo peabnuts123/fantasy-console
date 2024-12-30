@@ -17,10 +17,10 @@ export class ProjectMutator extends Mutator<ProjectMutationArguments> {
   }
 
   public override persistChanges(): Promise<void> {
-    const projectFileJson = this.projectController.currentProjectJson.toString();
+    const projectFileJson = this.projectController.projectDefinition.toString();
     const projectFileBytes = new TextEncoder().encode(projectFileJson);
     return this.projectController.fileSystem.writeFile(
-      this.projectController.currentProjectFileName,
+      this.projectController.project.fileName,
       projectFileBytes,
     );
   }

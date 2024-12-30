@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 
-import type { CameraComponentData } from "@lib/composer/data";
+import type { CameraComponentData } from "@lib/project/data";
 import type { InspectorComponent } from "./InspectorComponent";
 import { InspectorComponentBase } from "./InspectorComponentBase";
 

@@ -5,7 +5,7 @@ import { PlusIcon } from '@heroicons/react/24/outline'
 import { observer } from "mobx-react-lite";
 
 import { CreateBlankGameObjectMutation, DeleteGameObjectMutation } from "@lib/mutation/scene/mutations";
-import { GameObjectData } from "@lib/composer/data";
+import { GameObjectData } from "@lib/project/data";
 import { isRunningInBrowser } from "@lib/tauri";
 
 import { gameObjectAt } from "./util";

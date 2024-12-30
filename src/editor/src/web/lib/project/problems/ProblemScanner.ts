@@ -1,6 +1,8 @@
 import { AssetDb } from "../AssetDb";
-import { ProjectAssetEvent } from "../ProjectAssetsWatcher";
 import { ProjectController } from "../ProjectController";
+import { ProjectAssetEvent } from "../watcher/assets";
+import { ProjectFileEvent } from "../watcher/project";
+import { ProjectSceneEvent } from "../watcher/scenes";
 
 import { ProjectScanners } from './scanners/project';
 import { SceneScanners } from './scanners/scene';
@@ -19,21 +21,28 @@ export interface ScannerContext {
 export class ProblemScanner {
   private readonly projectController: ProjectController;
   private cancelDebounce: (() => void) | undefined = undefined;
-  private stopListening: () => void;
+  private stopListeningToFileSystemEvents: () => void;
 
   public constructor(projectController: ProjectController) {
     this.projectController = projectController;
 
-    // Subscribe to asset events
-    this.stopListening = this.projectController.assetsWatcher.listen((event) => this.onAssetChanged(event));
+    // Subscribe to file events
+    const stopListeningToAssetEvents = this.projectController.filesWatcher.onAssetChanged((event) => this.onFileChanged(event));
+    const stopListeningToSceneEvents = this.projectController.filesWatcher.onSceneChanged((event) => this.onFileChanged(event));
+    const stopListeningToProjectFileEvents = this.projectController.filesWatcher.onProjectFileChanged((event) => this.onFileChanged(event));
+    this.stopListeningToFileSystemEvents = () => {
+      stopListeningToAssetEvents();
+      stopListeningToSceneEvents();
+      stopListeningToProjectFileEvents();
+    };
   }
 
-  private onAssetChanged(event: ProjectAssetEvent) {
-    console.log(`[DEBUG] [ProblemScanner] (onAssetChanged) Got asset event:`, event);
+  private onFileChanged(event: ProjectAssetEvent | ProjectSceneEvent | ProjectFileEvent) {
+    console.log(`[DEBUG] [ProblemScanner] (onFileChanged) Got event:`, event);
 
     // Cancel debounce timer if there is one ongoing
     if (this.cancelDebounce !== undefined) {
-      console.log(`[DEBUG] [ProblemScanner] (onAssetChanged) Debounc'd!`);
+      console.log(`[DEBUG] [ProblemScanner] (onFileChanged) Debounc'd!`);
       this.cancelDebounce();
     }
 
@@ -56,23 +65,23 @@ export class ProblemScanner {
     }
     const scannerContext: ScannerContext = {
       projectController: this.projectController,
-      assetDb: this.projectController.assetDb,
+      assetDb: this.projectController.project.assets,
     };
 
     console.log(`[ProblemScanner] (scanForProblems) Scanning project for problems...`);
 
     // Scan project
-    const project = this.projectController.currentProject;
+    const project = this.projectController.projectDefinition;
     for (const projectScanner of ProjectScanners) {
-      projectScanner.scan(project, reportProblem, scannerContext);
+      projectScanner.scan(project.value, reportProblem, scannerContext);
     }
 
     // Scan scenes
-    for (const rawSceneData of this.projectController.currentProjectRawSceneData) {
-      console.log(`[ProblemScanner] (scanForProblems) Scanning scene '${rawSceneData.manifest.path}' for problems...`);
-      const sceneDefinition = rawSceneData.jsonc.value;
+    for (const scene of this.projectController.project.scenes.getAll()) {
+      console.log(`[ProblemScanner] (scanForProblems) Scanning scene '${scene.manifest.path}' for problems...`);
+      const sceneDefinition = scene.jsonc.value;
       for (const sceneScanner of SceneScanners) {
-        sceneScanner.scan(sceneDefinition, rawSceneData.manifest.path, reportProblem, scannerContext);
+        sceneScanner.scan(sceneDefinition, scene.manifest.path, reportProblem, scannerContext);
       }
     }
   }
@@ -82,7 +91,7 @@ export class ProblemScanner {
   }
 
   public onDestroy() {
-    this.stopListening();
+    this.stopListeningToFileSystemEvents();
     if (this.cancelDebounce !== undefined) {
       this.cancelDebounce();
     }

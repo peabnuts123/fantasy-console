@@ -6,18 +6,20 @@ import { toColor3Core } from "@fantasy-console/runtime/src/util";
 import { AssetDb } from "@lib/project/AssetDb";
 import { loadObjectDefinition } from "./loadObjectDefinition";
 import { GameObjectData } from "./GameObjectData";
+import { SceneDefinition, SceneManifest } from "../definition";
 
 export class SceneData {
   public readonly id: string;
   public path: string;
+  public hash: string;
   public objects: GameObjectData[];
   public config: SceneDataConfiguration;
 
-  public constructor(sceneDefinition: RuntimeSceneDefinition, assetDb: AssetDb) {
-    this.id = sceneDefinition.id;
-
-    /* Path */
-    this.path = sceneDefinition.path;
+  public constructor(sceneDefinition: SceneDefinition, sceneManifest: SceneManifest, assetDb: AssetDb) {
+    /* Manifest */
+    this.id = sceneManifest.id;
+    this.path = sceneManifest.path;
+    this.hash = sceneManifest.hash;
 
     /* Config */
     this.config = {
@@ -28,7 +30,7 @@ export class SceneData {
           color: toColor3Core(sceneDefinition.config.lighting.ambient.color),
         },
       }
-    }
+    };
 
     /* Game Objects */
     this.objects = [];

@@ -10,5 +10,5 @@ import { ComponentDefinitionType } from "./ComponentDefinitionType";
  */
 export interface ScriptComponentDefinition extends ComponentDefinitionBase {
   type: ComponentDefinitionType.Script;
-  scriptFileId: string | null; // @TODO Rename to `scriptAssetId`
+  scriptFileId: string | null | undefined; // @TODO Rename to `scriptAssetId` // @TODO make everything nulldefinedable
 }

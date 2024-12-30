@@ -1,15 +1,16 @@
 import { ComponentDefinition, ComponentDefinitionType } from "@fantasy-console/runtime/src/cartridge";
+import { isDefined } from "@fantasy-console/runtime/src/util";
+import { ScriptAssetData } from "@lib/project/data/AssetData";
 import { ReportProblemFn, ScannerContext } from "../../ProblemScanner";
 import { IComponentScanner } from "./IComponentScanner";
-import { ScriptAssetData } from "@lib/project/data/AssetData";
 
 export const ScriptComponentScanner: IComponentScanner = {
   scan: function (component: ComponentDefinition, reportProblem: ReportProblemFn, { assetDb }: ScannerContext): void {
     const componentPath = [`Script component (id='${component.id}')`];
 
     if (component.type === ComponentDefinitionType.Script) {
-      if (component.scriptFileId !== undefined) {
-        const asset = assetDb.assets.find((asset) => asset.id === component.scriptFileId);
+      if (isDefined(component.scriptFileId)) {
+        const asset = assetDb.findById(component.scriptFileId);
 
         if (asset === undefined) {
           reportProblem(

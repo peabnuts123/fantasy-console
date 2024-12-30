@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 
-import type { DirectionalLightComponentData } from "@lib/composer/data";
+import type { DirectionalLightComponentData } from "@lib/project/data";
 import { SetGameObjectLightComponentColorMutation, SetGameObjectLightComponentIntensityMutation } from "@lib/mutation/scene/mutations";
 import { ColorInput } from "../ColorInput";
 import { NumberInput } from "../NumberInput";

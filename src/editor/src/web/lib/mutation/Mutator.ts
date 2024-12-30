@@ -1,5 +1,5 @@
 import { runInAction } from "mobx";
-import { GameObjectData } from "@lib/composer/data";
+import { GameObjectData } from "@lib/project/data";
 import { isContinuousMutation } from "./IContinuousMutation";
 import { IMutation } from "./IMutation";
 import { IContinuousMutation } from "./IContinuousMutation";

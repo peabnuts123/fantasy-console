@@ -17,9 +17,9 @@ export const AssetList: FunctionComponent = observer(({ }) => {
   const [currentDirectory, setCurrentDirectory] = useState<string[]>([]);
 
   // Computed state
-  const { assetDb } = ProjectController;
+  const { assets } = ProjectController.project;
   const assetsDirView = createDirView(
-    assetDb.assets,
+    assets.getAll(),
     currentDirectory,
     (asset) => asset.pathList,
     (asset) => ({

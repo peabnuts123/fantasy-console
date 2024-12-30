@@ -2,13 +2,16 @@ mod build;
 mod filesystem;
 mod polyzone;
 
+use std::hash::Hasher as _;
 use std::path::PathBuf;
 
 use build::build;
-use filesystem::RawProjectAsset;
+use filesystem::assets::RawProjectAsset;
+use filesystem::scenes::RawProjectScene;
 use polyzone::PolyZoneApp;
 use tauri::Manager;
 use tauri::async_runtime::Mutex;
+use twox_hash::XxHash3_64;
 
 type PolyZoneAppState<'a> = tauri::State<'a, Mutex<PolyZoneApp>>;
 
@@ -36,8 +39,9 @@ pub fn run() {
             create_cartridge,
             load_project,
             unload_project,
-            start_watching_project_assets,
+            start_watching_project_files,
             stop_watching_project_assets,
+            hash_data,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -63,12 +67,12 @@ fn create_cartridge(
 #[tauri::command]
 async fn load_project(
     poly_zone_app: PolyZoneAppState::<'_>,
-    project_root: &str,
+    project_file_path: &str,
 ) -> Result<(), ()> {
-    let project_root = PathBuf::from(project_root);
+    let project_file_path = PathBuf::from(project_file_path);
 
     let mut poly_zone_app = poly_zone_app.lock().await;
-    poly_zone_app.load_project(project_root);
+    poly_zone_app.load_project(project_file_path);
 
     Ok(())
 }
@@ -82,20 +86,30 @@ async fn unload_project(poly_zone_app: PolyZoneAppState::<'_>) -> Result<(), ()>
 }
 
 #[tauri::command]
-async fn start_watching_project_assets(
+async fn start_watching_project_files(
     poly_zone_app: PolyZoneAppState<'_>,
     project_assets: Vec<RawProjectAsset>,
+    project_scenes: Vec<RawProjectScene>,
 ) -> Result<String, &str> {
     let mut poly_zone_app = poly_zone_app.lock().await;
-    poly_zone_app.start_watching_assets(project_assets).await;
+    poly_zone_app.start_watching_assets(project_assets, project_scenes).await;
 
-    Ok(format!("Watching assets in project root: {:?}", poly_zone_app.project_root))
+    Ok(format!("Watching files in project root: {:?}", poly_zone_app.project_root))
 }
 
 #[tauri::command]
+// @TODO Rename lol
 async fn stop_watching_project_assets(poly_zone_app: PolyZoneAppState::<'_>) -> Result<(), ()>{
     let mut poly_zone_app = poly_zone_app.lock().await;
     poly_zone_app.stop_watching_assets().await;
 
     Ok(())
+}
+
+#[tauri::command]
+fn hash_data(data: Vec<u8>) -> String {
+    let mut hasher = XxHash3_64::new();
+    hasher.write(&data);
+    let result = hasher.finish();
+    format!("{:x}", result)
 }

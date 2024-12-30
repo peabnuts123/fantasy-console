@@ -168,12 +168,14 @@
   "scenes": [
     /* How do you change scenes? By file name? What about file suffix? */
     {
+      "id": "f2215ac1-2fbe-4d6d-a8fc-d63c88ecbf51",
       "path": "scenes/main.pzscene",
-      "hash": "dce83a14dc185472", // @TODO needed?
+      "hash": "cae05baf73207b91",
     },
     {
+      "id": "d7641dad-c3f9-46cf-a0cc-79db0201ca0d",
       "path": "scenes/second.pzscene",
-      "hash": "eecbf9d0036c30cd", // @TODO needed?
+      "hash": "4cd632de6dba2076",
     },
   ],
   // @TODO ???

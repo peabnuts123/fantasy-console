@@ -94,6 +94,7 @@ export type MutationPath<_TTarget> = (string | number)[];
 /**
  * Use an arrow function to select a path within a given target object type
  * using a type-safe interface.
+ * @TODO put some warnings in here about putting logic in the selector
  * @param selector Arrow function for selecting the path
  * @returns An array of path segments, for interacting with JSON. Numeric path segments will be converted to numbers.
  * @example resolvePath<MyObject>((myObject) => myObject.people[0].name) // Returns ['people', 0, 'name']

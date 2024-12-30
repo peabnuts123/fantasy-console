@@ -21,14 +21,11 @@ export interface SceneDataConfiguration {
  * but not yet loaded into the game.
  */
 export class SceneData {
-  public readonly id: string;
   public readonly path: string;
   public readonly objects: GameObjectData[];
   public readonly config: SceneDataConfiguration;
 
   public constructor(sceneDefinition: SceneDefinition, assetDb: AssetDb) {
-    this.id = sceneDefinition.id;
-
     /* Path */
     this.path = sceneDefinition.path;
 

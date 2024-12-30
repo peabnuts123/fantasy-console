@@ -27,7 +27,7 @@ export interface AssetDbVirtualDirectory extends AssetDbVirtualNodeBase {
 }
 
 export class AssetDb {
-  public readonly assets: AssetData[];
+  private readonly assets: AssetData[];
   public readonly fileSystem: IFileSystem;
 
   public constructor(assetDefinitions: AssetDefinition[], fileSystem: IFileSystem) {
@@ -47,6 +47,11 @@ export class AssetDb {
     makeAutoObservable(this);
   }
 
+  public getAll(): AssetData[] {
+    return this.assets;
+  }
+
+  // @TODO I think this should return `undefined` and the caller should handle that
   public getById<TAssetData extends AssetData>(
     assetId: string,
     ExpectedType: ClassReference<TAssetData>,
@@ -61,6 +66,23 @@ export class AssetDb {
     }
 
     return asset;
+  }
+
+  public findById(assetId: string) {
+    return this.assets.find((asset) => asset.id === assetId);
+  }
+
+  public add(asset: AssetData) {
+    this.assets.push(asset);
+  }
+
+  public remove(assetId: string) {
+    const assetIndex = this.assets.findIndex((asset) => asset.id === assetId);
+    if (assetIndex === -1) {
+      console.warn(`[AssetDb] (remove) Could not remove asset with ID '${assetId}' from AssetDb - no asset exists with this ID`);
+      return;
+    }
+    this.assets.splice(assetIndex, 1);
   }
 
   public async loadAsset(asset: AssetData): Promise<VirtualFile> {

@@ -1,4 +1,4 @@
-import { GameObjectData, IComposerComponentData } from "@lib/composer/data";
+import { GameObjectData, IComposerComponentData } from "@lib/project/data";
 import { ISceneMutation } from "../ISceneMutation";
 import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { isSelectableObject } from "@lib/composer/scene/components";

@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite';
 
 import { AssetType } from '@fantasy-console/runtime/src/cartridge';
 
-import type { ScriptComponentData } from "@lib/composer/data";
+import type { ScriptComponentData } from "@lib/project/data";
 import { SetGameObjectScriptComponentAssetMutation } from '@lib/mutation/scene/mutations';
 import type { ScriptAssetData } from '@lib/project/data/AssetData';
 import { createAssetReferenceComponentOfType } from '../AssetReference';

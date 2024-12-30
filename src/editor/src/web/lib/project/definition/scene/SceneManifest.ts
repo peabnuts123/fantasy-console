@@ -1,4 +1,5 @@
 export interface SceneManifest {
+  id: string;
   path: string;
-  // hash: string; // @TODO soon...
+  hash: string;
 }

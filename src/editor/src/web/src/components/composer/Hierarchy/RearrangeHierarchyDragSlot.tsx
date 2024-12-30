@@ -2,7 +2,7 @@ import type { FunctionComponent } from "react";
 import { useEffect, useRef } from 'react';
 import cn from 'classnames';
 
-import { GameObjectData } from "@lib/composer/data";
+import { GameObjectData } from "@lib/project/data";
 import { useDrop } from '@lib/util/drag-and-drop'
 import { HierarchyObjectDragData, HierarchyObjectDropZoneData } from "./util";
 import { HierarchyObjectFacade } from "./HierarchyObjectFacade";

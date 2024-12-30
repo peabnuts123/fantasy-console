@@ -54,7 +54,7 @@ export class BrowserMock {
       switch (parsed.command) {
         // @TODO Consider making this more like an array of things that "might" handle the command (return bool)
         case 'create_cartridge':
-        case 'start_watching_project_assets':
+        case 'start_watching_project_files':
         case 'stop_watching_project_assets':
         case 'load_project':
         case 'unload_project':

@@ -27,11 +27,11 @@ const IndexPage: FunctionComponent = observer(() => {
 
 const ToolsMenu: FunctionComponent = observer(() => {
   const { ProjectController } = useLibrary();
-  const { currentProject } = ProjectController;
+  const { project } = ProjectController;
 
   return (
     <>
-      <h2 className="text-h2 italic mb-3 font-serif text-retro-shadow">{currentProject.manifest.projectName}</h2>
+      <h2 className="text-h2 italic mb-3 font-serif text-retro-shadow">{project.manifest.projectName}</h2>
       <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 py-3">
         <AppTile href="/composer" label="Composer" description="Create, edit and arrange objects and scenes. Test your game." />
         <AppTile href="/player" label="Player" description="Play game cartridges." />

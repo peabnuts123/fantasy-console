@@ -2,9 +2,10 @@ import { v4 as uuid } from 'uuid';
 
 import { ComponentDefinitionType } from '@fantasy-console/runtime/src/cartridge';
 
-import { resolvePath } from '@lib/util/JsoncContainer';
+import { JsoncContainer, resolvePath } from '@lib/util/JsoncContainer';
 import { ProjectDefinition, SceneManifest } from '@lib/project/definition';
 import { SceneDefinition } from '@lib/project/definition/scene/SceneDefinition';
+import { invoke } from '@lib/util/TauriCommands';
 import { IProjectMutation } from "../IProjectMutation";
 import { ProjectMutationArguments } from "../ProjectMutationArguments";
 
@@ -16,22 +17,49 @@ export class CreateNewSceneMutation implements IProjectMutation {
   }
 
   apply({ ProjectController }: ProjectMutationArguments): void {
-    // @TODO Do we need to make explicit different types for scene on disk vs scene in manifest?
+    // New Data
     const newSceneManifest: SceneManifest = {
-      // hash: "", // @TODO soon...
+      id: uuid(),
+      hash: "", // @NOTE calculated asynchronously
       path: this.path,
     };
+    const newSceneJsonc = this.createNewSceneDefinition();
+    const newSceneJsoncBytes = new TextEncoder().encode(
+      newSceneJsonc.toString()
+    );
+
+    // 0. Calculate hash
+    invoke('hash_data', {
+      data: Array.from(newSceneJsoncBytes),
+    }).then((newSceneHash) => {
+      // ?. (Later) Update JSON with updated hash
+      let sceneIndex = ProjectController.projectDefinition.value.scenes.findIndex((scene) => scene.id === newSceneManifest.id);
+      // Re-read scene data from SceneDb (sanity check / robustness for future architectural changes)
+      let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[sceneIndex].hash);
+      ProjectController.projectDefinition.mutate(jsonPath, newSceneHash);
+    });
 
     // 1. Update data
-    ProjectController.currentProject.scenes.push(newSceneManifest);
+    ProjectController.project.scenes.add(newSceneManifest, newSceneJsonc);
 
     // 2. Update JSON
-    const jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[ProjectController.currentProject.scenes.length]);
-    ProjectController.currentProjectJson.mutate(jsonPath, newSceneManifest, { isArrayInsertion: true })
+    const jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[ProjectController.project.scenes.length]);
+    ProjectController.projectDefinition.mutate(jsonPath, newSceneManifest, { isArrayInsertion: true })
 
     // 3. Create new asset on disk
-    const newSceneDefinition: SceneDefinition = {
-      id: uuid(),
+    void ProjectController.fileSystem.writeFile(
+      this.path,
+      newSceneJsoncBytes,
+    );
+  }
+
+  undo(args: ProjectMutationArguments): void {
+    // @TODO prompt for undo?
+    throw new Error("Method not implemented.");
+  }
+
+  private createNewSceneDefinition(): JsoncContainer<SceneDefinition> {
+    const definition: SceneDefinition = {
       config: {
         clearColor: {
           r: 255,
@@ -91,17 +119,7 @@ export class CreateNewSceneMutation implements IProjectMutation {
       ],
     };
 
-    void ProjectController.fileSystem.writeFile(
-      this.path,
-      new TextEncoder().encode(
-        JSON.stringify(newSceneDefinition, null, 2)
-      )
-    );
-  }
-
-  // @TODO Some way of not supporting "undo" ?
-  undo(args: ProjectMutationArguments): void {
-    throw new Error("Method not implemented.");
+    return new JsoncContainer(JSON.stringify(definition, null, 2));
   }
 
   get description(): string {

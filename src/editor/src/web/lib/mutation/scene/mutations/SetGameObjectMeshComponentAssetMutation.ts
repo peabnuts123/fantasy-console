@@ -2,7 +2,7 @@ import { AssetContainer } from "@babylonjs/core/assetContainer";
 
 import type { MeshComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
 
-import { GameObjectData, MeshComponentData } from "@lib/composer/data";
+import { GameObjectData, MeshComponentData } from "@lib/project/data";
 import { MeshComponent } from "@lib/composer/scene";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
 import type { MeshAssetData } from "@lib/project/data/AssetData";

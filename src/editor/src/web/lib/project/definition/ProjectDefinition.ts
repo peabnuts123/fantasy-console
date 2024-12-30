@@ -2,12 +2,11 @@ import { AssetDefinition } from "./AssetDefinition";
 import { SceneManifest } from "./scene";
 
 export interface ProjectManifest {
-  projectName: string;
+  readonly projectName: string;
 }
 
-// @TODO Do we need a `ProjectData`?
 export interface ProjectDefinition {
-  manifest: ProjectManifest,
-  assets: AssetDefinition[];
-  scenes: SceneManifest[];
+  readonly manifest: ProjectManifest,
+  readonly assets: AssetDefinition[];
+  readonly scenes: SceneManifest[];
 }

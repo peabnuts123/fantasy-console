@@ -1,7 +1,6 @@
 import { unzip, zip } from 'fflate';
 
-import type { CreateCartridgeCmdArgs } from "@lib/composer/ComposerController";
-import type { WatchProjectAssetsCommandArgs } from '@lib/project/ProjectAssetsWatcher';
+import { TauriCommandArgs } from '@lib/util/TauriCommands';
 
 import { Paths } from "../config";
 import { promisify, throwUnhandled } from '../util';
@@ -14,8 +13,8 @@ export class PolyZoneMockModule {
     switch (action) {
       case 'create_cartridge':
         return this.mockCreateCartridge(args);
-      case 'start_watching_project_assets':
-        return this.mockStartWatchingProjectAssets(args);
+      case 'start_watching_project_files':
+        return this.mockStartWatchingProjectFiles(args);
       case 'stop_watching_project_assets':
         return this.mockStopWatchingProjectAssets(args);
       case 'load_project':
@@ -37,7 +36,8 @@ export class PolyZoneMockModule {
    * If you add or remove an asset the game likely won't even run. You will have to rebuild
    * the mock cartridge using the full app first.
    */
-  public static async mockCreateCartridge({ manifestFileBytes }: CreateCartridgeCmdArgs): Promise<Uint8Array> {
+  public static async mockCreateCartridge(args: TauriCommandArgs<'create_cartridge'>): Promise<Uint8Array> {
+    const { manifestFileBytes } = args[0];
     const result = await fetch(Paths.MockCartridgeFile);
     if (result.ok) {
       const cartridgeBytes = await result.arrayBuffer();
@@ -58,11 +58,11 @@ export class PolyZoneMockModule {
     // @NOTE No-op.
   }
 
-  public static async mockStartWatchingProjectAssets({ }: WatchProjectAssetsCommandArgs): Promise<void> {
-    console.warn(`[PolyZoneMockModule] (start_watching_project_assets) Tauri is mocked - project assets will not be watched`);
+  public static async mockStartWatchingProjectFiles({ }: TauriCommandArgs<'start_watching_project_files'>): Promise<void> {
+    console.warn(`[PolyZoneMockModule] (start_watching_project_files) Tauri is mocked - project files will not be watched`);
   }
 
-  public static async mockStopWatchingProjectAssets({ }: WatchProjectAssetsCommandArgs): Promise<void> {
+  public static async mockStopWatchingProjectAssets({ }: TauriCommandArgs<'stop_watching_project_assets'>): Promise<void> {
     // @NOTE No-op.
   }
 }

@@ -1,15 +1,16 @@
 import { ComponentDefinition, ComponentDefinitionType } from "@fantasy-console/runtime/src/cartridge";
+import { isDefined } from "@fantasy-console/runtime/src/util";
+import { MeshAssetData } from "@lib/project/data/AssetData";
 import { ReportProblemFn, ScannerContext } from "../../ProblemScanner";
 import { IComponentScanner } from "./IComponentScanner";
-import { MeshAssetData } from "@lib/project/data/AssetData";
 
 export const MeshComponentScanner: IComponentScanner = {
   scan: function (component: ComponentDefinition, reportProblem: ReportProblemFn, { assetDb }: ScannerContext): void {
     const componentPath = [`Mesh component (id='${component.id}')`];
 
     if (component.type === ComponentDefinitionType.Mesh) {
-      if (component.meshFileId !== undefined) {
-        const asset = assetDb.assets.find((asset) => asset.id === component.meshFileId);
+      if (isDefined(component.meshFileId)) {
+        const asset = assetDb.findById(component.meshFileId);
 
         if (asset === undefined) {
           reportProblem(

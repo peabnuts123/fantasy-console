@@ -1,5 +1,5 @@
 
-import { GameObjectData } from "@lib/composer/data";
+import { GameObjectData } from "@lib/project/data";
 
 export function gameObjectAt(gameObjects: GameObjectData[], index: number): string | undefined {
   if (index < 0) return undefined;

@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 
 import { GameObjectDefinition } from "@fantasy-console/runtime/src/cartridge";
 
-import { GameObjectData, loadObjectDefinition } from "@lib/composer/data";
+import { GameObjectData, loadObjectDefinition } from "@lib/project/data";
 import { ISceneMutation } from '../ISceneMutation';
 import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { resolvePathForSceneObjectMutation } from '@lib/mutation/util';
@@ -29,7 +29,7 @@ export class CreateBlankGameObjectMutation implements ISceneMutation {
       children: [],
       components: [],
     };
-    const newGameObjectData = loadObjectDefinition(newObjectDefinition, ProjectController.assetDb);
+    const newGameObjectData = loadObjectDefinition(newObjectDefinition, ProjectController.project.assets);
 
 
     if (this.parentGameObjectId !== undefined) {

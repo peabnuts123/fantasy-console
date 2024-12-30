@@ -199,12 +199,12 @@ const Editor: FunctionComponent = observer(() => {
                   <h1 className="text-h2">No scene loaded</h1>
                   <p>Select a scene to load</p>
                   <ul className="flex flex-col items-center">
-                    {ProjectController.currentProject.scenes.map((sceneManifest) => (
+                    {ProjectController.project.scenes.getAllManifests().map((scene) => (
                       <button
-                        key={sceneManifest.path}
-                        onClick={() => ComposerController.loadSceneForTab(tab.id, sceneManifest)}
+                        key={scene.id}
+                        onClick={() => ComposerController.loadSceneForTab(tab.id, scene)}
                         className="button"
-                      >{sceneManifest.path}</button>
+                      >{scene.path}</button>
                     ))}
                   </ul>
                 </div>

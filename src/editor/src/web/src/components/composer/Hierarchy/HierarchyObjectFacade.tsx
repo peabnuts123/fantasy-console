@@ -1,7 +1,7 @@
 import type { FunctionComponent } from "react";
 import { ChevronRightIcon, ChevronDownIcon, ArrowTurnDownRightIcon } from '@heroicons/react/24/solid'
 
-import { GameObjectData } from "@lib/composer/data";
+import { GameObjectData } from "@lib/project/data";
 
 export const HierarchyObjectFacade: FunctionComponent<{ gameObject: GameObjectData | undefined }> = (({ gameObject }) => {
   // Constants

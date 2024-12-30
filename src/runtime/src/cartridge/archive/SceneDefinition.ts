@@ -10,7 +10,6 @@ import { ColorDefinition } from "./util";
  * i.e. The raw data in the archive before being loaded by the engine into a {@link SceneData}.
  */
 export interface SceneDefinition {
-  id: string;
   path: string;
   config: {
     clearColor: ColorDefinition;

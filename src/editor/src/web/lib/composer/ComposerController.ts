@@ -1,22 +1,15 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { invoke } from '@tauri-apps/api/core'
 import { v4 as uuid } from 'uuid';
 
 import { AssetType, CartridgeArchiveManifest } from '@fantasy-console/runtime/src/cartridge';
 
 import { ProjectController } from '@lib/project/ProjectController';
-import { SceneManifest } from '@lib/project/definition';
-import { SceneDefinition, toRuntimeSceneDefinition } from '@lib/project/definition/scene/SceneDefinition';
-import { TauriCommands } from '@lib/util/TauriCommands';
+import { SceneManifest, toRuntimeSceneDefinition } from '@lib/project/definition';
+import { SceneData } from '@lib/project/data';
+import { invoke } from '@lib/util/TauriCommands';
 import { SceneViewController } from './scene/SceneViewController';
-import { SceneData } from './data/SceneData';
 
-export interface CreateCartridgeCmdArgs {
-  manifestFileBytes: string;
-  projectRootPath: string;
-  assetPaths: string[];
-  scriptPaths: string[];
-}
+
 
 export interface TabData {
   id: string;
@@ -52,14 +45,13 @@ export class ComposerController {
   public async loadSceneForTab(tabId: string, sceneManifest: SceneManifest) {
     for (const tab of this.currentlyOpenTabs) {
       if (tab.id === tabId) {
-        // Find scene definition in memory
-        const rawSceneData = this.projectController.currentProjectRawSceneData.find((rawSceneDatum) => rawSceneDatum.manifest.path === sceneManifest.path);
-        if (rawSceneData === undefined) throw new Error(`Could not load scene for tab - no scene exists with path '${sceneManifest.path}'`);
-        const runtimeSceneDefinition = toRuntimeSceneDefinition(rawSceneData.jsonc.value, rawSceneData.manifest.path);
+        // Look up scene data
+        const scene = this.projectController.project.scenes.getByPath(sceneManifest.path);
+        if (scene === undefined) throw new Error(`Could not load scene for tab - no scene exists with path '${sceneManifest.path}'`);
 
         const sceneViewController = new SceneViewController(
-          new SceneData(runtimeSceneDefinition, this.projectController.assetDb),
-          rawSceneData.jsonc,
+          scene.data,
+          scene.jsonc,
           this.projectController
         );
 
@@ -115,13 +107,11 @@ export class ComposerController {
   public async debug_buildCartridge(entryPointSceneIdOverride: string | undefined = undefined): Promise<Uint8Array> {
 
     // Load scene definitions
-    const scenes = this.projectController.currentProjectRawSceneData.map((rawSceneDatum) =>
-      toRuntimeSceneDefinition(rawSceneDatum.jsonc.value, rawSceneDatum.manifest.path)
-    );
+    const scenes = this.projectController.project.scenes.getAll();
 
     // Move `overrideEntryPoint` to be the first scene in the list
     if (entryPointSceneIdOverride !== undefined) {
-      const overrideIndex = scenes.findIndex((scene) => scene.id === entryPointSceneIdOverride);
+      const overrideIndex = scenes.findIndex((scene) => scene.manifest.id === entryPointSceneIdOverride);
       if (overrideIndex === -1) {
         throw new Error(`Cannot build cartridge. Cannot set entrypoint to SceneDefinition with ID '${entryPointSceneIdOverride}' - it isn't one of the current project's scenes`);
       }
@@ -132,7 +122,7 @@ export class ComposerController {
 
     // Build cartridge manifest
     const manifest: CartridgeArchiveManifest = {
-      assets: this.projectController.assetDb.assets
+      assets: this.projectController.project.assets.getAll()
         .map((asset) => {
           // @NOTE map assets to pluck only desired properties
           if (asset.type === AssetType.Script) {
@@ -150,20 +140,22 @@ export class ComposerController {
             };
           }
         }),
-      scenes
+      scenes: scenes.map((scene) =>
+        toRuntimeSceneDefinition(scene.jsonc.value, scene.manifest.path)
+      ),
     };
 
     // Compile cartridge file
-    const createCartridgeResult = await invoke<number[]>(TauriCommands.CreateCartridge, {
+    const createCartridgeResult = await invoke('create_cartridge', {
       manifestFileBytes: JSON.stringify(manifest),
-      projectRootPath: this.projectController.currentProjectRoot,
-      assetPaths: this.projectController.assetDb.assets
+      projectRootPath: this.projectController.project.rootPath,
+      assetPaths: this.projectController.project.assets.getAll()
         .filter((asset) => asset.type !== AssetType.Script)
         .map((asset) => asset.path),
-      scriptPaths: this.projectController.assetDb.assets
+      scriptPaths: this.projectController.project.assets.getAll()
         .filter((asset) => asset.type === AssetType.Script)
         .map((asset) => asset.path),
-    } satisfies CreateCartridgeCmdArgs)
+    })
 
     return new Uint8Array(createCartridgeResult);
   }

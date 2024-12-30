@@ -5,7 +5,7 @@ import {
   MeshComponentData,
   PointLightComponentData,
   ScriptComponentData,
-} from "@lib/composer/data";
+} from "@lib/project/data";
 import type { FunctionComponent } from "react";
 import type { InspectorComponent } from "./InspectorComponent";
 import { InspectorComponentBase } from "./InspectorComponentBase";

@@ -25,15 +25,12 @@ import {
 import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 import { toColor3Babylon } from '@fantasy-console/runtime/src/util';
 
-import { SceneManifest } from '@lib/project/definition/scene';
 import { JsoncContainer } from '@lib/util/JsoncContainer';
 import { ProjectController } from '@lib/project/ProjectController';
 import { SceneViewMutator } from '@lib/mutation/scene/SceneViewMutator';
-import { AssetData } from '@lib/project/data/AssetData';
-import { SceneDefinition } from '@lib/project/definition/scene/SceneDefinition';
-import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from '../data/components';
-import { SceneData } from '../data/SceneData';
-import { GameObjectData } from '../data/GameObjectData';
+import { SceneDefinition, SceneManifest } from '@lib/project/definition';
+import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from '@lib/project/data/components';
+import { SceneData, GameObjectData, AssetData } from '@lib/project/data';
 import { ComposerSelectionCache } from '../util/ComposerSelectionCache';
 import { ISelectableObject, isSelectableObject, MeshComponent } from './components';
 import { CurrentSelectionTool, SelectionManager } from './SelectionManager';

@@ -20,9 +20,9 @@ export const SceneList: FunctionComponent = observer(({ }) => {
   const [currentDirectory, setCurrentDirectory] = useState<string[]>([]);
 
   // Computed state
-  const { currentProject: { scenes } } = ProjectController;
+  const { scenes } = ProjectController.project;
   const scenesDirView = createDirView(
-    scenes,
+    scenes.getAllData(),
     currentDirectory,
     (scene) => toPathList(scene.path),
     (scene) => ({

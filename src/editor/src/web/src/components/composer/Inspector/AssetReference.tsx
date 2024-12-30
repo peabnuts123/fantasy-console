@@ -47,7 +47,7 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
     };
     const onClickAssetButton = async () => {
       // Map asset data into modal data
-      const assets = ProjectController.assetDb.assets
+      const assets = ProjectController.project.assets.getAll()
         .filter((asset) => asset.type === assetType)
         .map((assetData) => ({
           id: assetData.id,
@@ -67,7 +67,7 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
         // User selected an asset in the modal
         // Resolve asset ID back into full AssetData instance
         console.log(`[AssetReference] (onClickAssetButton) Selected asset: ${result.assetId}`);
-        const selectedAsset = ProjectController.assetDb.assets.find((asset) => asset.id === result.assetId) as AssetDataOfType<TAssetType>;
+        const selectedAsset = ProjectController.project.assets.findById(result.assetId) as AssetDataOfType<TAssetType>;
         onAssetChange(selectedAsset);
       } else {
         // User cancelled

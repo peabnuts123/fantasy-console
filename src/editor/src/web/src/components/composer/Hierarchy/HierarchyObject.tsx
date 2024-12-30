@@ -6,7 +6,7 @@ import { Menu, MenuItem } from "@tauri-apps/api/menu";
 import cn from 'classnames';
 
 import { SetGameObjectParentMutation } from "@lib/mutation/scene/mutations";
-import { GameObjectData } from "@lib/composer/data";
+import { GameObjectData } from "@lib/project/data";
 import { useDrag, useDrop } from '@lib/util/drag-and-drop'
 import { isRunningInBrowser } from "@lib/tauri";
 import { observer } from "mobx-react-lite";
