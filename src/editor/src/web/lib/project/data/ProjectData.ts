@@ -15,7 +15,7 @@ export class ProjectData {
   public readonly rootPath: string;
   public fileName: string;
   public readonly assets: AssetDb;
-  public readonly scenes: SceneDb
+  public readonly scenes: SceneDb;
   public readonly manifest: ProjectManifest;
 
   private constructor(rootPath: string, fileName: string, manifest: ProjectManifest, assets: AssetDb, scenes: SceneDb) {

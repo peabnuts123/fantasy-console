@@ -24,15 +24,16 @@ export class SceneDb {
     makeAutoObservable(this);
   }
 
-  public add(manifest: SceneManifest, definitionJsonc: JsoncContainer<SceneDefinition>): SceneData {
+  public add(manifest: SceneManifest, definitionJsonc: JsoncContainer<SceneDefinition>): SceneDbRecord {
     const sceneData = new SceneData(definitionJsonc.value, manifest, this.assetDb);
-    this.records.push({
+    const newRecord = {
       manifest,
       jsonc: definitionJsonc,
       data: sceneData,
-    });
+    } satisfies SceneDbRecord;
+    this.records.push(newRecord);
 
-    return sceneData;
+    return newRecord;
   }
 
   public remove(sceneId: string) {

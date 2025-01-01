@@ -6,13 +6,10 @@ import Resolver from '@fantasy-console/runtime/src/Resolver';
 import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
 import { JsoncContainer } from "@lib/util/JsoncContainer";
 import { ProjectMutator } from "@lib/mutation/project/ProjectMutator";
-import { ProjectDefinition, ProjectManifest } from "./definition";
+import { ProjectDefinition } from "./definition";
 import { invoke } from "@lib/util/TauriCommands";
 import { ProjectFilesWatcher } from "./watcher/ProjectFilesWatcher";
-import { AssetDb } from "./AssetDb";
-import { SceneDefinition } from "./definition/scene/SceneDefinition";
 import { ProblemScanner } from "./problems/ProblemScanner";
-import { SceneDb } from "./SceneDb";
 import { ProjectData } from "./data/ProjectData";
 
 

@@ -18,6 +18,10 @@ export interface ScannerContext {
   assetDb: AssetDb;
 }
 
+// @TODO Problem scanner backlog
+// - Shouldn't the scanner hierarchy really be project -> (scene manifests/assets) -> scenes -> objects -> components
+// - Duplicate files in asset list will cause problems in zip archive
+
 export class ProblemScanner {
   private readonly projectController: ProjectController;
   private cancelDebounce: (() => void) | undefined = undefined;

@@ -16,6 +16,9 @@ export enum WritingState {
   Failed,
 }
 
+// @TODO Eventing like onFinishSave or whatever so that fs events can wait until
+// finished saving.
+// + Also maybe some way to disable saving
 
 export class TauriFileSystem extends IFileSystem {
   private readonly projectRootDir: string;

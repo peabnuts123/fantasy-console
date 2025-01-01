@@ -1,5 +1,4 @@
 import { makeAutoObservable } from 'mobx';
-import * as Jsonc from 'jsonc-parser';
 import { Engine } from '@babylonjs/core/Engines/engine';
 import { Scene as BabylonScene } from '@babylonjs/core/scene';
 import { FreeCamera as FreeCameraBabylon } from '@babylonjs/core/Cameras/freeCamera';
@@ -22,32 +21,35 @@ import {
   DirectionalLightComponent as DirectionalLightComponentRuntime,
   PointLightComponent as PointLightComponentRuntime,
 } from '@fantasy-console/runtime/src/world';
-import { IFileSystem } from '@fantasy-console/runtime/src/filesystem';
 import { toColor3Babylon } from '@fantasy-console/runtime/src/util';
 
 import { JsoncContainer } from '@lib/util/JsoncContainer';
 import { ProjectController } from '@lib/project/ProjectController';
 import { SceneViewMutator } from '@lib/mutation/scene/SceneViewMutator';
-import { SceneDefinition, SceneManifest } from '@lib/project/definition';
+import { SceneDefinition } from '@lib/project/definition';
 import { CameraComponentData, DirectionalLightComponentData, IComposerComponentData, MeshComponentData, PointLightComponentData, ScriptComponentData } from '@lib/project/data/components';
 import { SceneData, GameObjectData, AssetData } from '@lib/project/data';
+import { ProjectSceneEventType } from '@lib/project/watcher/scenes';
+import { ProjectFileEventType } from '@lib/project/watcher/project';
+import { SceneDbRecord } from '@lib/project/SceneDb';
 import { ComposerSelectionCache } from '../util/ComposerSelectionCache';
 import { ISelectableObject, isSelectableObject, MeshComponent } from './components';
 import { CurrentSelectionTool, SelectionManager } from './SelectionManager';
 
 export class SceneViewController {
-  private readonly _scene: SceneData;
-  private readonly _sceneJson: JsoncContainer<SceneDefinition>;
+  private _scene: SceneData;
+  private _sceneJson: JsoncContainer<SceneDefinition>;
   private readonly projectController: ProjectController;
   private readonly _mutator: SceneViewMutator;
 
   private readonly _canvas: HTMLCanvasElement;
   private readonly engine: Engine;
   private readonly babylonScene: BabylonScene;
+  private sceneCamera!: FreeCameraBabylon;
   private readonly assetCache: Map<AssetData, AssetContainer>;
   private readonly _selectionManager: SelectionManager;
-
   private readonly babylonToWorldSelectionCache: ComposerSelectionCache;
+  private readonly unlistenToFileSystemEvents: () => void;
 
   public constructor(scene: SceneData, sceneJson: JsoncContainer<SceneDefinition>, projectController: ProjectController) {
     this._scene = scene;
@@ -75,17 +77,41 @@ export class SceneViewController {
     this.babylonScene = new BabylonScene(this.engine);
     this._selectionManager = new SelectionManager(this.babylonScene, this.mutator);
 
+    // Build scene
+    void this.buildScene();
+
+    const stopListeningToProjectFileEvents = projectController.filesWatcher.onProjectFileChanged((event) => {
+      if (event.type === ProjectFileEventType.Modify) {
+        const scene = event.project.scenes.getById(this.scene.id);
+        if (scene === undefined) {
+          // @TODO - close tab or something (gracefully exit)
+          throw new Error(`Error while reloading scene due to project file change - no scene with ID '${this.scene.id}' could be found in new project data`);
+        } else {
+          void this.reloadSceneData(scene);
+        }
+      }
+    });
+    const stopListeningToSceneFileEvents = projectController.filesWatcher.onSceneChanged((event) => {
+      if (event.type === ProjectSceneEventType.Modify) {
+        void this.reloadSceneData(event.scene);
+      } else if (event.type === ProjectSceneEventType.Delete) {
+        // @TODO close scene tab
+      }
+    });
+
+    this.unlistenToFileSystemEvents = () => {
+      stopListeningToProjectFileEvents();
+      stopListeningToSceneFileEvents();
+    }
+
     // @NOTE Class properties MUST have a value explicitly assigned
     // by this point otherwise mobx won't pick them up.
     makeAutoObservable(this);
-
-    // Build scene
-    void this.buildScene();
   }
 
   private async buildScene() {
     // @DEBUG Random camera constants
-    const camera = new FreeCameraBabylon("main", new Vector3Babylon(6, 2, -1), this.babylonScene);
+    const camera = this.sceneCamera = new FreeCameraBabylon("main", new Vector3Babylon(6, 2, -1), this.babylonScene);
     camera.setTarget(Vector3Babylon.Zero());
     camera.attachControl(this.canvas, true);
     camera.speed = 0.3;
@@ -99,9 +125,9 @@ export class SceneViewController {
     camera.keysUpward.push(32);
     camera.keysDownward.push(16);
 
-    await this.createScene()
+    await this.createScene();
 
-    await this.babylonScene.whenReadyAsync()
+    await this.babylonScene.whenReadyAsync();
 
     this.babylonScene.onPointerObservable.add((pointerInfo) => {
       if (pointerInfo.type === PointerEventTypes.POINTERTAP) {
@@ -147,6 +173,7 @@ export class SceneViewController {
     this.babylonScene.onPointerObservable.clear();
     this.babylonScene.dispose();
     this.engine.dispose();
+    this.unlistenToFileSystemEvents();
   }
 
   private async createScene() {
@@ -161,6 +188,7 @@ export class SceneViewController {
     ambientLight.specular = Color3Babylon.Black();
 
     for (let sceneObject of this.scene.objects) {
+      // @TODO do this more in parallel?
       const gameObject = await this.createGameObject(sceneObject);
     }
   }
@@ -252,6 +280,28 @@ export class SceneViewController {
     } else {
       console.error(`[SceneViewController] (loadSceneObject) Unrecognised component data: `, componentData);
     }
+  }
+
+  private async reloadSceneData(scene: SceneDbRecord): Promise<void> {
+    // Clear out the scene
+    this.selectionManager.deselectAll();
+    this.babylonToWorldSelectionCache.clear();
+    this.assetCache.clear();
+
+    const rootNodes = [...this.babylonScene.rootNodes];
+    for (const sceneObject of rootNodes) {
+      if (sceneObject !== this.sceneCamera) {
+        sceneObject.dispose(false, true);
+      }
+    }
+    // @TODO Do we need to explicitly iterate through, like, materials and textures and stuff?
+    // We could just create a new scene and put the camera back in the same place ...
+
+    // Update data
+    this._scene = scene.data;
+    this._sceneJson = scene.jsonc;
+
+    await this.createScene();
   }
 
   /**

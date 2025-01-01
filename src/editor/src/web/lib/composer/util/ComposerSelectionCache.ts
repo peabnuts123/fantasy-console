@@ -25,4 +25,8 @@ export class ComposerSelectionCache {
       this.cache.delete(asset);
     }
   }
+
+  public clear() {
+    this.cache.clear;
+  }
 }

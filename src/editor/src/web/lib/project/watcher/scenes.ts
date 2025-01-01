@@ -7,6 +7,7 @@ import { JsoncContainer, resolvePath } from "@lib/util/JsoncContainer";
 import { SceneData } from "@lib/project/data";
 import { ProjectDefinition, SceneDefinition, SceneManifest } from "../definition";
 import { ProjectController } from "../ProjectController";
+import { SceneDbRecord } from "../SceneDb";
 
 export interface RawProjectScene {
   id: string;
@@ -59,23 +60,23 @@ export enum ProjectSceneEventType {
 /** Frontend event that a scene has been created. */
 export interface ProjectSceneCreatedEvent {
   type: ProjectSceneEventType.Create;
-  scene: SceneData;
+  scene: SceneDbRecord;
 }
 /** Frontend event that a scene has been deleted. */
 export interface ProjectSceneDeletedEvent {
   type: ProjectSceneEventType.Delete;
-  scene: SceneData;
+  scene: SceneDbRecord;
 }
 /** Frontend event that a scene has been modified. */
 export interface ProjectSceneModifiedEvent {
   type: ProjectSceneEventType.Modify;
-  scene: SceneData;
+  scene: SceneDbRecord;
   oldHash: string;
 }
 /** Frontend event that a scene has been renamed. */
 export interface ProjectSceneRenamedEvent {
   type: ProjectSceneEventType.Rename;
-  scene: SceneData;
+  scene: SceneDbRecord;
   oldPath: string;
 }
 /** Any frontend event that a scene has been updated. */
@@ -173,7 +174,7 @@ export class ProjectScenesWatcher {
 
       return {
         type: ProjectSceneEventType.Create,
-        scene: newSceneData!,
+        scene: newSceneData,
       };
     });
   }
@@ -197,7 +198,7 @@ export class ProjectScenesWatcher {
 
       return {
         type: ProjectSceneEventType.Delete,
-        scene: scene.data,
+        scene: scene,
       };
     });
   }
@@ -233,7 +234,7 @@ export class ProjectScenesWatcher {
 
       return Promise.resolve({
         type: ProjectSceneEventType.Modify,
-        scene: scene.data,
+        scene,
         oldHash,
       });
     });
@@ -264,7 +265,7 @@ export class ProjectScenesWatcher {
 
       return Promise.resolve({
         type: ProjectSceneEventType.Rename,
-        scene: scene.data,
+        scene: scene,
         oldPath,
       });
     });
