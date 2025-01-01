@@ -3,6 +3,7 @@ import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { action, computed, makeAutoObservable, makeObservable, observable, runInAction } from 'mobx';
 
 import { IFileSystem, VirtualFile } from "@fantasy-console/runtime/src/filesystem";
+import { invoke } from '@lib/util/TauriCommands';
 
 /**
  * Minimum amount of time the FS will stay in the 'Writing' state for,
@@ -52,6 +53,13 @@ export class TauriFileSystem extends IFileSystem {
   public async writeFile(path: string, data: Uint8Array): Promise<void> {
     this.writingState = WritingState.Writing;
     const startWriteTime = performance.now();
+
+    // Flag file as being written to ignore fs events
+    await invoke('set_path_is_busy', {
+      path,
+      isBusy: true,
+    });
+
     try {
       await writeFile(`${this.projectRootDir}/${path}`, data);
 
@@ -62,6 +70,16 @@ export class TauriFileSystem extends IFileSystem {
           this.writingState = WritingState.UpToDate;
         });
       }, waitTime);
+
+      // Flag file as no-longer being written, after
+      // a short grace period, to (hopefully) ensure the
+      // backend has picked up the event before removing the flag
+      setTimeout(() => {
+        void invoke('set_path_is_busy', {
+          path,
+          isBusy: false,
+        });
+      }, 200);
     } catch (e) {
       runInAction(() => {
         this.writingState = WritingState.Failed;

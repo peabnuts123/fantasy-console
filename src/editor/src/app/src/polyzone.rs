@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use tauri::AppHandle;
 use tokio_util::sync::CancellationToken;
+use std::sync::Arc;
 
 use crate::filesystem::{self, assets::{ProjectAsset, RawProjectAsset}, scenes::{ProjectScene, RawProjectScene}, FsWatcherState};
 
@@ -9,6 +10,7 @@ pub struct PolyZoneApp {
     pub project_root: Option<PathBuf>,
     pub project_file_path: Option<PathBuf>,
     app: AppHandle,
+    watch_assets_state: Option<Arc<FsWatcherState>>,
     watch_assets_cancellation_token: Option<CancellationToken>,
 }
 
@@ -22,6 +24,7 @@ impl PolyZoneApp {
             project_root: None,
             project_file_path: None,
             app,
+            watch_assets_state: None,
             watch_assets_cancellation_token: None,
         }
     }
@@ -64,13 +67,15 @@ impl PolyZoneApp {
         }).collect();
 
         // Construct shared state for file watcher
-        let state = FsWatcherState::new(
+        let state = Arc::new(FsWatcherState::new(
             self.app.clone(),
             self.project_root.clone().unwrap(),
             self.project_file_path.clone().unwrap(),
             project_assets,
             project_scenes,
-        ).await;
+        ).await);
+
+        self.watch_assets_state = Some(state.clone());
 
         // Watch files in background thread
         let cancellation_token = CancellationToken::new();
@@ -85,6 +90,21 @@ impl PolyZoneApp {
         if let Some(cancellation_token) = self.watch_assets_cancellation_token.take() {
             log::debug!("Stopping asset watcher");
             cancellation_token.cancel();
+        }
+    }
+
+    pub async fn set_path_busy(&mut self, path: PathBuf, is_busy: bool) {
+        if let Some(state) = &self.watch_assets_state {
+            let mut busy_paths = state.busy_paths.lock().await;
+            if is_busy {
+                log::debug!("Setting path as busy: {:?}", path);
+                busy_paths.insert(path);
+            } else {
+                log::debug!("Setting path as NOT busy: {:?}", path);
+                busy_paths.remove(&path);
+            }
+        } else {
+            log::error!("[PolyZoneApp] (set_path_busy)")
         }
     }
 }

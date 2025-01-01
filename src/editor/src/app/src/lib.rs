@@ -42,6 +42,7 @@ pub fn run() {
             start_watching_project_files,
             stop_watching_project_assets,
             hash_data,
+            set_path_is_busy,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -112,4 +113,15 @@ fn hash_data(data: Vec<u8>) -> String {
     hasher.write(&data);
     let result = hasher.finish();
     format!("{:x}", result)
+}
+
+#[tauri::command]
+async fn set_path_is_busy(
+    poly_zone_app: PolyZoneAppState<'_>,
+    path: PathBuf,
+    is_busy: bool,
+) -> Result<(), ()> {
+    let mut poly_zone_app = poly_zone_app.lock().await;
+    poly_zone_app.set_path_busy(path, is_busy).await;
+    Ok(())
 }

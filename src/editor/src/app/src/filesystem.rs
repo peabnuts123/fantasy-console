@@ -12,6 +12,7 @@ use tauri::async_runtime::spawn;
 use tauri::AppHandle;
 use tokio::select;
 use tokio_util::sync::CancellationToken;
+use std::collections::HashSet;
 use std::hash::Hasher as _;
 use std::path::PathBuf;
 use std::{sync::Arc, time::Duration};
@@ -38,6 +39,9 @@ pub struct FsWatcherState {
     assets: Mutex<Vec<ProjectAsset>>,
     scenes: Mutex<Vec<ProjectScene>>,
     project_file: Mutex<ProjectFile>,
+    /// FS events are ignored for busy paths as it is assumed they
+    /// are currently being edited by the application itself
+    pub busy_paths: Mutex<HashSet<PathBuf>>,
     app: AppHandle,
     ignore_filter: IgnoreFilter,
 }
@@ -66,6 +70,7 @@ impl FsWatcherState {
             project_file: Mutex::new(project_file),
             assets: Mutex::new(project_assets),
             scenes: Mutex::new(project_scenes),
+            busy_paths: Mutex::new(HashSet::new()),
             ignore_filter,
         }
     }
@@ -73,11 +78,10 @@ impl FsWatcherState {
 
 /// Begin watching files within the project root for changes.
 /// Changes will be emitted back to the frontend.
-pub async fn watch_project_files(state: FsWatcherState, cancellation_token: CancellationToken) {
+pub async fn watch_project_files(state: Arc<FsWatcherState>, cancellation_token: CancellationToken) {
     log::debug!("Watching {:?}", &state.project_root);
 
     // Run initial reconciliations before watching
-    let state = Arc::new(state);
     assets::perform_asset_reconciliation(state.clone()).await;
     scenes::perform_scene_reconciliation(state.clone()).await;
     project::perform_project_reconciliation(state.clone()).await;
@@ -94,7 +98,6 @@ pub async fn watch_project_files(state: FsWatcherState, cancellation_token: Canc
         log::error!("[filesystem] (watch_project_files) Error from watcher: {error:?}");
     }
 }
-
 
 /// Begin watching the filesystem for any changes.
 /// Any changes that are relevant will trigger a reconciliation to
@@ -155,6 +158,8 @@ async fn watch_fs(state: Arc<FsWatcherState>, cancellation_token: CancellationTo
                             Ok(raw_event) => {
                                 log::debug!("[filesystem] (watch_fs) Received event: {:?}", raw_event);
 
+                                let busy_paths = state.busy_paths.lock().await;
+
                                 let mut is_asset_event_we_care_about = false;
                                 let mut is_scene_event_we_care_about = false;
                                 let mut is_project_file_event_we_care_about = false;
@@ -164,6 +169,15 @@ async fn watch_fs(state: Arc<FsWatcherState>, cancellation_token: CancellationTo
                                 //  - A prefix of any known file
                                 //  - An extant file that matches the ignore filter AND is a type we care about
                                 for path in raw_event.paths.iter() {
+                                    let relative_path = PathBuf::from(path.strip_prefix(&state.project_root).unwrap());
+
+                                    // Ignore busy paths that are being written to by the application
+                                    let is_path_busy = busy_paths.contains(&relative_path);
+                                    if is_path_busy {
+                                        log::debug!("[filesystem] (watch_fs) Ignoring busy file: {:?}", relative_path);
+                                        continue;
+                                    }
+
                                     let is_asset_file = assets::is_supported_asset_type(path);
                                     let is_scene_file = scenes::is_path_scene_file(path);
                                     let is_project_file = project::is_path_project_file(path);
@@ -188,7 +202,6 @@ async fn watch_fs(state: Arc<FsWatcherState>, cancellation_token: CancellationTo
                                             is_project_file_event_we_care_about = true;
                                         }
                                     } else {
-                                        let relative_path = PathBuf::from(path.strip_prefix(&state.project_root).unwrap());
                                         let path_is_prefix_for_any_known_asset = {
                                             let state_assets = state.assets.lock().await;
                                             state_assets

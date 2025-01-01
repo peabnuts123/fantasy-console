@@ -32,6 +32,11 @@ type TauriCommands = {
   hash_data(args: {
     data: number[],
   }): string;
+
+  set_path_is_busy(args: {
+    path: string;
+    isBusy: boolean;
+  }): void;
 }
 
 export type TauriCommandArgs<T extends keyof TauriCommands> = Parameters<TauriCommands[T]>;
