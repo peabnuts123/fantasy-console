@@ -11,7 +11,7 @@ const IndexPage: FunctionComponent = observer(() => {
 
   return (
     <div className="p-3 h-full bg-gradient-to-b from-[blue] to-black text-white">
-      <h1 className="text-h1 italic mb-3 font-serif text-retro-shadow">Fantasy Console</h1>
+      <h1 className="text-h1 italic mb-3 font-serif text-retro-shadow">PolyZone</h1>
       {ProjectController.hasLoadedProject ? (
         <ToolsMenu />
       ) : ProjectController.isLoadingProject ? (

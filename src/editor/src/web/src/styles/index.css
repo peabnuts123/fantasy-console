@@ -57,34 +57,50 @@
 
   .text-retro-shadow:not(.is-shallow) {
     text-shadow:
-      1px 1px black,
-      2px 2px black,
-      3px 3px black,
-      4px 4px black;
+      0.5px 0.5px 0 black,
+      1px 1px 0 black,
+      1.5px 1.5px 0 black,
+      2px 2px 0 black,
+      2.5px 2.5px 0 black,
+      3px 3px 0 black,
+      3.5px 3.5px 0 black,
+      4px 4px 0 black;
   }
   .text-retro-shadow.is-shallow {
     text-shadow:
-      1px 1px black,
-      2px 2px black;
+      0.5px 0.5px 0 black,
+      1px 1px 0 black,
+      1.5px 1.5px 0 black,
+      2px 2px 0 black;
   }
 
   .retro-shadow:not(.is-shallow) {
     box-shadow:
+      0.5px 0.5px 0 black,
       1px 1px 0 black,
+      1.5px 1.5px 0 black,
       2px 2px 0 black,
+      2.5px 2.5px 0 black,
       3px 3px 0 black,
+      3.5px 3.5px 0 black,
       4px 4px 0 black;
   }
   .retro-shadow.is-shallow {
     box-shadow:
+      0.5px 0.5px 0 black,
       1px 1px 0 black,
+      1.5px 1.5px 0 black,
       2px 2px 0 black;
   }
   .retro-shadow:disabled {
     box-shadow:
+      0.5px 0.5px 0 #AAA,
       1px 1px 0 #AAA,
+      1.5px 1.5px 0 #AAA,
       2px 2px 0 #AAA,
+      2.5px 2.5px 0 #AAA,
       3px 3px 0 #AAA,
+      3.5px 3.5px 0 #AAA,
       4px 4px 0 #AAA;
   }
 
