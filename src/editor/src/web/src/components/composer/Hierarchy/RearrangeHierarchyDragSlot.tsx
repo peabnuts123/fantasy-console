@@ -75,6 +75,7 @@ export const RearrangeHierarchyDragSlot: FunctionComponent<RearrangeHierarchyDra
     // Animate the size of the drop zones based on the distance to the mouse
     // Controlled via min-height so as to not animate
     const onMouseMove = (e: globalThis.MouseEvent) => {
+      if (!isDragging) return;
       if (isLastTopLevelSlot) return;
 
       const HoverRangeMax = 50; /* pixels */

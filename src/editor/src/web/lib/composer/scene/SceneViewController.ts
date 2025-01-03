@@ -174,6 +174,7 @@ export class SceneViewController {
     this.babylonScene.dispose();
     this.engine.dispose();
     this.unlistenToFileSystemEvents();
+    this._canvas.remove();
   }
 
   private async createScene() {

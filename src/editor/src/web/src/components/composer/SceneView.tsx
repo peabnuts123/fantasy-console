@@ -26,7 +26,7 @@ const SceneViewComponent: FunctionComponent<Props> = observer(({ controller }) =
     }
 
     return controller.startBabylonView();
-  }, []);
+  }, [controller, controller.canvas]);
 
   return (
     <div className="h-full flex flex-col">

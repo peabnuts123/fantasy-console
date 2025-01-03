@@ -42,12 +42,17 @@ export class ComposerController {
     // @TODO remove?
   }
 
-  public async loadSceneForTab(tabId: string, sceneManifest: SceneManifest) {
+  public async loadSceneForTab(tabId: string, sceneManifest: SceneData) {
     for (const tab of this.currentlyOpenTabs) {
       if (tab.id === tabId) {
         // Look up scene data
         const scene = this.projectController.project.scenes.getByPath(sceneManifest.path);
         if (scene === undefined) throw new Error(`Could not load scene for tab - no scene exists with path '${sceneManifest.path}'`);
+
+        // Unload possible previously-loaded scene
+        if (tab.sceneViewController !== undefined) {
+          tab.sceneViewController?.destroy();
+        }
 
         const sceneViewController = new SceneViewController(
           scene.data,

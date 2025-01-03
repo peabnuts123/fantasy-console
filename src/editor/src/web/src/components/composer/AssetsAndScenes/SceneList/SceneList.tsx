@@ -8,11 +8,16 @@ import { baseName, toPathList } from "@fantasy-console/runtime/src/util";
 import { useLibrary } from "@lib/index";
 import { CreateNewSceneMutation } from "@lib/mutation/project/mutations";
 import { createDirView } from "@lib/util/path";
+import { SceneData } from "@lib/project/data";
 import { SceneListFileItem, SceneListVirtualFile } from './SceneListFileItem';
 import { SceneListDirectoryItem, SceneListVirtualDirectory } from './SceneListDirectoryItem';
 import { ListItemCommon } from "../ListItemCommon";
 
-export const SceneList: FunctionComponent = observer(({ }) => {
+interface Props {
+  openScene: (scene: SceneData) => void;
+}
+
+export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
   // Hooks
   const { ProjectController } = useLibrary();
 
@@ -24,13 +29,13 @@ export const SceneList: FunctionComponent = observer(({ }) => {
   const scenesDirView = createDirView(
     scenes.getAllData(),
     currentDirectory,
-    (scene) => toPathList(scene.path),
-    (scene) => ({
+    /* toPath: */(scene) => toPathList(scene.path),
+    /* toFile: */(scene) => ({
       id: scene.path,
       type: 'file',
       scene,
     } satisfies SceneListVirtualFile as SceneListVirtualFile),
-    (directoryName, scene) => ({
+    /* toDirectory: */(directoryName, scene) => ({
       id: scene.path,
       type: 'directory',
       name: directoryName,
@@ -77,6 +82,7 @@ export const SceneList: FunctionComponent = observer(({ }) => {
             <SceneListFileItem
               key={item.id}
               file={item}
+              onClick={() => openScene(item.scene)}
             />
           )
         } else {

@@ -1,11 +1,16 @@
 import type { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 
+import { SceneData } from "@lib/project/data";
 import { TabProvider, TabBar, TabPage } from "@app/components/tabs";
 import { AssetList } from "./AssetList";
 import { SceneList } from "./SceneList";
 
-export const AssetsAndScenes: FunctionComponent = observer(({ }) => {
+interface Props {
+  openScene: (scene: SceneData) => void;
+}
+
+export const AssetsAndScenes: FunctionComponent<Props> = observer(({ openScene }) => {
   return (
     <TabProvider defaultTabId="assets">
       <div className="h-full flex flex-col">
@@ -29,7 +34,7 @@ export const AssetsAndScenes: FunctionComponent = observer(({ }) => {
         </TabPage>
 
         <TabPage tabId="scenes">
-          <SceneList />
+          <SceneList openScene={openScene} />
         </TabPage>
       </div>
     </TabProvider>

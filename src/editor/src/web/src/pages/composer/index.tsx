@@ -1,5 +1,5 @@
 import type { FunctionComponent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { save } from '@tauri-apps/plugin-dialog';
@@ -9,11 +9,13 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 import { useLibrary } from "@lib/index";
 import { DragAndDropDataProvider } from '@lib/util/drag-and-drop'
+import { SceneData } from "@lib/project/data";
 import SceneView from "@app/components/composer/SceneView";
 import Player from "@app/components/player";
 import { AssetsAndScenes } from "@app/components/composer/AssetsAndScenes";
 import { TabBar, TabButtonProps, TabPage, TabProvider, useTabState } from "@app/components/tabs";
 import { StatusBar } from "@app/components/composer/StatusBar";
+import { useSceneDrop } from "@app/interactions";
 
 
 interface Props { }
@@ -109,8 +111,32 @@ const Editor: FunctionComponent = observer(() => {
   const { ComposerController, ProjectController } = useLibrary();
   const TabState = useTabState();
 
+  // Store tab state in ref to avoid capturing it in a closure
+  const TabStateRef = useRef<typeof TabState>(undefined!);
+  TabStateRef.current = TabState;
+
   // Computed state
   const noTabsOpen = ComposerController.currentlyOpenTabs.length === 0;
+  const [{ isDragOverThisZone }, DropTarget] = useSceneDrop(
+    /* onDrop: */({ sceneData, }) => {
+      const TabState = TabStateRef.current;
+      if (TabState.currentTabPageId === undefined) {
+        // No tab open - we must first open a tab to load the scene into
+        const newTabData = createNewTab();
+        void ComposerController.loadSceneForTab(newTabData.id, sceneData);
+      } else {
+        // Replace the current tab
+
+        const currentlyFocusedTabData = ComposerController.currentlyOpenTabs.find((tab) => tab.id === TabState.currentTabPageId)!;
+        if (currentlyFocusedTabData.sceneViewController?.scene.id === sceneData.id) {
+          // Do not re-load the same scene
+          return;
+        }
+
+        void ComposerController.loadSceneForTab(TabState.currentTabPageId, sceneData);
+      }
+    }
+  );
 
   // Functions
   const createNewTab = () => {
@@ -119,6 +145,7 @@ const Editor: FunctionComponent = observer(() => {
     setTimeout(() =>
       TabState.setCurrentTabPageId(newTabData.id)
     );
+    return newTabData;
   }
 
   const closeTab = (tabId: string) => {
@@ -144,6 +171,21 @@ const Editor: FunctionComponent = observer(() => {
       });
     }
   }
+
+  const openSceneInAppropriateTab = (scene: SceneData) => {
+    const currentlyFocusedTabData = ComposerController.currentlyOpenTabs.find((tab) => tab.id === TabState.currentTabPageId)
+
+    // If current tab is empty, replace current tab,
+    // Otherwise, open a new tab
+    if (TabState.currentTabPageId !== undefined && currentlyFocusedTabData?.sceneViewController === undefined) {
+      // The selected tab is empty - load into this tab
+      void ComposerController.loadSceneForTab(TabState.currentTabPageId, scene);
+    } else {
+      // No tab open / the current tab has a scene loaded - load into a new tab
+      const newTabData = createNewTab();
+      void ComposerController.loadSceneForTab(newTabData.id, scene);
+    }
+  };
 
   return (
     <>
@@ -179,42 +221,41 @@ const Editor: FunctionComponent = observer(() => {
 
       <PanelGroup direction="vertical">
         <Panel defaultSize={75} minSize={25}>
-          {noTabsOpen && (
-            <div className="flex flex-col justify-center items-center h-full">
-              <h1 className="text-h2">No open tabs!</h1>
-              <p>Would you like to do something about it? 🙃</p>
-            </div>
-          )}
+          <div
+            ref={DropTarget}
+            className="w-full h-full relative"
+          >
+            {/* Overlay for scene drag drop */}
+            {isDragOverThisZone &&
+              <div className="w-full h-full absolute inset-0 bg-blue-300 opacity-50 z-[1]"></div>
+            }
+            {noTabsOpen && (
+              <div className="flex flex-col justify-center items-center h-full">
+                <h1 className="text-h2">No open tabs!</h1>
+                <p>Would you like to do something about it? 🙃</p>
+              </div>
+            )}
 
-          {ComposerController.currentlyOpenTabs.map((tab) => (
-            <TabPage tabId={tab.id} key={tab.id}>
-              {tab.sceneViewController ? (
-                /* Scene loaded */
-                <>
-                  <SceneView controller={tab.sceneViewController} />
-                </>
-              ) : (
-                /* No scene loaded */
-                <div className="flex flex-col justify-center items-center h-full">
-                  <h1 className="text-h2">No scene loaded</h1>
-                  <p>Select a scene to load</p>
-                  <ul className="flex flex-col items-center">
-                    {ProjectController.project.scenes.getAllManifests().map((scene) => (
-                      <button
-                        key={scene.id}
-                        onClick={() => ComposerController.loadSceneForTab(tab.id, scene)}
-                        className="button"
-                      >{scene.path}</button>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </TabPage>
-          ))}
+            {ComposerController.currentlyOpenTabs.map((tab) => (
+              <TabPage tabId={tab.id} key={tab.id}>
+                {tab.sceneViewController ? (
+                  /* Scene loaded */
+                  <>
+                    <SceneView controller={tab.sceneViewController} />
+                  </>
+                ) : (
+                  /* No scene loaded */
+                  <div className="flex flex-col justify-center items-center h-full">
+                    <h1 className="text-h2">No scene loaded</h1>
+                  </div>
+                )}
+              </TabPage>
+            ))}
+          </div>
         </Panel>
         <PanelResizeHandle className="drag-separator" />
         <Panel minSize={10}>
-          <AssetsAndScenes />
+          <AssetsAndScenes openScene={openSceneInAppropriateTab} />
         </Panel>
       </PanelGroup>
 
