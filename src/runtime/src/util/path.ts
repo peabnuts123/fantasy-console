@@ -32,3 +32,15 @@ export function toPathList(path: string): string[] {
 export function baseName(path: string): string {
   return path.split(/\/+/g).pop()!;
 }
+
+/**
+ * Rename the file (base name) part of a path, preserving the full parent path
+ * @param path Path to rename
+ * @param newBaseName New base (i.e. file) name
+ * @returns Full path with the renamed file
+ */
+export function rename(path: string, newBaseName: string): string {
+  const pathList = toPathList(path);
+  pathList.push(newBaseName);
+  return pathList.join('/');
+}

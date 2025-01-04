@@ -1,5 +1,5 @@
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { readFile, writeFile } from '@tauri-apps/plugin-fs';
+import { readFile, writeFile, rename, exists } from '@tauri-apps/plugin-fs';
 import { action, computed, makeAutoObservable, makeObservable, observable, runInAction } from 'mobx';
 
 import { IFileSystem, VirtualFile } from "@fantasy-console/runtime/src/filesystem";
@@ -87,6 +87,23 @@ export class TauriFileSystem extends IFileSystem {
       console.error(`Failed to write file: `, e);
       throw e;
     }
+  }
+
+  public async moveFile(oldPath: string, newPath: string): Promise<void> {
+    oldPath = `${this.projectRootDir}/${oldPath}`;
+    newPath = `${this.projectRootDir}/${newPath}`;
+
+    if (!await exists(oldPath)) {
+      throw new Error(`Cannot move file: oldPath '${oldPath}' does not exist`);
+    }
+    if (await exists(newPath)) {
+      throw new Error(`Cannot move file: newPath '${newPath}' already exists - this operation is not allowed to replace files`);
+    }
+
+    await rename(
+      oldPath,
+      newPath,
+    );
   }
 
   public get writingState(): WritingState {

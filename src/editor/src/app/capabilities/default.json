@@ -6,6 +6,7 @@
   "permissions": [
     "core:default",
     "shell:allow-open",
-    "fs:allow-app-read-recursive"
+    "fs:allow-app-read-recursive",
+    "fs:allow-rename"
   ]
 }

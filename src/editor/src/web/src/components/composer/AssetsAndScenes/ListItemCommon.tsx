@@ -1,4 +1,4 @@
-import { ComponentType, createElement, ElementType, FunctionComponent, HTMLAttributes, LegacyRef, PropsWithChildren, ReactNode } from "react";
+import { ComponentType, createElement, ElementType, FunctionComponent, HTMLAttributes, LegacyRef, MouseEventHandler, PropsWithChildren, ReactNode } from "react";
 import { observer } from "mobx-react-lite";
 import cn from 'classnames';
 
@@ -8,11 +8,12 @@ export interface ListItemCommonProps {
   innerContent?: ReactNode;
   classNames?: string;
   onClick?: () => void;
+  onContextMenu?: MouseEventHandler<HTMLButtonElement|HTMLDivElement>;
   Icon?: ComponentType<React.HTMLAttributes<Element>>;
   innerRef?: LegacyRef<any>;
 }
 
-export const ListItemCommon: FunctionComponent<ListItemCommonProps> = observer(({ onClick, Icon, label, innerContent, classNames, innerRef }) => {
+export const ListItemCommon: FunctionComponent<ListItemCommonProps> = observer(({ onClick, onContextMenu, Icon, label, innerContent, classNames, innerRef }) => {
   // Prop defaults
   innerRef ??= () => { };
   classNames ??= "";
@@ -26,6 +27,7 @@ export const ListItemCommon: FunctionComponent<ListItemCommonProps> = observer((
       className: cn("w-full my-2 flex flex-row items-center p-2 border select-none bg-white hover:bg-blue-100 group/listitem", classNames),
       tabIndex: 0,
       onClick,
+      onContextMenu,
       ref: innerRef,
     }, (
       <>
