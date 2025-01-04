@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeFile } from '@tauri-apps/plugin-fs';
-import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/solid'
+import { PlayIcon, StopIcon, ArrowLeftEndOnRectangleIcon, CubeIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 import { useLibrary } from "@lib/index";
@@ -195,7 +195,7 @@ const Editor: FunctionComponent = observer(() => {
           tabId: tab.id,
           innerContent: (
             <>
-              <span className="mr-1">{tab.label}</span>
+              <span className="mr-2">{tab.label}</span>
 
               <div
                 role="button"
@@ -203,7 +203,7 @@ const Editor: FunctionComponent = observer(() => {
                 className="hover:bg-pink-400 p-1 inline-flex justify-center items-center"
                 onClick={() => closeTab(tab.id)}
               >
-                <TrashIcon className="icon w-4" />
+                <XMarkIcon className="icon w-4" />
               </div>
             </>
           ),
