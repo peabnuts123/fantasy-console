@@ -4,6 +4,7 @@ import { Engine } from "@babylonjs/core/Engines/engine";
 
 import { InputButton, NativeInputManager } from '@fantasy-console/core/src/modules/Input'
 
+// @NOTE Find keycodes here: https://www.babylonjs-playground.com/#CIBK2P
 enum KeyCodes {
   'Tilde' = 192,
   'W' = 87,
@@ -14,6 +15,10 @@ enum KeyCodes {
   'ArrowLeft' = 37,
   'ArrowRight' = 39,
   'ArrowDown' = 40,
+  'Space' = 32,
+  'LShift' = 16,
+  'Enter' = 13,
+  'Escape' = 27,
 }
 
 
@@ -28,11 +33,11 @@ const InputButtonToKeyCode: Record<InputButton, KeyCodes> = {
   [InputButton['R1']]: KeyCodes['Tilde'],
   [InputButton['R2']]: KeyCodes['Tilde'],
   [InputButton['R3']]: KeyCodes['Tilde'],
-  [InputButton['A']]: KeyCodes['Tilde'],
+  [InputButton['A']]: KeyCodes.Space,
   [InputButton['B']]: KeyCodes['Tilde'],
   [InputButton['X']]: KeyCodes['Tilde'],
   [InputButton['Y']]: KeyCodes['Tilde'],
-  [InputButton['Start']]: KeyCodes['Tilde'],
+  [InputButton['Start']]: KeyCodes.Escape,
   [InputButton['Select']]: KeyCodes['Tilde'],
 }
 
