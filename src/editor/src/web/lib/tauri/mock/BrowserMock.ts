@@ -58,6 +58,8 @@ export class BrowserMock {
         case 'stop_watching_project_assets':
         case 'load_project':
         case 'unload_project':
+        case 'hash_data':
+        case 'notify_project_file_updated':
           return PolyZoneMockModule.handle(parsed.command, args);
         default:
           throw throwUnhandled(`[BrowserMock] (handle) Unimplemented module. (module='${parsed.command}') args: `, args);

@@ -1348,6 +1348,7 @@ dependencies = [
  "debounce",
  "ignore",
  "ignore-files",
+ "jsonc-parser 0.26.2",
  "log",
  "notify 7.0.0",
  "serde",
@@ -2708,6 +2709,15 @@ name = "jsonc-parser"
 version = "0.21.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7b56a20e76235284255a09fcd1f45cf55d3c524ea657ebd3854735925c57743d"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
+name = "jsonc-parser"
+version = "0.26.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b558af6b49fd918e970471374e7a798b2c9bbcda624a210ffa3901ee5614bc8e"
 dependencies = [
  "serde_json",
 ]
@@ -4914,7 +4924,7 @@ dependencies = [
  "dashmap",
  "either",
  "indexmap 2.6.0",
- "jsonc-parser",
+ "jsonc-parser 0.21.1",
  "lru",
  "once_cell",
  "parking_lot",

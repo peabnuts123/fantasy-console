@@ -1,10 +1,11 @@
-use std::path::PathBuf;
+use std::{hash::Hasher as _, path::PathBuf};
 
 use tauri::AppHandle;
 use tokio_util::sync::CancellationToken;
+use twox_hash::XxHash3_64;
 use std::sync::Arc;
 
-use crate::filesystem::{self, assets::{ProjectAsset, RawProjectAsset}, scenes::{ProjectScene, RawProjectScene}, FsWatcherState};
+use crate::filesystem::{self, FsWatcherState};
 
 pub struct PolyZoneApp {
     pub project_root: Option<PathBuf>,
@@ -50,29 +51,17 @@ impl PolyZoneApp {
 
     pub async fn start_watching_assets(
         &mut self,
-        project_assets: Vec<RawProjectAsset>,
-        project_scenes: Vec<RawProjectScene>,
     ) {
         // Validation
         if self.project_root.is_none() {
             panic!("Cannot watch assets: No project is loaded");
         }
 
-        // Convert raw types into meaningful types
-        let project_assets: Vec<ProjectAsset> = project_assets.iter().map(|asset| {
-            ProjectAsset::new(&asset)
-        }).collect();
-        let project_scenes: Vec<ProjectScene> = project_scenes.iter().map(|scene| {
-            ProjectScene::new(&scene)
-        }).collect();
-
         // Construct shared state for file watcher
         let state = Arc::new(FsWatcherState::new(
             self.app.clone(),
             self.project_root.clone().unwrap(),
             self.project_file_path.clone().unwrap(),
-            project_assets,
-            project_scenes,
         ).await);
 
         self.watch_assets_state = Some(state.clone());
@@ -93,18 +82,16 @@ impl PolyZoneApp {
         }
     }
 
-    pub async fn set_path_busy(&mut self, path: PathBuf, is_busy: bool) {
-        if let Some(state) = &self.watch_assets_state {
-            let mut busy_paths = state.busy_paths.lock().await;
-            if is_busy {
-                log::debug!("Setting path as busy: {:?}", path);
-                busy_paths.insert(path);
-            } else {
-                log::debug!("Setting path as NOT busy: {:?}", path);
-                busy_paths.remove(&path);
-            }
+    pub async fn notify_project_file_updated(&mut self, data: Vec<u8>) {
+        let mut hasher = XxHash3_64::new();
+        hasher.write(&data);
+        let result = hasher.finish();
+
+        if let Some(state) = self.watch_assets_state.clone() {
+            let mut project_file = state.project_file.lock().await;
+            project_file.hash = format!("{:x}", result);
         } else {
-            log::error!("[PolyZoneApp] (set_path_busy)")
+            log::error!("Cannot update project file hash - no FSWatcher state exists");
         }
     }
 }

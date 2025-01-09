@@ -2,9 +2,7 @@ pub mod assets;
 pub mod project;
 pub mod scenes;
 
-use assets::ProjectAsset;
-use project::ProjectFile;
-use scenes::ProjectScene;
+use project::{read_project_definition, ProjectFile};
 use debounce::EventDebouncer;
 use ignore_files::{IgnoreFile, IgnoreFilter};
 use notify::{recommended_watcher, RecursiveMode, Watcher};
@@ -12,7 +10,6 @@ use tauri::async_runtime::spawn;
 use tauri::AppHandle;
 use tokio::select;
 use tokio_util::sync::CancellationToken;
-use std::collections::HashSet;
 use std::hash::Hasher as _;
 use std::path::PathBuf;
 use std::{sync::Arc, time::Duration};
@@ -36,12 +33,7 @@ const EXCLUDED_PATH_GLOBS: [&str; 4] = [
 /// State that is shared by filesystem watcher logic
 pub struct FsWatcherState {
     project_root: PathBuf,
-    assets: Mutex<Vec<ProjectAsset>>,
-    scenes: Mutex<Vec<ProjectScene>>,
-    project_file: Mutex<ProjectFile>,
-    /// FS events are ignored for busy paths as it is assumed they
-    /// are currently being edited by the application itself
-    pub busy_paths: Mutex<HashSet<PathBuf>>,
+    pub project_file: Mutex<ProjectFile>,
     app: AppHandle,
     ignore_filter: IgnoreFilter,
 }
@@ -50,8 +42,6 @@ impl FsWatcherState {
         app: AppHandle,
         project_root: PathBuf,
         project_file_path: PathBuf,
-        project_assets: Vec<ProjectAsset>,
-        project_scenes: Vec<ProjectScene>,
     ) -> Self {
         // @NOTE Create ignore filter up-front meaning changes to any ignore files will not be picked up until
         // the next time the project is re-watched (generally, when the project is loaded)
@@ -68,11 +58,13 @@ impl FsWatcherState {
             app,
             project_root: project_root,
             project_file: Mutex::new(project_file),
-            assets: Mutex::new(project_assets),
-            scenes: Mutex::new(project_scenes),
-            busy_paths: Mutex::new(HashSet::new()),
             ignore_filter,
         }
+    }
+
+    pub async fn project_file_absolute_path(&self) -> PathBuf {
+        let project_file = self.project_file.lock().await;
+        self.project_root.join(&project_file.path)
     }
 }
 
@@ -158,7 +150,16 @@ async fn watch_fs(state: Arc<FsWatcherState>, cancellation_token: CancellationTo
                             Ok(raw_event) => {
                                 log::debug!("[filesystem] (watch_fs) Received event: {:?}", raw_event);
 
-                                let busy_paths = state.busy_paths.lock().await;
+                                // Read definitions from disk
+                                // @NOTE is this too slow? We might receive a lot of events :/
+                                let project_definition = match read_project_definition(&state).await {
+                                    Ok(project_definition) => project_definition,
+                                    Err(_) => {
+                                        log::warn!("[filesystem] (watch_fs) Failed while reading project definition, skipping event");
+                                        continue;
+                                    },
+                                };
+
 
                                 let mut is_asset_event_we_care_about = false;
                                 let mut is_scene_event_we_care_about = false;
@@ -171,13 +172,6 @@ async fn watch_fs(state: Arc<FsWatcherState>, cancellation_token: CancellationTo
                                 for path in raw_event.paths.iter() {
                                     let relative_path = PathBuf::from(path.strip_prefix(&state.project_root).unwrap());
 
-                                    // Ignore busy paths that are being written to by the application
-                                    let is_path_busy = busy_paths.contains(&relative_path);
-                                    if is_path_busy {
-                                        log::debug!("[filesystem] (watch_fs) Ignoring busy file: {:?}", relative_path);
-                                        continue;
-                                    }
-
                                     let is_asset_file = assets::is_supported_asset_type(path);
                                     let is_scene_file = scenes::is_path_scene_file(path);
                                     let is_project_file = project::is_path_project_file(path);
@@ -185,6 +179,7 @@ async fn watch_fs(state: Arc<FsWatcherState>, cancellation_token: CancellationTo
                                     if
                                         path.exists() &&
                                         !state.ignore_filter.match_path(path, path.is_dir()).is_ignore() &&
+                                        // @NOTE Explicitly want to ensure we are dealing with a file here
                                         (is_asset_file || is_project_file || is_scene_file)
                                     {
                                         if is_asset_file {
@@ -196,25 +191,47 @@ async fn watch_fs(state: Arc<FsWatcherState>, cancellation_token: CancellationTo
                                             // Scene file changed
                                             log::debug!("[filesystem] (watch_fs) Triggering scene reconciliation. An extant file that is not matched by the ignore filter AND is a scene file: {:?}", path);
                                             is_scene_event_we_care_about = true;
+                                            break;
                                         } else if is_project_file {
                                             // Project file changed
                                             log::debug!("[filesystem] (watch_fs) Triggering project file reconciliation. An extant file that is not matched by the ignore filter AND is a project file: {:?}", path);
                                             is_project_file_event_we_care_about = true;
+                                            break;
                                         }
                                     } else {
-                                        let path_is_prefix_for_any_known_asset = {
-                                            let state_assets = state.assets.lock().await;
-                                            state_assets
-                                                .iter()
-                                                .any(|asset| asset.path.starts_with(&relative_path))
-                                        };
-                                        if path_is_prefix_for_any_known_asset {
+                                        // Check whether path is a prefix for any type of file we care about
+                                        // as path may be a deleted file, or even a just a parent directory
+
+                                        // === IS IT AN ASSET FILE? ===
+                                        if project_definition.assets.iter()
+                                                .any(|asset| asset.path.starts_with(&relative_path)) {
                                             // Event path is a prefix of a known asset
                                             log::debug!("[filesystem] (watch_fs) Triggering asset reconciliation. Event path is a prefix of a known asset: {:?}", relative_path);
                                             is_asset_event_we_care_about = true;
                                             break;
+
+
+                                        // === IS IT A SCENE FILE? ===
+                                        } else if project_definition.scenes.iter()
+                                                .any(|scene| scene.path.starts_with(&relative_path)) {
+                                            // Event path is a prefix of a known scene
+                                            log::debug!("[filesystem] (watch_fs) Triggering scene reconciliation. Event path is a prefix of a known scene: {:?}", relative_path);
+                                            is_scene_event_we_care_about = true;
+                                            break;
+
+                                        // === IS IT THE PROJECT FILE? ===
+                                        } else if {
+                                            let state_project_file = state.project_file.lock().await;
+                                            state_project_file.path.starts_with(&relative_path)
+                                        } {
+                                            // Event path is a prefix of the project file (basically only possible if the project file is deleted)
+                                            log::debug!("[filesystem] (watch_fs) Triggering project file reconciliation. Event path is a prefix of a known project file: {:?}", relative_path);
+                                            is_project_file_event_we_care_about = true;
+                                            break;
+
+                                        // === SHRUG ¯\_(ツ)_/¯ ===
                                         } else {
-                                            log::debug!("[filesystem] (watch_fs) Ignore presumed irrelevant event: {:?}", relative_path);
+                                            log::debug!("[filesystem] (watch_fs) Ignoring presumed irrelevant path: {:?}", relative_path);
                                         }
                                     }
                                 }

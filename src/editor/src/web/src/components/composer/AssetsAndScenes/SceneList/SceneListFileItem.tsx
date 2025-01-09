@@ -77,7 +77,11 @@ export const SceneListFileItem: FunctionComponent<SceneListFileItemProps> = obse
         className="w-full my-2 flex flex-row items-center p-2 border select-none bg-white"
       >
         <BuildingOffice2Icon className="icon mr-2 shrink-0" />
-        <SceneNameTextInput value={fileNameWithoutExtension} onFinishedEditing={onRenamed} />
+        <SceneNameTextInput
+          value={fileNameWithoutExtension}
+          onFinishedEditing={onRenamed}
+          onCanceledEditing={() => setIsRenaming(false)}
+        />
       </div>
     ) : (
       <ListItemCommon
@@ -92,11 +96,47 @@ export const SceneListFileItem: FunctionComponent<SceneListFileItemProps> = obse
   );
 });
 
+export interface CreateNewSceneListFileItemProps {
+  newPath: string,
+  onCreate: (newPath: string) => void,
+  onCancel: () => void,
+}
+/**
+ * Stripped down version of SceneListFileItem for creating a new scene.
+ * Only used to name the new scene, once the scene is named, a real SceneListFileItem
+ * is put in its place
+ */
+export const CreateNewSceneListFileItem: FunctionComponent<CreateNewSceneListFileItemProps> = observer(({ newPath, onCreate, onCancel }) => {
+  // Computed state
+  const fileName = baseName(newPath);
+  const fileNameWithoutExtension = fileName.replace(/\.pzscene$/, '');
+
+  // Functions
+  const onFinishedNaming = (newBaseName: string) => {
+    const createPath = rename(newPath, newBaseName);
+    onCreate(createPath);
+  }
+
+  return (
+    <div
+      className="w-full my-2 flex flex-row items-center p-2 border select-none bg-white"
+    >
+      <BuildingOffice2Icon className="icon mr-2 shrink-0" />
+      <SceneNameTextInput
+        value={fileNameWithoutExtension}
+        onFinishedEditing={onFinishedNaming}
+        onCanceledEditing={onCancel}
+      />
+    </div>
+  );
+});
+
 interface SceneNameTextInputProps {
   value: string;
   onFinishedEditing: (newValue: string) => void;
+  onCanceledEditing: () => void;
 }
-const SceneNameTextInput: FunctionComponent<SceneNameTextInputProps> = ({ value, onFinishedEditing }) => {
+const SceneNameTextInput: FunctionComponent<SceneNameTextInputProps> = ({ value, onFinishedEditing, onCanceledEditing }) => {
   // State
   const [inputText, setInputText] = useState<string>(`${value}`);
 
@@ -111,7 +151,7 @@ const SceneNameTextInput: FunctionComponent<SceneNameTextInputProps> = ({ value,
 
   // Functions
   function toSceneFileName(baseName: string): string {
-    return `${baseName}.pzscene`;
+    return `${baseName.trim()}.pzscene`;
   }
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     // @NOTE Remove characters that will make FS go brrrrr
@@ -121,12 +161,13 @@ const SceneNameTextInput: FunctionComponent<SceneNameTextInputProps> = ({ value,
   };
 
   const onBlurTextInput = () => {
+    // @TODO should blur cancel or accept?
     onFinishedEditing(toSceneFileName(inputText));
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
-      onFinishedEditing(toSceneFileName(value));
+      onCanceledEditing();
     } else if (e.key === 'Enter') {
       onFinishedEditing(toSceneFileName(inputText));
     }

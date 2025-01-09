@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use ignore_files::IgnoreFilter;
 use tauri::Emitter;
 use std::path::PathBuf;
@@ -6,7 +6,9 @@ use std::sync::Arc;
 use tokio::task::JoinSet;
 use tokio::time::Instant;
 use walkdir::WalkDir;
-use super::{get_file_hash, FsWatcherState};
+use super::{assets::AssetDefinition, scenes::SceneDefinition, get_file_hash, FsWatcherState};
+use tokio::fs::File;
+use tokio::io::AsyncReadExt;
 
 // Constants
 const PROJECT_FILE_EXTENSION: &str = "pzproj";
@@ -18,6 +20,21 @@ pub struct ProjectFile {
     pub path: PathBuf,
     pub hash: String,
 }
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectManifest {
+    project_name: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectDefinition {
+    pub manifest: ProjectManifest,
+    pub assets: Vec<AssetDefinition>,
+    pub scenes: Vec<SceneDefinition>,
+}
+
 /// An event representing a change to a project file
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -42,7 +59,6 @@ pub async fn perform_project_reconciliation(state: Arc<FsWatcherState>) {
 
     let timer = Instant::now();
 
-    // let mut fs_events = Vec::<ProjectFsEvent>::new();
     let mut fs_event: Option<ProjectFsEvent> = None;
     {
         let state_project_file_locked = state.project_file.lock().await;
@@ -124,21 +140,26 @@ async fn on_project_fs_event(event: ProjectFsEvent, state: Arc<FsWatcherState>) 
     // Apply modifications to project file in memory
     match &event {
         ProjectFsEvent::Delete { } => {
-            log::info!("The project file has been deleted: {:?}", state_project_file.path);
+            log::info!("[on_project_fs_event] The project file has been deleted: {:?}", state_project_file.path);
         }
         ProjectFsEvent::Modify { new_hash } => {
             state_project_file.hash = new_hash.clone();
+            log::debug!("[on_project_fs_event] Project file modified: {:?}", state_project_file.path);
         }
         ProjectFsEvent::Rename { new_path } => {
+            let old_path = state_project_file.path.clone();
             state_project_file.path = new_path.clone();
+            log::debug!("[on_project_fs_event] Project file renamed: {:?} -> {:?}", old_path, new_path);
         }
     }
 
     // Emit data to JavaScript
+    // Can only ever emit one event, though it is emitted as an array for convenience
+    let emitted_events = vec![event.clone()];
     const EVENT_NAME: &str = "on_project_file_updated";
-    match state.app.emit(EVENT_NAME, vec![event.clone()]) {
-        Ok(_) => log::debug!("[FsWatcher] (on_notify) Emitted event `{EVENT_NAME}`"),
-        Err(error) => log::error!("[FsWatcher] (on_notify) Error emitting event `{EVENT_NAME}`: {error:?}"),
+    match state.app.emit(EVENT_NAME, emitted_events) {
+        Ok(_) => log::debug!("[on_project_fs_event] Emitted event `{EVENT_NAME}`"),
+        Err(error) => log::error!("[on_project_fs_event] Error emitting event `{EVENT_NAME}`: {error:?}"),
     }
 }
 
@@ -209,5 +230,24 @@ pub fn is_path_project_file(path: &PathBuf) -> bool {
             extension == PROJECT_FILE_EXTENSION
         }
         None => false,
+    }
+}
+
+pub async fn read_project_definition(state: &Arc<FsWatcherState>) -> Result<ProjectDefinition, &str> {
+    let project_file_path = state.project_file_absolute_path().await;
+    let mut file = File::open(&project_file_path).await.map_err(|_| "Failed to open project file")?;
+    let mut jsonc = String::new();
+    file.read_to_string(&mut jsonc).await.map_err(|_| "Failed to read project file contents")?;
+
+    let parsed_jsonc = jsonc_parser::parse_to_serde_value(&jsonc, &Default::default()).map_err(|_| "Failed to parse project file JSONC")?;
+    match parsed_jsonc {
+        Some(parse_result) => {
+            let project_definition: ProjectDefinition = serde_json::from_value(parse_result).expect("Failed to convert JSONC into ProjectDefinition");
+            Ok(project_definition)
+        },
+        None => {
+            log::error!("Failed to parse project JSONC: {:?}", jsonc);
+            Err("Failed to parse project JSONC")
+        },
     }
 }

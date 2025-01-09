@@ -54,12 +54,6 @@ export class TauriFileSystem extends IFileSystem {
     this.writingState = WritingState.Writing;
     const startWriteTime = performance.now();
 
-    // Flag file as being written to ignore fs events
-    await invoke('set_path_is_busy', {
-      path,
-      isBusy: true,
-    });
-
     try {
       await writeFile(`${this.projectRootDir}/${path}`, data);
 
@@ -70,16 +64,6 @@ export class TauriFileSystem extends IFileSystem {
           this.writingState = WritingState.UpToDate;
         });
       }, waitTime);
-
-      // Flag file as no-longer being written, after
-      // a short grace period, to (hopefully) ensure the
-      // backend has picked up the event before removing the flag
-      setTimeout(() => {
-        void invoke('set_path_is_busy', {
-          path,
-          isBusy: false,
-        });
-      }, 200);
     } catch (e) {
       runInAction(() => {
         this.writingState = WritingState.Failed;

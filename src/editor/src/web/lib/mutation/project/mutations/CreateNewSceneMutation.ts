@@ -28,15 +28,26 @@ export class CreateNewSceneMutation implements IProjectMutation {
       newSceneJsonc.toString()
     );
 
-    // 0. Calculate hash
+    // 0. Calculate hash (asynchronously)
+    // @NOTE We could just delete this whole block and rely on the FS watcher to
+    // notify the frontend of the scene's hash. However, PolyZone has a principle that no
+    // functionality within the app should rely on the FS watcher. So we manually
+    // request the hash of the new scene and assign it, in case the FS watcher is not working.
     invoke('hash_data', {
       data: Array.from(newSceneJsoncBytes),
     }).then((newSceneHash) => {
-      // ?. (Later) Update JSON with updated hash
+      // ???. (later) - Update references to hash
+      const scene = ProjectController.project.scenes.getById(newSceneManifest.id);
+      if (scene !== undefined) {
+        scene.data.hash = newSceneHash;
+        scene.manifest.hash = newSceneHash;
+      }
+
       let sceneIndex = ProjectController.projectDefinition.value.scenes.findIndex((scene) => scene.id === newSceneManifest.id);
-      // Re-read scene data from SceneDb (sanity check / robustness for future architectural changes)
-      let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[sceneIndex].hash);
-      ProjectController.projectDefinition.mutate(jsonPath, newSceneHash);
+      if (ProjectController.projectDefinition.value.scenes[sceneIndex].hash !== newSceneHash) {
+        let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[sceneIndex].hash);
+        ProjectController.projectDefinition.mutate(jsonPath, newSceneHash);
+      }
     });
 
     // 1. Update data

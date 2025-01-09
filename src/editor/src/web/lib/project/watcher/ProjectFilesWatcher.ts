@@ -19,14 +19,7 @@ export class ProjectFilesWatcher {
 
   public async watch() {
     // Start watching project for file changes on disk
-    await invoke('start_watching_project_files', {
-      projectAssets: this.projectController.projectDefinition.value.assets,
-      projectScenes: this.projectController.project.scenes.getAllData().map((sceneData) => ({
-        id: sceneData.id,
-        path: sceneData.path,
-        hash: sceneData.hash,
-      })),
-    });
+    await invoke('start_watching_project_files');
 
     await Promise.all([
       this.assetsWatcher.startListening(),

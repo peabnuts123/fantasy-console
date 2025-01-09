@@ -14,7 +14,7 @@ export class PolyZoneMockModule {
       case 'create_cartridge':
         return this.mockCreateCartridge(args);
       case 'start_watching_project_files':
-        return this.mockStartWatchingProjectFiles(args);
+        return this.mockStartWatchingProjectFiles();
       case 'stop_watching_project_assets':
         return this.mockStopWatchingProjectAssets();
       case 'load_project':
@@ -22,9 +22,9 @@ export class PolyZoneMockModule {
       case 'unload_project':
         return this.mockUnloadProject();
       case 'hash_data':
-        throw this.mockHashData(args);
-      case 'set_path_is_busy':
-        return this.mockSetPathIsBusy(args);
+        return this.mockHashData(args);
+      case 'notify_project_file_updated':
+        return this.notifyProjectFileUpdated(args);
       default:
         throw throwUnhandled(`[PolyZoneMockModule] (handle) Unimplemented action. (action='${action}') args: `, args);
     }
@@ -75,7 +75,7 @@ export class PolyZoneMockModule {
     return '6f86d7a9413a517d';
   }
 
-  public static async mockSetPathIsBusy(...args: TauriCommandArgs<'set_path_is_busy'>): Promise<TauriCommandReturnType<'set_path_is_busy'>> {
+  public static async notifyProjectFileUpdated(...args: TauriCommandArgs<'notify_project_file_updated'>): Promise<TauriCommandReturnType<'notify_project_file_updated'>> {
     // @NOTE No-op.
   }
 }

@@ -6,8 +6,6 @@ use std::hash::Hasher as _;
 use std::path::PathBuf;
 
 use build::build;
-use filesystem::assets::RawProjectAsset;
-use filesystem::scenes::RawProjectScene;
 use polyzone::PolyZoneApp;
 use tauri::Manager;
 use tauri::async_runtime::Mutex;
@@ -42,7 +40,7 @@ pub fn run() {
             start_watching_project_files,
             stop_watching_project_assets,
             hash_data,
-            set_path_is_busy,
+            notify_project_file_updated,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -89,11 +87,9 @@ async fn unload_project(poly_zone_app: PolyZoneAppState::<'_>) -> Result<(), ()>
 #[tauri::command]
 async fn start_watching_project_files(
     poly_zone_app: PolyZoneAppState<'_>,
-    project_assets: Vec<RawProjectAsset>,
-    project_scenes: Vec<RawProjectScene>,
 ) -> Result<String, &str> {
     let mut poly_zone_app = poly_zone_app.lock().await;
-    poly_zone_app.start_watching_assets(project_assets, project_scenes).await;
+    poly_zone_app.start_watching_assets().await;
 
     Ok(format!("Watching files in project root: {:?}", poly_zone_app.project_root))
 }
@@ -116,12 +112,11 @@ fn hash_data(data: Vec<u8>) -> String {
 }
 
 #[tauri::command]
-async fn set_path_is_busy(
+async fn notify_project_file_updated(
     poly_zone_app: PolyZoneAppState<'_>,
-    path: PathBuf,
-    is_busy: bool,
+    data: Vec<u8>
 ) -> Result<(), ()> {
     let mut poly_zone_app = poly_zone_app.lock().await;
-    poly_zone_app.set_path_busy(path, is_busy).await;
+    poly_zone_app.notify_project_file_updated(data).await;
     Ok(())
 }

@@ -9,7 +9,7 @@ import { useLibrary } from "@lib/index";
 import { CreateNewSceneMutation } from "@lib/mutation/project/mutations";
 import { createDirView } from "@lib/util/path";
 import { SceneData } from "@lib/project/data";
-import { SceneListFileItem, SceneListVirtualFile } from './SceneListFileItem';
+import { CreateNewSceneListFileItem, SceneListFileItem, SceneListVirtualFile } from './SceneListFileItem';
 import { SceneListDirectoryItem, SceneListVirtualDirectory } from './SceneListDirectoryItem';
 import { ListItemCommon } from "../ListItemCommon";
 
@@ -23,6 +23,7 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
 
   // State
   const [currentDirectory, setCurrentDirectory] = useState<string[]>([]);
+  const [tempCreatePath, setTempCreatePath] = useState<string | undefined>(undefined);
 
   // Computed state
   const { scenes } = ProjectController.project;
@@ -31,12 +32,12 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
     currentDirectory,
     /* toPath: */(scene) => toPathList(scene.path),
     /* toFile: */(scene) => ({
-      id: scene.path,
+      id: scene.id,
       type: 'file',
       scene,
     } satisfies SceneListVirtualFile as SceneListVirtualFile),
     /* toDirectory: */(directoryName, scene) => ({
-      id: scene.path,
+      id: scene.id,
       type: 'directory',
       name: directoryName,
     } satisfies SceneListVirtualDirectory as SceneListVirtualDirectory)
@@ -55,7 +56,16 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
     }
 
     const newScenePath = [...currentDirectory, `${newSceneName}.pzscene`].join('/');
+    setTempCreatePath(newScenePath);
+  };
+
+  const onFinishedNamingNewScene = (newScenePath: string) => {
+    setTempCreatePath(undefined);
     ProjectController.mutator.apply(new CreateNewSceneMutation(newScenePath));
+  }
+
+  const onCancelCreateNewScene = () => {
+    setTempCreatePath(undefined);
   };
 
   return (
@@ -67,6 +77,8 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
         <PlusIcon className="icon mr-1" /> New scene
       </button>
 
+      {/* @TODO scroll should start here */}
+
       {/* Parent directory button */}
       {/* Only visible if you are not in the root */}
       {currentDirectory.length > 0 && (
@@ -75,6 +87,7 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
           onClick={() => setCurrentDirectory(currentDirectory.slice(0, currentDirectory.length - 1))}
         />
       )}
+
       {/* Assets in the current folder */}
       {scenesDirView.map((item) => {
         if (item.type === 'file') {
@@ -96,6 +109,15 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
           )
         }
       })}
+
+      {/* New scene slot */}
+      {tempCreatePath && (
+        <CreateNewSceneListFileItem
+          newPath={tempCreatePath}
+          onCreate={onFinishedNamingNewScene}
+          onCancel={onCancelCreateNewScene}
+        />
+      )}
     </div>
   );
 });

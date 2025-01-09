@@ -22,10 +22,7 @@ type TauriCommands = {
 
   unload_project(): void;
 
-  start_watching_project_files(args: {
-    projectAssets: AssetDefinition[];
-    projectScenes: RawProjectScene[];
-  }): string;
+  start_watching_project_files(): string;
 
   stop_watching_project_assets(): void;
 
@@ -33,9 +30,8 @@ type TauriCommands = {
     data: number[],
   }): string;
 
-  set_path_is_busy(args: {
-    path: string;
-    isBusy: boolean;
+  notify_project_file_updated(args: {
+    data: number[],
   }): void;
 }
 

@@ -27,6 +27,7 @@ tauri-build = { version = "2", features = [] }
 debounce = "0.2.2"
 ignore = "0.4.23"
 ignore-files = "3.0.2"
+jsonc-parser = { version = "0.26.2", features = ["serde"] }
 log = "0.4.22"
 notify = "7.0.0"
 serde = { version = "1", features = ["derive"] }
@@ -46,6 +47,6 @@ tauri-plugin-shell = "2"
 tokio = "1.42.0"
 tokio-util = "0.7.13"
 twox-hash = { version = "2.0.1", features = ["xxhash3_64", "std"] }
-uuid = { version = "1.11.0", features = ["v4"] }
+uuid = { version = "1.11.0", features = ["v4", "serde"] }
 walkdir = "2.5.0"
 zip = "2.1.1"
