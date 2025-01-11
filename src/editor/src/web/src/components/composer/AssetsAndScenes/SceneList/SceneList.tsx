@@ -2,11 +2,13 @@ import type { FunctionComponent } from "react";
 import { useState } from "react";
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { observer } from "mobx-react-lite";
+import cn from 'classnames';
 
 import { baseName, toPathList } from "@fantasy-console/runtime/src/util";
 
+import { useSceneDrop } from "@app/interactions";
 import { useLibrary } from "@lib/index";
-import { CreateNewSceneMutation } from "@lib/mutation/project/mutations";
+import { CreateNewSceneMutation, MoveSceneMutation } from "@lib/mutation/project/mutations";
 import { createDirView } from "@lib/util/path";
 import { SceneData } from "@lib/project/data";
 import { CreateNewSceneListFileItem, SceneListFileItem, SceneListVirtualFile } from './SceneListFileItem';
@@ -41,6 +43,14 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
       type: 'directory',
       name: directoryName,
     } satisfies SceneListVirtualDirectory as SceneListVirtualDirectory)
+  );
+  const [{ isDragOverThisZone: isDragOverParentDirectory }, ParentDirectoryDropTarget] = useSceneDrop(
+    ({ sceneData, }) => {
+      const newPath = currentDirectory.slice(0, currentDirectory.length - 1)
+        .concat(baseName(sceneData.path))
+        .join('/');
+      ProjectController.mutator.apply(new MoveSceneMutation(sceneData, newPath));
+    }
   );
 
   // Functions
@@ -85,6 +95,10 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
         <ListItemCommon
           label=".."
           onClick={() => setCurrentDirectory(currentDirectory.slice(0, currentDirectory.length - 1))}
+          classNames={cn({
+            "bg-blue-200": isDragOverParentDirectory,
+          })}
+          innerRef={ParentDirectoryDropTarget}
         />
       )}
 

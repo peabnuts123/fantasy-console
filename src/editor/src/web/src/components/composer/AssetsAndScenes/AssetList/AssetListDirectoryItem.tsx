@@ -17,7 +17,6 @@ export const AssetListDirectoryItem: FunctionComponent<AssetListDirectoryItemPro
     <ListItemCommon
       label={asset.name}
       Icon={FolderIcon}
-      classNames={cn("cursor-pointer focus:bg-blue-100 active:bg-blue-200")}
       onClick={() => {
         setCurrentDirectory([...currentDirectory, asset.name]);
       }}

@@ -154,7 +154,7 @@ export const AssetReferenceModalListFileItem: FunctionComponent<AssetReferenceMo
     <ListItemCommon
       label={asset.name}
       Icon={AssetIcon}
-      classNames={cn("cursor-grab", { '!bg-blue-300': isSelected })}
+      classNames={cn({ '!bg-blue-300': isSelected })}
       onClick={() => onSelectAsset(asset.id)}
     />
   );
@@ -173,7 +173,6 @@ export const AssetReferenceModalListDirectoryItem: FunctionComponent<AssetRefere
     <ListItemCommon
       label={asset.name}
       Icon={FolderIcon}
-      classNames="cursor-pointer focus:bg-blue-100 active:bg-blue-200"
       onClick={() => {
         setCurrentDirectory([...currentDirectory, asset.name]);
       }}

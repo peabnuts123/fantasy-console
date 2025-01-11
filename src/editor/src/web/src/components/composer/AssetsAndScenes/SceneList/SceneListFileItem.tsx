@@ -87,7 +87,7 @@ export const SceneListFileItem: FunctionComponent<SceneListFileItemProps> = obse
       <ListItemCommon
         label={fileName}
         Icon={BuildingOffice2Icon}
-        classNames=""
+        classNames="cursor-grab"
         onClick={onClick}
         onContextMenu={showContextMenu}
         innerRef={DragSource}

@@ -24,7 +24,14 @@ export const ListItemCommon: FunctionComponent<ListItemCommonProps> = observer((
   return (
     /* Switch between div and button based on whether the element is clickable */
     createElement(isClickable ? 'button' : 'div', {
-      className: cn("w-full my-2 flex flex-row items-center p-2 border select-none bg-white hover:bg-blue-100 group/listitem", classNames),
+      className: cn(
+        "w-full my-2 flex flex-row items-center p-2 border select-none bg-white hover:bg-blue-100 focus:bg-blue-100 active:bg-blue-200 group/listitem",
+        classNames,
+        {
+          // Default to `pointer` if no cursor class provided
+          "cursor-pointer": !/\bcursor-/.test(classNames),
+        }
+      ),
       tabIndex: 0,
       onClick,
       onContextMenu,

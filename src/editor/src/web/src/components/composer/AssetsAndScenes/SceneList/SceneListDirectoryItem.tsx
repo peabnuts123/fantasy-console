@@ -3,7 +3,12 @@ import { FolderIcon } from '@heroicons/react/24/outline'
 import cn from 'classnames';
 import { observer } from "mobx-react-lite";
 
+import { baseName } from "@fantasy-console/runtime/src/util";
+
 import { ListItemCommon } from '../ListItemCommon';
+import { useSceneDrop } from "@app/interactions";
+import { MoveSceneMutation } from "@lib/mutation/project/mutations";
+import { useLibrary } from "@lib/index";
 
 export interface SceneListVirtualDirectory {
   id: string;
@@ -18,14 +23,29 @@ export interface SceneListDirectoryItemProps {
 }
 
 export const SceneListDirectoryItem: FunctionComponent<SceneListDirectoryItemProps> = observer(({ directory, currentDirectory, setCurrentDirectory }) => {
+  // Hooks
+  const { ProjectController } = useLibrary();
+
+  const [{ isDragOverThisZone }, DropTarget] = useSceneDrop(
+      ({ sceneData, }) => {
+      const newPath = currentDirectory
+        .concat(directory.name, baseName(sceneData.path))
+        .join('/');
+      ProjectController.mutator.apply(new MoveSceneMutation(sceneData, newPath));
+    }
+  );
+
   return (
     <ListItemCommon
       label={directory.name}
       Icon={FolderIcon}
-      classNames={cn("cursor-pointer focus:bg-blue-100 active:bg-blue-200")}
+      classNames={cn({
+        "bg-blue-200": isDragOverThisZone,
+      })}
       onClick={() => {
         setCurrentDirectory([...currentDirectory, directory.name]);
       }}
+      innerRef={DropTarget}
     />
   )
 });
