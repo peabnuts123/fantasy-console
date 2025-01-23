@@ -107,4 +107,21 @@
   .u-animate-min-height {
     @apply transition-[min-height];
   }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(-100%); }
+    100% { transform: translateX(0); }
+  }
+  .marquee {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    span {
+      will-change: transform;
+      transform: translateX(0);
+      animation: marquee 12s ease-in-out infinite;
+    }
+  }
 }

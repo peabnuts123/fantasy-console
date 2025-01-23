@@ -1,4 +1,4 @@
-import { useEffect, useState, type FunctionComponent } from "react";
+import { useEffect, useState, type FunctionComponent, JSX, useRef } from "react";
 import { open } from '@tauri-apps/plugin-dialog';
 import { ArrowUpTrayIcon, DocumentIcon } from '@heroicons/react/24/outline'
 
@@ -22,15 +22,7 @@ export const RecentProjectList: FunctionComponent<RecentProjectListProps> = ({ s
 
   // Effects
   useEffect(() => {
-    ApplicationDataController.getAppDataWithCallback((appData) => {
-      // Load app data
-      setAppData(appData);
-
-      // Default to new project screen if there are no recent projects
-      if (appData.recentProjects.length === 0) {
-        showCreateProjectScreen();
-      }
-    });
+    ApplicationDataController.getAppDataWithCallback(setAppData);
   }, []);
 
   // Functions
@@ -50,7 +42,7 @@ export const RecentProjectList: FunctionComponent<RecentProjectListProps> = ({ s
   return (
     <>
       <div className="flex flex-row justify-between mb-2">
-        <h2 className="text-h2 text-retro-shadow font-serif mb-4">Recent projects</h2>
+        <h2 className="text-h2 text-retro-shadow font-serif">Recent projects</h2>
 
         <div className="flex flex-row">
           <button onClick={loadProject} className="button"><ArrowUpTrayIcon className="icon mr-1" /> Open project</button>
@@ -58,13 +50,103 @@ export const RecentProjectList: FunctionComponent<RecentProjectListProps> = ({ s
         </div>
       </div>
 
-      <div className="w-full mr-1 overflow-y-auto">
+      <div className="w-full overflow-y-auto grow">
         {isAppDataLoaded && (
-          appData.recentProjects.map((project, index) => (
-            <RecentProjectTile key={index} project={project} />
-          ))
+          <>
+            {/* Empty list */}
+            {appData.recentProjects.length === 0 && (
+              <div className="h-full flex flex-col">
+                <div className="w-full bg-slate-800 bg-opacity-30 mb-4 p-4">You have no recent projects. Create a project or open an existing one.</div>
+                <PlsGiveWall />
+              </div>
+            )}
+
+            {/* Recent projects */}
+            {appData.recentProjects.map((project, index) => (
+              <RecentProjectTile key={index} project={project} />
+            ))}
+          </>
         )}
       </div>
     </>
   )
 };
+
+const PlsGiveWall: FunctionComponent = () => {
+  // Constants
+  const ResizeMaxFrequency = 15;
+
+  // Refs
+  const containerRef = useRef<HTMLDivElement>(null);
+  const firstRowRef = useRef<HTMLDivElement>(null);
+  const resizeDebounceKey = useRef<number | undefined>(undefined);
+  // State
+  const [numRows, setNumRows] = useState<number>(8);
+
+  useEffect(() => {
+    // Observe container size
+    const resizeObserver = new ResizeObserver((entries) => {
+      const containerSize = entries[0].contentRect;
+      const rowHeight = firstRowRef.current?.clientHeight
+
+      if (rowHeight) {
+        // Fire resize event, rate-limited to `ResizeMaxFrequency`
+        if (resizeDebounceKey.current === undefined) {
+          // @NOTE TypeScript is confused here between DOM and Node.js, specify `window` to disambiguate
+          resizeDebounceKey.current = window.setTimeout(() => {
+            resizeDebounceKey.current = undefined;
+            onContainerResize(containerSize.height, rowHeight);
+          }, 1000 / ResizeMaxFrequency);
+        }
+      }
+    });
+    resizeObserver.observe(containerRef.current as unknown as Element); // @TODO FUCK YOU REACT!!!!!!
+
+    // Fire initial resize
+    const containerHeight = containerRef.current?.clientHeight;
+    const rowHeight = firstRowRef.current?.clientHeight
+    if (containerHeight && rowHeight) {
+      onContainerResize(containerHeight, rowHeight);
+    }
+  }, []);
+
+  // Functions
+  /**
+   * Recalculate the number of rows visible, based on the container and row heights.
+   */
+  function onContainerResize(containerHeight: number, rowHeight: number) {
+    setNumRows(Math.floor(containerHeight / rowHeight));
+  }
+
+  /**
+   * Really silly utility function to aggregate results from an iteration
+   * into an array.
+   */
+  function repeat<TOutput>(count: number, getValue: (index: number) => TOutput) {
+    const results: TOutput[] = [];
+    for (let i = 0; i < count; i++) {
+      results.push(getValue(i));
+    }
+    return results;
+  }
+
+  return (
+    <div className="grow overflow-y-hidden" ref={containerRef} data-id="face-container">{
+      /* @NOTE There are always 50 rows visible. `numRows` just controls their opacity */
+      repeat(50, (lineIndex) => (
+        <div className="text-3xl overflow-hidden whitespace-nowrap marquee pb-4" key={lineIndex} ref={lineIndex === 0 ? firstRowRef : null}>
+          {/* @NOTE 10 is just a magic number that's more than the number of elements that can fit in a row */}
+          {repeat(10, (index) => (
+            <span
+              className="pr-8"
+              style={{
+                animationDelay: `${lineIndex * 200}ms`,
+                opacity: `${Math.pow((numRows - Math.min(numRows, lineIndex)) / numRows, 2) * 100}%`
+              }} key={index}
+            >༼ つ ◕_◕ ༽つ</span>
+          ))}
+        </div>
+      ))
+    }</div>
+  )
+}
