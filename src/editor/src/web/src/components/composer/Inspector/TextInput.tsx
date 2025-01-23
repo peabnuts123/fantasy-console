@@ -38,7 +38,7 @@ export const TextInput: FunctionComponent<Props> = observer(({ label, value, onC
   return (
     <div className="mt-2">
       <label>
-        <span className="font-bold">Name</span>
+        <span className="font-bold">{label}</span>
         <input
           type="text"
           className="w-full p-1"
