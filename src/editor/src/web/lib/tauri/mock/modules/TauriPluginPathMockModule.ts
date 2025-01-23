@@ -1,6 +1,8 @@
 import type * as TauriPath from '@tauri-apps/api/path';
+import { BaseDirectory } from '@tauri-apps/api/path';
 
-import { MockHandlerWith2Args, MockHandlerWithRestArg, throwUnhandled } from "../util";
+import { MockHandlerWith1Arg, MockHandlerWith2Args, MockHandlerWithRestArg, throwUnhandled } from "../util";
+import { Paths } from "../config";
 
 export class TauriPluginPathMockModule {
   public static handle(action: string, args: any) {
@@ -9,6 +11,8 @@ export class TauriPluginPathMockModule {
         return this.basename(args);
       case 'resolve':
         return this.resolve(args);
+      case 'resolve_directory':
+        return this.resolveDirectory(args);
       default:
         throw throwUnhandled(`[TauriPluginPathMockModule] (handle) Unimplemented action. (action='${action}') args: `, args);
     }
@@ -28,5 +32,12 @@ export class TauriPluginPathMockModule {
     return new URL(path, 'http://foo.bar')
       .pathname
       .replaceAll(/(^\/+)|(\/+$)/g, '');
+  }
+
+  public static resolveDirectory: MockHandlerWith1Arg<'directory', (directory: BaseDirectory) => string> = ({ directory }) => {
+    // @NOTE `BaseDirectory` is mounted as an Object with enum values and keys swapped at runtime,
+    // so you can resolve the name of the value like this.
+    // e.g. `BaseDirectory[BaseDirectory.AppData]` => "AppData"
+    return `${Paths.MagicFileRoot}/${BaseDirectory[directory]}`;
   }
 }

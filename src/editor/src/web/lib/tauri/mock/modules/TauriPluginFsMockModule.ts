@@ -1,6 +1,6 @@
 import type * as TauriFs from '@tauri-apps/plugin-fs';
 
-import { MockHandlerWith2Args, MockHandlerWith3Args, throwUnhandled } from "../util";
+import { MockHandlerWith2Args, throwUnhandled } from "../util";
 import { Paths } from '../config';
 import { DebouncedWatchOptions, WatchEvent } from '@tauri-apps/plugin-fs';
 import { Channel } from '@tauri-apps/api/core';
@@ -12,8 +12,12 @@ export class TauriPluginFsMockModule {
         return this.readFile(args);
       case 'write_file':
         return this.writeFile(args);
+      case 'write_text_file':
+        return this.writeTextFile(args);
       case 'watch':
         return this.watch(args);
+      case 'exists':
+        return this.exists(args);
       default:
         throw throwUnhandled(`[TauriPluginFsMockModule] (handle) Unimplemented action. (action='${action}') args: `, args);
     }
@@ -39,12 +43,21 @@ export class TauriPluginFsMockModule {
     }
   };
 
-  private static writeFile: MockHandlerWith3Args<'path', 'content', 'options', typeof TauriFs.writeFile> = () => {
+  private static writeFile(data: Uint8Array) {
     console.warn(`[TauriPluginFsMockModule] (writeFile) Tauri is mocked - no file actually written`);
+  }
+
+  private static writeTextFile(data: Uint8Array) {
+    console.warn(`[TauriPluginFsMockModule] (writeTextFile) Tauri is mocked - no file actually written`);
   }
 
   private static watch({ }: { paths: (string | URL)[], options: DebouncedWatchOptions, onEvent: Channel<WatchEvent> }) {
     console.warn(`[TauriPluginFsMockModule] (watch) Tauri is mocked - file system will not be observed`);
     return () => { /* unwatch() */ };
+  }
+
+  private static exists: MockHandlerWith2Args<'path', 'options', typeof TauriFs.exists> = ({ path, options }) => {
+    console.warn(`[TauriPluginFsMockModule] (watch) Tauri is mocked - 'exists()' will always return true`);
+    return true;
   }
 }

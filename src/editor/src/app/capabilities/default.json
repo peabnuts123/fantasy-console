@@ -2,11 +2,21 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "shell:allow-open",
     "fs:allow-app-read-recursive",
-    "fs:allow-rename"
+    "fs:allow-rename",
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [
+        {
+          "path": "$APPDATA/*"
+        }
+      ]
+    }
   ]
 }
