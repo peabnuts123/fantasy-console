@@ -123,5 +123,11 @@
       transform: translateX(0);
       animation: marquee 12s ease-in-out infinite;
     }
+
+    @media (prefers-reduced-motion) {
+      span {
+        animation: none;
+      }
+    }
   }
 }

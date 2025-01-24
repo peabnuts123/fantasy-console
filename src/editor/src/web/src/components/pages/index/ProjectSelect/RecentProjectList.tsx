@@ -140,7 +140,7 @@ const PlsGiveWall: FunctionComponent = () => {
             <span
               className="pr-8"
               style={{
-                animationDelay: `${lineIndex * 200}ms`,
+                animationDelay: `-${lineIndex * 200}ms`,
                 opacity: `${Math.pow((numRows - Math.min(numRows, lineIndex)) / numRows, 2) * 100}%`
               }} key={index}
             >༼ つ ◕_◕ ༽つ</span>
