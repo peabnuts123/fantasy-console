@@ -55,3 +55,14 @@ export function createDirView<TItem, TFile, TDirectory>(
     ...files,
   ];
 }
+
+/**
+ * Convert a given string to a "safe" file name.
+ * That is, not necessarily anything "reasonable", but not overtly
+ * forbidden by common filesystems.
+ */
+export function convertToSafeFileName(s: string): string {
+  // @NOTE Remove characters that will make FS go brrrrr
+  // Might need to be more restrictive with this later
+  return s.replace(/[\/:*?"<>|]/g, '');
+}

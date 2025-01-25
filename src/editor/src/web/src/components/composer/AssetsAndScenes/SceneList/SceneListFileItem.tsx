@@ -10,6 +10,7 @@ import { isRunningInBrowser } from "@lib/tauri";
 import { MoveSceneMutation } from "@lib/mutation/project/mutations";
 import { useSceneDrag } from "@app/interactions/scenes";
 import { ListItemCommon } from '../ListItemCommon';
+import { convertToSafeFileName } from "@lib/util/path";
 
 
 export interface SceneListVirtualFile {
@@ -154,9 +155,7 @@ const SceneNameTextInput: FunctionComponent<SceneNameTextInputProps> = ({ value,
     return `${baseName.trim()}.pzscene`;
   }
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    // @NOTE Remove characters that will make FS go brrrrr
-    // Might need to be more restrictive with this later
-    const inputText = e.target.value.replace(/[\/:*?"<>|]/g, '');
+    const inputText = convertToSafeFileName(e.target.value);
     setInputText(inputText);
   };
 

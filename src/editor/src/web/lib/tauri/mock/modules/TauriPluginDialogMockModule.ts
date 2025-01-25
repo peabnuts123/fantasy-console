@@ -26,6 +26,8 @@ export class TauriPluginDialogMockModule {
   private static save: MockHandlerWith1Arg<'options', typeof TauriDialog.save> = ({ options }) => {
     if (options?.filters?.some((filter) => filter.extensions.includes('pzcart'))) {
       return `${Paths.MagicFileRoot}/${Paths.MockCartridgeFile}`;
+    } else if (options?.filters?.some((filter) => filter.extensions.includes('pzproj'))) {
+      return `${Paths.MagicFileRoot}/${Paths.MockProjectFile}`;
     }
     throw throwUnhandled(`[TauriPluginDialogMockModule] (save) Unhandled request. options: `, options);
   };

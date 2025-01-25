@@ -13,6 +13,8 @@ export class TauriPluginPathMockModule {
         return this.resolve(args);
       case 'resolve_directory':
         return this.resolveDirectory(args);
+      case 'join':
+        return this.join(args);
       default:
         throw throwUnhandled(`[TauriPluginPathMockModule] (handle) Unimplemented action. (action='${action}') args: `, args);
     }
@@ -39,5 +41,9 @@ export class TauriPluginPathMockModule {
     // so you can resolve the name of the value like this.
     // e.g. `BaseDirectory[BaseDirectory.AppData]` => "AppData"
     return `${Paths.MagicFileRoot}/${BaseDirectory[directory]}`;
+  }
+
+  public static join: MockHandlerWithRestArg<'paths', typeof TauriPath.join> = (args) => {
+    return this.resolve(args);
   }
 }

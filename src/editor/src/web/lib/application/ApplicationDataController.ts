@@ -33,7 +33,7 @@ export class ApplicationDataController {
     }
 
     // 3. Ensure appData exists
-    const appDataPath = `${appDataDir}/${ApplicationDataFileName}`;
+    const appDataPath = await path.join(appDataDir, ApplicationDataFileName);
     const appDataExists = await exists(appDataPath);
     let appData: ApplicationData;
     if (!appDataExists) {
@@ -79,7 +79,7 @@ export class ApplicationDataController {
     await ApplicationDataSchema.parseAsync(mutatedAppData);
 
     // Write updated data
-    const appDataPath = `${appDataDir}/${ApplicationDataFileName}`;
+    const appDataPath = await path.join(appDataDir, ApplicationDataFileName);
     await writeTextFile(appDataPath, mutatedAppDataJson);
 
     // Update observed data

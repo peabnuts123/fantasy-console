@@ -9,6 +9,7 @@ export const RecentProjectDataSchema = z.object({
   name: z.string().nonempty(),
   path: z.string().nonempty(),
   lastOpened: z.coerce.date(),
+  // @TODO which scenes are open
 });
 
 /** PolyZone application data. Top-level object. */
