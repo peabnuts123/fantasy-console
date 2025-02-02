@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { readTextFile } from "@tauri-apps/plugin-fs";
+import { makeAutoObservable } from 'mobx';
 
 /** The max number of projects to keep in "recent projects" app data. */
 export const MAX_RECENT_PROJECTS = 10;
@@ -25,10 +26,10 @@ export type RecentProjectData = z.infer<typeof RecentProjectDataSchema>;
 
 /** Create default app data for when there is no app data found on-disk. */
 export function createNewApplicationData(): ApplicationData {
-  return {
+  return makeAutoObservable({
     version: '1.0',
     recentProjects: [],
-  };
+  });
 }
 
 /**
@@ -38,5 +39,7 @@ export function createNewApplicationData(): ApplicationData {
 export async function loadApplicationData(appDataPath: string): Promise<ApplicationData> {
   const json = await readTextFile(appDataPath);
   const appDataRaw = JSON.parse(json) as unknown;
-  return ApplicationDataSchema.parseAsync(appDataRaw);
+  return makeAutoObservable(
+    ApplicationDataSchema.parseAsync(appDataRaw)
+  );
 }

@@ -4,7 +4,10 @@ import { observer } from "mobx-react-lite";
 import { NewProjectScreen } from "./NewProjectScreen";
 import { RecentProjectList } from "./RecentProjectList";
 
-export const ProjectSelect: FunctionComponent = observer(() => {
+export interface ProjectSelectProps {
+  showError: (error: string) => void;
+}
+export const ProjectSelect: FunctionComponent<ProjectSelectProps> = observer(({ showError }) => {
   // State
   const [isCreatingNewProject, setIsCreatingNewProject] = useState<boolean>(false);
 
@@ -13,7 +16,10 @@ export const ProjectSelect: FunctionComponent = observer(() => {
       {isCreatingNewProject ? (
         <NewProjectScreen cancelCreate={() => setIsCreatingNewProject(false)} />
       ) : (
-        <RecentProjectList showCreateProjectScreen={() => setIsCreatingNewProject(true)} />
+        <RecentProjectList
+          showCreateProjectScreen={() => setIsCreatingNewProject(true)}
+          showErrorMessage={showError}
+        />
       )}
     </div>
   )

@@ -104,6 +104,26 @@
       4px 4px 0 #AAA;
   }
 
+  .icon-retro-shadow:not(.is-shallow) {
+    /* @NOTE SVG drop shadow offset STACKS, rather than using absolute offset */
+    /* @TODO not working in safari */
+    filter: drop-shadow(0.5px 0.5px black)
+      drop-shadow(0.5px 0.5px black)
+      drop-shadow(0.5px 0.5px black)
+      drop-shadow(0.5px 0.5px black)
+      drop-shadow(0.5px 0.5px black)
+      drop-shadow(0.5px 0.5px black)
+      drop-shadow(0.5px 0.5px black)
+      drop-shadow(0.5px 0.5px black);
+  }
+  .icon-retro-shadow.is-shallow {
+    /* @NOTE SVG drop shadow offset STACKS, rather than using absolute offset */
+    filter: drop-shadow(0.5px 0.5px black)
+      drop-shadow(0.5px 0.5px black)
+      drop-shadow(0.5px 0.5px black)
+      drop-shadow(0.5px 0.5px black);
+  }
+
   .u-animate-min-height {
     @apply transition-[min-height];
   }

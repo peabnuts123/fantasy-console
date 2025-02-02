@@ -5,13 +5,15 @@ import { ArrowUpTrayIcon, DocumentIcon } from '@heroicons/react/24/outline'
 import { useLibrary } from "@lib/index";
 import { ApplicationData } from "@lib/application";
 import { RecentProjectTile } from "./RecentProjectTile";
+import { observer } from "mobx-react-lite";
 
 
 interface RecentProjectListProps {
   showCreateProjectScreen: () => void;
+  showErrorMessage: (error: string) => void;
 }
 
-export const RecentProjectList: FunctionComponent<RecentProjectListProps> = ({ showCreateProjectScreen }) => {
+export const RecentProjectList: FunctionComponent<RecentProjectListProps> = observer(({ showCreateProjectScreen, showErrorMessage }) => {
   const { ProjectController, ApplicationDataController } = useLibrary();
 
   // State
@@ -22,8 +24,10 @@ export const RecentProjectList: FunctionComponent<RecentProjectListProps> = ({ s
 
   // Effects
   useEffect(() => {
-    ApplicationDataController.getAppDataWithCallback(setAppData);
-  }, []);
+    if (ApplicationDataController.hasLoadedAppData) {
+      setAppData(ApplicationDataController.appData);
+    }
+  }, [ApplicationDataController.hasLoadedAppData]);
 
   // Functions
   const loadProject = async () => {
@@ -63,14 +67,14 @@ export const RecentProjectList: FunctionComponent<RecentProjectListProps> = ({ s
 
             {/* Recent projects */}
             {appData.recentProjects.map((project, index) => (
-              <RecentProjectTile key={index} project={project} />
+              <RecentProjectTile key={index} project={project} showError={showErrorMessage} />
             ))}
           </>
         )}
       </div>
     </>
   )
-};
+});
 
 const PlsGiveWall: FunctionComponent = () => {
   // Constants

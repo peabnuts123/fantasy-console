@@ -8,16 +8,24 @@ import { Paths } from "@lib/tauri/mock/config";
 const ApplicationDataFileName = 'appData.json';
 
 export class ApplicationDataController {
-  private appDataPromise: Promise<ApplicationData>;
+  private _isLoadingAppData: boolean = false;
+  private _appData: ApplicationData = undefined!; // @NOTE loaded async
 
   public constructor() {
     // Eagerly load app data
     // @TODO I'd rather not have mock stuff laying around - is there a more opaque way we can do this?
-    this.appDataPromise = isRunningInBrowser() ? this.initMockAppData() : this.initAppData();
+    if (isRunningInBrowser()) {
+      this.initMockAppData()
+    } else {
+      this.initAppData();
+    }
+
     makeAutoObservable(this);
   }
 
-  private async initAppData(): Promise<ApplicationData> {
+  private async initAppData(): Promise<void> {
+    this._isLoadingAppData = true;
+
     // 1. Get data directory (i.e. `%APPDATA%/<bundle-id>`, `$HOME/Library/Application Support/<bundle-id>`, etc.)
     const appDataDir = await path.appDataDir();
 
@@ -47,7 +55,10 @@ export class ApplicationDataController {
       console.log(`[ApplicationDataController] (initAppData) Loaded existing app data: ${appDataPath}`);
     }
 
-    return appData;
+    runInAction(() => {
+      this._isLoadingAppData = false;
+      this._appData = appData;
+    })
   }
 
   /**
@@ -60,19 +71,22 @@ export class ApplicationDataController {
     // Read current app data
     const [appDataDir, appData] = await Promise.all([
       path.appDataDir(),
-      this.appDataPromise,
+      this._appData,
     ]);
 
     // Call mutator function
-    const mutatedAppData = mutator(appData);
+    let mutatedAppData = appData;
+    runInAction(() => {
+      mutatedAppData = mutator(mutatedAppData);
 
-    // Manipulate / default new data
-    // Sort recent projects by date opened, limited to max number
-    appData.recentProjects = appData.recentProjects
-      .sort((projectA, projectB) => {
-        return projectB.lastOpened.valueOf() - projectA.lastOpened.valueOf()
-      })
-      .slice(0, MAX_RECENT_PROJECTS);
+      // Manipulate / default new data
+      // Sort recent projects by date opened, limited to max number
+      appData.recentProjects = appData.recentProjects
+        .sort((projectA, projectB) => {
+          return projectB.lastOpened.valueOf() - projectA.lastOpened.valueOf()
+        })
+        .slice(0, MAX_RECENT_PROJECTS);
+    });
 
     // Validate updated app data against schema
     const mutatedAppDataJson = JSON.stringify(mutatedAppData);
@@ -84,21 +98,13 @@ export class ApplicationDataController {
 
     // Update observed data
     runInAction(() => {
-      this.appDataPromise = Promise.resolve(mutatedAppData);
+      this._appData = mutatedAppData;
     });
   }
 
-  public getAppDataWithCallback(callback: (appData: ApplicationData) => void) {
-    this.appDataPromise.then(callback);
-  }
-
-  public async getAppDataAsync(): Promise<ApplicationData> {
-    return this.appDataPromise;
-  }
-
-  private initMockAppData(): Promise<ApplicationData> {
+  private initMockAppData(): void {
     // Mock for debugging in browser. Just return a default data set.
-    return Promise.resolve({
+    this._appData = makeAutoObservable({
       version: '1.0',
       recentProjects: [
         {
@@ -118,5 +124,26 @@ export class ApplicationDataController {
         },
       ],
     });
+  }
+
+  public get isLoadingAppData() {
+    return this._isLoadingAppData;
+  }
+
+  public get hasLoadedAppData() {
+    return this._appData !== undefined;
+  }
+
+  public get appData(): ApplicationData {
+    if (this._appData === undefined) {
+      throw new AppDataNotLoadedError();
+    }
+    return this._appData;
+  }
+}
+
+export class AppDataNotLoadedError extends Error {
+  public constructor() {
+    super(`App data has not yet finished loading`);
   }
 }

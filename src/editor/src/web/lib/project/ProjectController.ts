@@ -12,6 +12,7 @@ import { invoke } from "@lib/util/TauriCommands";
 import { ProjectFilesWatcher } from "./watcher/ProjectFilesWatcher";
 import { ProblemScanner } from "./problems/ProblemScanner";
 import { ProjectData } from "./data/ProjectData";
+import { exists } from "@tauri-apps/plugin-fs";
 
 
 export class ProjectController {
@@ -36,6 +37,14 @@ export class ProjectController {
   public async loadProject(projectPath: string): Promise<void> {
     this._isLoadingProject = true;
 
+    // Check file exists
+    if (!await exists(projectPath)) {
+      runInAction(() => {
+        this._isLoadingProject = false;
+      })
+      throw new ProjectFileNotFoundError(projectPath);
+    }
+
     // Create file system relative to project
     const projectFileName = await path.basename(projectPath);
     const projectDirRoot = await path.resolve(projectPath, '..');
@@ -52,6 +61,7 @@ export class ProjectController {
 
     const projectFile = await fileSystem.readFile(projectFileName);
     const projectJson = new JsoncContainer<ProjectDefinition>(projectFile.textContent);
+    // @TODO validate :/
 
     const project = await ProjectData.new({
       rootPath: projectDirRoot,
@@ -174,3 +184,8 @@ export class ProjectNotLoadedError extends Error {
   }
 }
 
+export class ProjectFileNotFoundError extends Error {
+  public constructor(projectPath: string) {
+    super(`No project file found at path: ${projectPath}`);
+  }
+}
