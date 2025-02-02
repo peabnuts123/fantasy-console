@@ -195,7 +195,7 @@ const Editor: FunctionComponent = observer(() => {
           tabId: tab.id,
           innerContent: (
             <>
-              <span className="mr-2">{tab.label}</span>
+              <span className="mr-2">{tab.sceneViewController?.scene.path || "No scene loaded"}</span>
 
               <div
                 role="button"

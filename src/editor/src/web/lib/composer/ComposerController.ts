@@ -13,7 +13,6 @@ import { SceneViewController } from './scene/SceneViewController';
 
 export interface TabData {
   id: string;
-  label: string;
   sceneViewController?: SceneViewController;
 }
 
@@ -61,7 +60,6 @@ export class ComposerController {
         );
 
         runInAction(() => {
-          tab.label = sceneViewController.scene.path;
           tab.sceneViewController = sceneViewController;
         });
         return;
@@ -74,7 +72,6 @@ export class ComposerController {
   public openNewTab() {
     const newTabData: TabData = {
       id: uuid(),
-      label: "No scene loaded",
     };
 
     runInAction(() => {
