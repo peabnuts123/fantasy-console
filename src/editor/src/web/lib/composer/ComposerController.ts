@@ -100,7 +100,10 @@ export class ComposerController {
 
   /** Called when the app is unloaded (e.g. page refresh) */
   public onDestroy(): void {
-    /* No-op */
+    // Destroy all scene view controllers
+    for (const tab of this.currentlyOpenTabs) {
+      tab.sceneViewController?.destroy();
+    }
   }
 
   // Kind of a debug method with a bit of a mashup of concerns

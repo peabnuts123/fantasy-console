@@ -25,7 +25,7 @@ if (typeof window !== "undefined") {
 const App: FunctionComponent<AppProps> = ({ Component }) => {
   const Router = useRouter();
 
-  const library = useMemo(createLibrary, []);
+  const library = createLibrary();
 
   const { ProjectController } = library;
 

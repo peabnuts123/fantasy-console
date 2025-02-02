@@ -1,11 +1,12 @@
 import { type FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
+import { ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/outline'
 
 import { useLibrary } from "@lib/index";
 import { AppTile } from "./AppTile";
 
 export const ToolsMenu: FunctionComponent = observer(() => {
-  const { ProjectController } = useLibrary();
+  const { ProjectController, unloadProject } = useLibrary();
   const { project } = ProjectController;
 
   return (
@@ -18,6 +19,11 @@ export const ToolsMenu: FunctionComponent = observer(() => {
         <AppTile label="Soon&trade;" />
         <AppTile label="Soon&trade;" />
         <AppTile label="Soon&trade;" />
+        <AppTile className="hover:!bg-pink-200 hover:!border-pink-300 focus:!bg-pink-200 focus:!border-pink-300" onClick={unloadProject} content={
+          <div className="font-bold">
+            <ArrowLeftEndOnRectangleIcon className="icon mr-1" /> Close project
+          </div>
+        } />
       </div>
     </>
   );
