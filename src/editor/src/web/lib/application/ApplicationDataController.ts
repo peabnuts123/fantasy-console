@@ -108,19 +108,19 @@ export class ApplicationDataController {
       version: '1.0',
       recentProjects: [
         {
-          name: "Mock project 1",
+          name: "Sample Project",
           lastOpened: new Date(),
           path: `${Paths.MagicFileRoot}/${Paths.MockProjectFile}`,
         },
         {
-          name: "Mock project 2",
+          name: "Санкт-Петербург: Origins",
           lastOpened: new Date(),
-          path: `C:\\Users\\jeff.andrews\\Documents\\Projects\\Misc\\fantasy-console\\src\\editor\\src\\web\\public\\project\\sample.pzproj`
+          path: `${Paths.MagicFileRoot}/${Paths.MockProjectFile}`
         },
         {
-          name: "Mock project 1",
+          name: "Mystery of Myanmar",
           lastOpened: new Date(),
-          path: `/Users/jeff.andrews/Documents/Projects/Misc/fantasyconsole/src/editor/src/web/public/project/sample.pzproj`
+          path: `${Paths.MagicFileRoot}/${Paths.MockProjectFile}`
         },
       ],
     });
