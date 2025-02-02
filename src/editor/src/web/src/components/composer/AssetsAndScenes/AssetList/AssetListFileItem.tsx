@@ -4,7 +4,7 @@ import { DocumentIcon, DocumentTextIcon, PhotoIcon, CubeIcon } from '@heroicons/
 import { observer } from "mobx-react-lite";
 
 import { useAssetDrag } from "@app/interactions/assets";
-import type { AssetDbVirtualFile } from "@lib/project/AssetDb";
+import type { AssetDbVirtualFile } from "@lib/project/data/AssetDb";
 import { ListItemCommon } from '../ListItemCommon';
 
 

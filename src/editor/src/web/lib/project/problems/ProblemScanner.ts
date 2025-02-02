@@ -1,4 +1,4 @@
-import { AssetDb } from "../AssetDb";
+import { AssetDb } from "../data/AssetDb";
 import { ProjectController } from "../ProjectController";
 import { ProjectAssetEvent } from "../watcher/assets";
 import { ProjectFileEvent } from "../watcher/project";

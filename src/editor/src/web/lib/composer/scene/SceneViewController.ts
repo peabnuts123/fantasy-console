@@ -31,7 +31,7 @@ import { CameraComponentData, DirectionalLightComponentData, IComposerComponentD
 import { SceneData, GameObjectData, AssetData } from '@lib/project/data';
 import { ProjectSceneEventType } from '@lib/project/watcher/scenes';
 import { ProjectFileEventType } from '@lib/project/watcher/project';
-import { SceneDbRecord } from '@lib/project/SceneDb';
+import { SceneDbRecord } from '@lib/project/data/SceneDb';
 import { ComposerSelectionCache } from '../util/ComposerSelectionCache';
 import { ISelectableObject, isSelectableObject, MeshComponent } from './components';
 import { CurrentSelectionTool, SelectionManager } from './SelectionManager';

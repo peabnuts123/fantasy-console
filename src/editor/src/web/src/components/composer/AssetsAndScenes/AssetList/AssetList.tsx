@@ -5,7 +5,7 @@ import { observer } from "mobx-react-lite";
 import { useLibrary } from "@lib/index";
 import { AssetListFileItem } from "./AssetListFileItem";
 import { AssetListDirectoryItem } from "./AssetListDirectoryItem";
-import { AssetDbVirtualDirectory, AssetDbVirtualFile } from "@lib/project/AssetDb";
+import { AssetDbVirtualDirectory, AssetDbVirtualFile } from "@lib/project/data/AssetDb";
 import { createDirView } from "@lib/util/path";
 import { ListItemCommon } from "../ListItemCommon";
 

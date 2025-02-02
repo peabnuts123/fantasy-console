@@ -4,8 +4,8 @@ import { SceneDefinition as RuntimeSceneDefinition } from "@fantasy-console/runt
 import { IFileSystem } from "@fantasy-console/runtime/src/filesystem";
 
 import { JsoncContainer } from "@lib/util/JsoncContainer";
-import { SceneDefinition, SceneManifest, toRuntimeSceneDefinition } from "./definition";
-import { SceneData } from "./data";
+import { SceneDefinition, SceneManifest, toRuntimeSceneDefinition } from "../definition";
+import { SceneData } from ".";
 import { AssetDb } from "./AssetDb";
 
 export interface SceneDbRecord {

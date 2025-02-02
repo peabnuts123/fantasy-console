@@ -2,7 +2,7 @@ import { FunctionComponent } from "react";
 import { FolderIcon } from '@heroicons/react/24/outline'
 import { observer } from "mobx-react-lite";
 
-import type { AssetDbVirtualDirectory } from "@lib/project/AssetDb";
+import type { AssetDbVirtualDirectory } from "@lib/project/data/AssetDb";
 import { ListItemCommon } from '../ListItemCommon';
 
 export interface AssetListDirectoryItemProps {

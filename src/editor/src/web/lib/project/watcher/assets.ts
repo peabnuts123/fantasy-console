@@ -7,7 +7,7 @@ import { resolvePath } from "@lib/util/JsoncContainer";
 import { AssetDefinition, ProjectDefinition } from "../definition";
 import { ProjectController } from "../ProjectController";
 import { AssetData, createAssetData } from "../data/AssetData";
-import { AssetDb } from "../AssetDb";
+import { AssetDb } from "../data/AssetDb";
 
 
 // EVENTS - INCOMING

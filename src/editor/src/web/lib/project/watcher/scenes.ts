@@ -7,7 +7,7 @@ import { JsoncContainer, resolvePath } from "@lib/util/JsoncContainer";
 import { SceneData } from "@lib/project/data";
 import { ProjectDefinition, SceneDefinition, SceneManifest } from "../definition";
 import { ProjectController } from "../ProjectController";
-import { SceneDbRecord } from "../SceneDb";
+import { SceneDbRecord } from "../data/SceneDb";
 
 export interface RawProjectScene {
   id: string;

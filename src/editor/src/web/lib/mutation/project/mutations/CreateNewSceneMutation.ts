@@ -47,6 +47,8 @@ export class CreateNewSceneMutation implements IProjectMutation {
       if (ProjectController.projectDefinition.value.scenes[sceneIndex].hash !== newSceneHash) {
         let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[sceneIndex].hash);
         ProjectController.projectDefinition.mutate(jsonPath, newSceneHash);
+        // @NOTE re-invoke persistChanges() after editing project file a second time
+        return ProjectController.mutator.persistChanges();
       }
     });
 

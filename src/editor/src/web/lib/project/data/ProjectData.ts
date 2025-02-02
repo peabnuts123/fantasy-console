@@ -1,8 +1,8 @@
 import { makeAutoObservable } from "mobx";
 import { IFileSystem } from "@fantasy-console/runtime/src/filesystem";
-import { AssetDb } from "../AssetDb";
 import { ProjectDefinition, ProjectManifest } from "../definition";
-import { SceneDb } from "../SceneDb";
+import { AssetDb } from "./AssetDb";
+import { SceneDb } from "./SceneDb";
 
 export interface ProjectDataConstructorArgs {
   rootPath: string;

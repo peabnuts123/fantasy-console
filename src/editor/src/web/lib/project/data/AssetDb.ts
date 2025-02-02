@@ -5,9 +5,9 @@ import { getFileExtension } from "@fantasy-console/runtime/src/util";
 import type { IFileSystem, VirtualFile } from '@fantasy-console/runtime/src/filesystem';
 import { AssetType, AssetTypeMap } from '@fantasy-console/runtime/src/cartridge/data';
 
-import { AssetData, createAssetData } from './data/AssetData';
+import { AssetData, createAssetData } from './AssetData';
 import { makeAutoObservable } from 'mobx';
-import { AssetDefinition } from './definition';
+import { AssetDefinition } from '../definition';
 
 
 export type AssetDbVirtualNode = AssetDbVirtualFile | AssetDbVirtualDirectory;
