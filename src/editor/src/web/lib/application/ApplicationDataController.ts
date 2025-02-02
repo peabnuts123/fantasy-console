@@ -9,7 +9,7 @@ const ApplicationDataFileName = 'appData.json';
 
 export class ApplicationDataController {
   private _isLoadingAppData: boolean = false;
-  private _appData: ApplicationData = undefined!; // @NOTE loaded async
+  private _appData: ApplicationData | undefined = undefined; // @NOTE loaded async
 
   public constructor() {
     // Eagerly load app data
@@ -68,11 +68,25 @@ export class ApplicationDataController {
    * @param mutator Mutator function
    */
   public async mutateAppData(mutator: (appData: ApplicationData) => ApplicationData): Promise<void> {
-    // Read current app data
-    const [appDataDir, appData] = await Promise.all([
-      path.appDataDir(),
-      this._appData,
-    ]);
+    // Get app data... hopefully it has finished loading
+    let appData: ApplicationData;
+    if (this.hasLoadedAppData) {
+      appData = this.appData;
+    } else {
+      // Eugh, we gotta wait for it async,
+      // even though it's a sync property 😕😕😕
+      // I'M SORRY 😭😭😭
+      appData = await new Promise((resolve) => {
+        const intervalKey = setInterval(() => {
+          if (this.hasLoadedAppData) {
+            clearInterval(intervalKey);
+            resolve(this.appData);
+          }
+        }, 50);
+      })
+    }
+
+    const appDataDir = await path.appDataDir();
 
     // Call mutator function
     let mutatedAppData = appData;
