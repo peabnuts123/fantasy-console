@@ -175,15 +175,15 @@ export class ProjectScenesWatcher {
       return {
         type: ProjectSceneEventType.Create,
         scene: newSceneData,
-      };
+      } satisfies ProjectSceneCreatedEvent;
     });
   }
 
-  private async applyDelete({ delete: event }: RawSceneDeletedEvent): Promise<ProjectSceneDeletedEvent> {
+  private applyDelete({ delete: event }: RawSceneDeletedEvent): Promise<ProjectSceneDeletedEvent> {
     const { sceneId } = event;
     const sceneDb = this.projectController.project.scenes;
 
-    return runInAction(() => {
+    return Promise.resolve(runInAction(() => {
       // 1. Update data
       const scene = sceneDb.getById(sceneId);
       if (scene === undefined) throw new Error(`Cannot apply 'Delete' event: No scene found in SceneDb with id: ${sceneId}`);
@@ -199,8 +199,8 @@ export class ProjectScenesWatcher {
       return {
         type: ProjectSceneEventType.Delete,
         scene: scene,
-      };
-    });
+      } satisfies ProjectSceneDeletedEvent;
+    }));
   }
 
   private async applyModify({ modify: event }: RawSceneModifiedEvent): Promise<ProjectSceneModifiedEvent> {
@@ -232,11 +232,11 @@ export class ProjectScenesWatcher {
       let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[jsonIndex].hash);
       this.projectController.projectDefinition.mutate(jsonPath, newHash);
 
-      return Promise.resolve({
+      return {
         type: ProjectSceneEventType.Modify,
         scene,
         oldHash,
-      });
+      } satisfies ProjectSceneModifiedEvent;
     });
   }
 
@@ -248,7 +248,7 @@ export class ProjectScenesWatcher {
     // If you rename a file AND modify it, the fs watcher will emit a Delete + Create
     // This is helpful in this instance because it means we don't have to re-scan the file
 
-    return runInAction(() => {
+    return Promise.resolve(runInAction(() => {
       // 1. Update data
       const scene = sceneDb.getById(sceneId);
       if (scene === undefined) throw new Error(`Cannot apply 'Rename' event: No scene found in SceneDb with id: ${sceneId}`);
@@ -263,11 +263,11 @@ export class ProjectScenesWatcher {
       let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[jsonIndex].path);
       this.projectController.projectDefinition.mutate(jsonPath, newPath);
 
-      return Promise.resolve({
+      return {
         type: ProjectSceneEventType.Rename,
         scene: scene,
         oldPath,
-      });
-    });
+      } satisfies ProjectSceneRenamedEvent;
+    }));
   }
 }
