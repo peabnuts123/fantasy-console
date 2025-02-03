@@ -92,6 +92,9 @@ export class SceneViewController {
       }
     });
     const stopListeningToSceneFileEvents = projectController.filesWatcher.onSceneChanged((event) => {
+      // Ignore events for other scenes
+      if (event.scene.data.id !== this.scene.id) return;
+
       if (event.type === ProjectSceneEventType.Modify) {
         void this.reloadSceneData(event.scene);
       } else if (event.type === ProjectSceneEventType.Delete) {
