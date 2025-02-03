@@ -125,15 +125,15 @@ const Editor: FunctionComponent = observer(() => {
         const newTabData = createNewTab();
         void ComposerController.loadSceneForTab(newTabData.id, sceneData);
       } else {
-        // Replace the current tab
-
-        const currentlyFocusedTabData = ComposerController.currentlyOpenTabs.find((tab) => tab.id === TabState.currentTabPageId)!;
-        if (currentlyFocusedTabData.sceneViewController?.scene.id === sceneData.id) {
-          // Do not re-load the same scene
+        // If scene is already open - switch to tab
+        const existingTabForScene = ComposerController.currentlyOpenTabs.find((tab) => tab.sceneViewController?.scene.id === sceneData.id);
+        if (existingTabForScene !== undefined) {
+          TabState.setCurrentTabPageId(existingTabForScene.id)
           return;
+        } else {
+          // Replace the current tab
+          void ComposerController.loadSceneForTab(TabState.currentTabPageId, sceneData);
         }
-
-        void ComposerController.loadSceneForTab(TabState.currentTabPageId, sceneData);
       }
     }
   );
@@ -173,6 +173,13 @@ const Editor: FunctionComponent = observer(() => {
   }
 
   const openSceneInAppropriateTab = (scene: SceneData) => {
+    // If scene is already open - switch to tab
+    const existingTabForScene = ComposerController.currentlyOpenTabs.find((tab) => tab.sceneViewController?.scene.id === scene.id);
+    if (existingTabForScene !== undefined) {
+      TabState.setCurrentTabPageId(existingTabForScene.id)
+      return;
+    }
+
     const currentlyFocusedTabData = ComposerController.currentlyOpenTabs.find((tab) => tab.id === TabState.currentTabPageId)
 
     // If current tab is empty, replace current tab,
