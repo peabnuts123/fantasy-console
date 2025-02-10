@@ -332,8 +332,9 @@ pub async fn create_ignore_filter(root_path: &PathBuf) -> IgnoreFilter {
     let mut ignore_filter = IgnoreFilter::new(root_path, &all_ignore_files)
         .await
         .unwrap();
+
     ignore_filter
-        .add_globs(&EXCLUDED_PATH_GLOBS, Some(root_path))
+        .add_globs(&EXCLUDED_PATH_GLOBS, Some(&PathBuf::from(prefix(root_path))))
         .unwrap();
 
     ignore_filter
@@ -361,4 +362,21 @@ pub async fn get_file_hash(path: &PathBuf) -> String {
 
     let result = hasher.finish();
     format!("{:x}", result)
+}
+
+// @NOTE Only needed until this PR is merged: https://github.com/watchexec/watchexec/pull/908
+// From watchexec source: // https://github.com/watchexec/watchexec/blob/c0b01a43a39bfbc5e4aa5a19d5791326d30cb57e/crates/ignore-files/src/filter.rs#L410
+fn prefix<T: AsRef<std::path::Path>>(path: T) -> String {
+    let path = path.as_ref();
+
+    let Some(prefix) = path.components().next() else {
+        return "/".into();
+    };
+
+    match prefix {
+        std::path::Component::Prefix(prefix_component) => {
+            prefix_component.as_os_str().to_str().unwrap_or("/").into()
+        }
+        _ => "/".into(),
+    }
 }
