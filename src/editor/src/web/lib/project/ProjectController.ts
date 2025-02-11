@@ -22,7 +22,7 @@ export class ProjectController {
   private readonly ApplicationDataController: ApplicationDataController;
   private _project: ProjectData | undefined = undefined;
   private _fileSystem: TauriFileSystem | undefined = undefined;
-  private _assetsWatcher: ProjectFilesWatcher | undefined = undefined;
+  private _filesWatcher: ProjectFilesWatcher | undefined = undefined;
   private problemScanner: ProblemScanner | undefined = undefined;
 
   public constructor(ApplicationDataController: ApplicationDataController) {
@@ -96,8 +96,8 @@ export class ProjectController {
     });
 
     // Start asset watcher
-    this._assetsWatcher = new ProjectFilesWatcher(this);
-    await this._assetsWatcher.watch();
+    this._filesWatcher = new ProjectFilesWatcher(this);
+    await this._filesWatcher.watch();
 
     // Start problem scanner
     // @TODO just pass the watcher in directly (?)
@@ -134,7 +134,7 @@ export class ProjectController {
     if (this.hasLoadedProject) {
       invoke('unload_project');
     }
-    this._assetsWatcher?.onDestroy();
+    this._filesWatcher?.onDestroy();
     this.problemScanner?.onDestroy();
   }
 
@@ -171,10 +171,10 @@ export class ProjectController {
   }
 
   public get filesWatcher(): ProjectFilesWatcher {
-    if (this._assetsWatcher === undefined) {
+    if (this._filesWatcher === undefined) {
       throw new ProjectNotLoadedError();
     }
-    return this._assetsWatcher;
+    return this._filesWatcher;
   }
 }
 

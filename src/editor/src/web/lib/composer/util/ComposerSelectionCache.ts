@@ -3,6 +3,7 @@ import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 import { GameObjectData } from "@lib/project/data";
 
 
+// @TODO Move and rename this. It is specific to a SceneViewController!
 export class ComposerSelectionCache {
   private cache: Map<AbstractMesh, GameObjectData>;
 
@@ -27,6 +28,6 @@ export class ComposerSelectionCache {
   }
 
   public clear() {
-    this.cache.clear;
+    this.cache.clear();
   }
 }

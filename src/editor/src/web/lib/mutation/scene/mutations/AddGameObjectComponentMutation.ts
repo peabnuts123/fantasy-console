@@ -21,14 +21,7 @@ export class AddGameObjectComponentMutation implements ISceneMutation {
 
     // 2. Update scene
     const gameObject = gameObjectData.sceneInstance!;
-    SceneViewController.createGameObjectComponent(gameObject, this.newComponent).then((component) => {
-      if (component !== undefined) {
-        if (isSelectableObject(component)) {
-          SceneViewController.addToSelectionCache(gameObjectData, component);
-        }
-        gameObject.addComponent(component);
-      }
-    });
+    SceneViewController.createGameObjectComponent(gameObjectData, gameObject, this.newComponent);
 
     // 3. Update JSONC
     const newComponentDefinition = this.newComponent.toComponentDefinition();

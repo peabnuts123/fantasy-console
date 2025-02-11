@@ -31,30 +31,8 @@ export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
 
     // 2. Update babylon scene
     const gameObject = gameObjectData.sceneInstance!;
-    const oldMeshComponent = gameObject.components.find((component) => component.id === this.componentId) as MeshComponent;
-    // - Remove from selection cache
-    SceneViewController.removeFromSelectionCache(oldMeshComponent);
-    // - Cull old assets
-    oldMeshComponent.onDestroy();
-    // - Load new assets (if applicable)
-    let meshAssetPromise: Promise<AssetContainer>;
-    if (this.meshAsset !== undefined) {
-      // @NOTE Setting mesh to a defined value
-      meshAssetPromise = SceneViewController.loadAssetCached(this.meshAsset)
-    } else {
-      meshAssetPromise = Promise.resolve(new AssetContainer());
-    }
-
-    meshAssetPromise.then((newAssetContainer) => {
-      const newMeshComponent = new MeshComponent(componentData.id, gameObject, newAssetContainer);
-      // - Add to selection cache
-      SceneViewController.addToSelectionCache(gameObjectData, newMeshComponent);
-      // - Replace old component
-      gameObjectData.sceneInstance!.components[componentIndex] = newMeshComponent;
-      componentData.componentInstance = newMeshComponent;
-      // - Update selection gizmo
-      SceneViewController.selectionManager.updateGizmos();
-    });
+    const meshComponent = gameObject.components.find((component) => component.id === this.componentId) as MeshComponent;
+    /* @NOTE async */ void SceneViewController.reinitializeComponentInstance(meshComponent, gameObjectData);
 
     // 3. Modify JSONC
     // - Replace ID of asset in component definition

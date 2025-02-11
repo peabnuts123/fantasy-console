@@ -12,6 +12,7 @@ export class MeshComponentData implements IComposerComponentData {
   /** {@link MeshAssetData} containing the mesh asset. */
   public meshAsset?: MeshAssetData;
 
+  // @TODO is this good? Is this useful? I think maybe it should be removed
   public componentInstance: MeshComponent | undefined = undefined;
 
   public constructor(id: string, meshAsset: MeshAssetData | undefined) {

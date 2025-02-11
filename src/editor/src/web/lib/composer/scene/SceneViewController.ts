@@ -33,8 +33,9 @@ import { ProjectSceneEventType } from '@lib/project/watcher/scenes';
 import { ProjectFileEventType } from '@lib/project/watcher/project';
 import { SceneDbRecord } from '@lib/project/data/SceneDb';
 import { ComposerSelectionCache } from '../util/ComposerSelectionCache';
-import { ISelectableObject, isSelectableObject, MeshComponent } from './components';
+import { isAssetDependentComponent, ISelectableObject, isSelectableObject, MeshComponent } from './components';
 import { CurrentSelectionTool, SelectionManager } from './SelectionManager';
+import { AssetDependencyCache } from './AssetDependencyCache';
 
 export class SceneViewController {
   private _scene: SceneData;
@@ -46,7 +47,8 @@ export class SceneViewController {
   private readonly engine: Engine;
   private readonly babylonScene: BabylonScene;
   private sceneCamera!: FreeCameraBabylon;
-  private readonly assetCache: Map<AssetData, AssetContainer>;
+  private readonly assetDependencyCache: AssetDependencyCache;
+  private readonly assetCache: Map<string, AssetContainer>;
   private readonly _selectionManager: SelectionManager;
   private readonly babylonToWorldSelectionCache: ComposerSelectionCache;
   private readonly unlistenToFileSystemEvents: () => void;
@@ -56,6 +58,7 @@ export class SceneViewController {
     this._sceneJson = sceneJson;
     this.projectController = projectController;
     this.assetCache = new Map();
+    this.assetDependencyCache = new AssetDependencyCache(this, projectController.filesWatcher);
     this.babylonToWorldSelectionCache = new ComposerSelectionCache();
     this._mutator = new SceneViewMutator(
       this,
@@ -172,6 +175,7 @@ export class SceneViewController {
 
   public destroy() {
     this.assetCache.forEach((asset) => asset.dispose());
+    this.assetDependencyCache.onDestroy();
     this.selectionManager.destroy();
     this.babylonScene.onPointerObservable.clear();
     this.babylonScene.dispose();
@@ -193,6 +197,9 @@ export class SceneViewController {
 
     for (let sceneObject of this.scene.objects) {
       // @TODO do this more in parallel?
+      // @TODO store this in a World or something
+      //  - remove need for `sceneInstance`
+      //  - call `destroy` on the objects, lol
       const gameObject = await this.createGameObject(sceneObject);
     }
   }
@@ -233,24 +240,20 @@ export class SceneViewController {
     transform.gameObject = gameObject;
 
     // Store reverse reference to new instance
+    // @TODO nah I actually don't know if I wanna do this
     gameObjectData.sceneInstance = gameObject;
 
     // Load game object components
-    for (let componentData of gameObjectData.components) {
-      const component = await this.createGameObjectComponent(gameObject, componentData);
-      // @NOTE This logic is duplicated in `AddGameObjectComponentMutation`
-      if (component !== undefined) {
-        if (isSelectableObject(component)) {
-          this.addToSelectionCache(gameObjectData, component);
-        }
-        gameObject.addComponent(component);
-      }
-    }
+    await Promise.all(gameObjectData.components.map((componentData) =>
+      this.createGameObjectComponent(gameObjectData, gameObject, componentData)
+    ));
 
     return gameObject;
   }
 
-  public async createGameObjectComponent(gameObject: GameObjectRuntime, componentData: IComposerComponentData): Promise<GameObjectComponent | undefined> {
+  public async createGameObjectComponent(gameObjectData: GameObjectData, gameObject: GameObjectRuntime, componentData: IComposerComponentData): Promise<GameObjectComponent | undefined> {
+    let newComponent: GameObjectComponent | undefined = undefined;
+
     if (componentData instanceof MeshComponentData) {
       /* Mesh component */
       let meshAsset: AssetContainer;
@@ -259,10 +262,9 @@ export class SceneViewController {
       } else {
         meshAsset = new AssetContainer(this.babylonScene!);
       }
-      const meshComponent = new MeshComponent(componentData.id, gameObject, meshAsset);
+      const meshComponent = newComponent = new MeshComponent(componentData, gameObject, meshAsset);
       // Store reverse reference to new instance for managing instance later (e.g. autoload)
       componentData.componentInstance = meshComponent;
-      return meshComponent;
     } else if (componentData instanceof ScriptComponentData) {
       /* @NOTE Script has no effect in the Composer */
     } else if (componentData instanceof CameraComponentData) {
@@ -273,17 +275,59 @@ export class SceneViewController {
       light.specular = Color3Babylon.Black();
       light.intensity = componentData.intensity;
       light.diffuse = toColor3Babylon(componentData.color);
-      return new DirectionalLightComponentRuntime(componentData.id, gameObject, light);
+      newComponent = new DirectionalLightComponentRuntime(componentData.id, gameObject, light);
     } else if (componentData instanceof PointLightComponentData) {
       /* Point Light component */
       const light = new PointLightBabylon(`light_point`, Vector3Babylon.Zero(), this.babylonScene);
       light.specular = Color3Babylon.Black();
       light.intensity = componentData.intensity;
       light.diffuse = toColor3Babylon(componentData.color);
-      return new PointLightComponentRuntime(componentData.id, gameObject, light);
+      newComponent = new PointLightComponentRuntime(componentData.id, gameObject, light);
     } else {
-      console.error(`[SceneViewController] (loadSceneObject) Unrecognised component data: `, componentData);
+      console.error(`[SceneViewController] (createGameObjectComponent) Unrecognised component data: `, componentData);
     }
+
+    // Only continue processing if a component was actually made
+    if (newComponent === undefined) return;
+
+    // Store selectable objects in cache (for efficient lookup of model => game object on click)
+    if (isSelectableObject(newComponent)) {
+      this.addToSelectionCache(gameObjectData, newComponent);
+    }
+
+    // Store asset dependencies in a cache (for reloading components when assets change)
+    if (isAssetDependentComponent(newComponent)) {
+      this.assetDependencyCache.registerDependency(newComponent.assetDependencyIds, newComponent, gameObjectData);
+    }
+
+    gameObject.addComponent(newComponent);
+  }
+
+  /**
+   * Reload the instance of a component from its definition for an object loaded in the scene view.
+   * @param componentInstance Current instance of the component. This instance will be destroyed.
+   * @param gameObjectData GameObject on which this component lives
+   */
+  public async reinitializeComponentInstance(componentInstance: GameObjectComponent, gameObjectData: GameObjectData) {
+    const gameObjectInstance = componentInstance.gameObject as GameObjectRuntime;
+    const componentData = gameObjectData.components.find((component) => component.id === componentInstance.id);
+    if (componentData === undefined) throw new Error(`Cannot reinitialize component. Component with ID '${componentInstance.id}' is not a component of GameObject with ID '${gameObjectData.id}'`);
+
+    // Remove selectable components from selection cache
+    if (isSelectableObject(componentInstance)) {
+      this.removeFromSelectionCache(componentInstance);
+    }
+
+    // Remove registered asset dependency (since component instance is about to be destroyed)
+    if (isAssetDependentComponent(componentInstance)) {
+      this.assetDependencyCache.unregisterDependency(componentInstance);
+    }
+
+    // Remove (and destroy) component instance
+    gameObjectInstance.removeComponent(componentInstance.id);
+
+    // Re-create component instance
+    await this.createGameObjectComponent(gameObjectData, gameObjectInstance, componentData);
   }
 
   private async reloadSceneData(scene: SceneDbRecord): Promise<void> {
@@ -291,6 +335,7 @@ export class SceneViewController {
     this.selectionManager.deselectAll();
     this.babylonToWorldSelectionCache.clear();
     this.assetCache.clear();
+    this.assetDependencyCache.clear();
 
     const rootNodes = [...this.babylonScene.rootNodes];
     for (const sceneObject of rootNodes) {
@@ -308,13 +353,17 @@ export class SceneViewController {
     await this.createScene();
   }
 
+  public invalidateAssetCache(assetId: string) {
+    this.assetCache.delete(assetId);
+  }
+
   /**
    * Load an {@link AssetData} through a cache.
    * @param asset Asset to load.
    * @returns The new asset, or a reference to the existing asset if it existed in the cache.
    */
   public async loadAssetCached(asset: AssetData): Promise<AssetContainer> {
-    let cached = this.assetCache.get(asset);
+    let cached = this.assetCache.get(asset.id);
     if (cached) {
       return cached;
     } else {
@@ -325,7 +374,7 @@ export class SceneViewController {
         undefined,
         asset.fileExtension
       );
-      this.assetCache.set(asset, assetContainer);
+      this.assetCache.set(asset.id, assetContainer);
       return assetContainer;
     }
   }
