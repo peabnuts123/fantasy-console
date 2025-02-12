@@ -4,7 +4,7 @@
     "editor.insertSpaces": true,
   },
   "eslint.workingDirectories": [
-    "src/editor/src/web",
+    "src/editor",
   ],
   "rust-analyzer.linkedProjects": [
     "src/editor/src/app/Cargo.toml",

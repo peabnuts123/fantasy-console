@@ -35,7 +35,7 @@ interface UseDropState<TDragData, TDropData> {
   __dropZoneId: string;
 }
 
-export function useDrop<TDragData, TDropData = never, TElementType extends HTMLElement = HTMLDivElement>(options: UseDropOptions<TDragData, TDropData>): [UseDropState<TDragData, TDropData>, RefObject<TElementType>] {
+export function useDrop<TDragData, TDropData = never, TElementType extends HTMLElement = HTMLDivElement>(options: UseDropOptions<TDragData, TDropData>): [UseDropState<TDragData, TDropData>, RefObject<TElementType | null>] {
   // Store drag and drop data in a ref so that callbacks always reference the current version
   const dragAndDropDataRef = useRef<ReturnType<typeof useDragAndDropData>>(undefined!);
   dragAndDropDataRef.current = useDragAndDropData();
@@ -44,7 +44,7 @@ export function useDrop<TDragData, TDropData = never, TElementType extends HTMLE
   /** Ref used to store the ID of this drop zone */
   const dropZoneIdRef = useRef<string>(undefined!);
   /** Ref used to store the previous value of `isDragging`s */
-  const _isDraggingOldValue = useRef<boolean>();
+  const _isDraggingOldValue = useRef<boolean>(undefined);
   /** Ref used to track which element is the the drag is currently over */
   const currentDragHoverTarget = useRef<EventTarget | null>(null);
 

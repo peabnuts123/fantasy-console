@@ -17,7 +17,7 @@ interface UseDragState {
   isDragging: boolean;
 }
 
-export function useDrag<TDragData, TElementType extends HTMLElement = HTMLDivElement>(options: UseDragOptions<TDragData>): [UseDragState, RefObject<TElementType>] {
+export function useDrag<TDragData, TElementType extends HTMLElement = HTMLDivElement>(options: UseDragOptions<TDragData>): [UseDragState, RefObject<TElementType | null>] {
   // Store drag and drop data in a ref so that callbacks always reference the current version
   const dragAndDropDataRef = useRef<DragAndDropData>(undefined!);
   dragAndDropDataRef.current = useDragAndDropData();

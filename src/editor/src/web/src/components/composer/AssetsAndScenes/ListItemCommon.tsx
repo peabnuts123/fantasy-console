@@ -1,4 +1,4 @@
-import { ComponentType, createElement, ElementType, FunctionComponent, HTMLAttributes, LegacyRef, MouseEventHandler, PropsWithChildren, ReactNode } from "react";
+import { ComponentType, createElement, FunctionComponent, Ref, MouseEventHandler, ReactNode } from "react";
 import { observer } from "mobx-react-lite";
 import cn from 'classnames';
 
@@ -10,7 +10,7 @@ export interface ListItemCommonProps {
   onClick?: () => void;
   onContextMenu?: MouseEventHandler<HTMLButtonElement|HTMLDivElement>;
   Icon?: ComponentType<React.HTMLAttributes<Element>>;
-  innerRef?: LegacyRef<any>;
+  innerRef?: Ref<any>;
 }
 
 export const ListItemCommon: FunctionComponent<ListItemCommonProps> = observer(({ onClick, onContextMenu, Icon, label, innerContent, classNames, innerRef }) => {

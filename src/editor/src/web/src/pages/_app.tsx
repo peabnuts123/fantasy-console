@@ -1,5 +1,5 @@
 import type { FunctionComponent } from 'react';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -40,7 +40,7 @@ const App: FunctionComponent<AppProps> = ({ Component }) => {
     // ... and the app is not viewing the 404 page
     Router.route !== '/404'
   ) {
-    isRedirecting = true
+    isRedirecting = true;
     if (typeof window !== 'undefined') {
       void Router.push('/');
     }
@@ -51,7 +51,7 @@ const App: FunctionComponent<AppProps> = ({ Component }) => {
     window.addEventListener('pagehide', library.onPageUnload);
   }, []);
 
-  return <>
+  return (<>
     <Head>
       <meta charSet="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -69,7 +69,7 @@ const App: FunctionComponent<AppProps> = ({ Component }) => {
         <Component />
       )}
     </LibraryContext.Provider>
-  </>;
+  </>);
 };
 
 export default App;
@@ -83,7 +83,7 @@ export default App;
   rendering of Next.js. I really, genuinely wish I could disable this and just use
   Next.js as a "managed React installation".
 */
-function __hackNextJsServerSideRenderingForTauri() {
+function __hackNextJsServerSideRenderingForTauri(): void {
   // `global` is the Node.js global equivalent to `window` (its supported by a few browsers now too)
   if (typeof global !== 'undefined' && typeof window === 'undefined') {
     // "Just enough mocking"
@@ -91,13 +91,10 @@ function __hackNextJsServerSideRenderingForTauri() {
       location: {
         protocol: 'http://',
         hostname: 'localhost',
-        port: '3000'
+        port: '3000',
       },
       document: {
         querySelector: () => { },
-      },
-      navigator: {
-        userAgent: "",
       },
       __TAURI_INTERNALS__: {
         metadata: {
@@ -106,15 +103,19 @@ function __hackNextJsServerSideRenderingForTauri() {
           },
           currentWebview: {
             label: "",
-          }
-        }
-      }
+          },
+        },
+      },
     };
     // Define `window`
     (global as any)['window'] = mockWindow;
     // Define all properties of `window` on the global object to simulate `window` containing itself
     for (const prop in mockWindow) {
-      (global as any)[prop] = mockWindow[prop as keyof typeof mockWindow];
+      try {
+        (global as any)[prop] = mockWindow[prop as keyof typeof mockWindow];
+      } catch (e) {
+        throw new Error(`Failed to mock property '${prop}' on window: ${e}`);
+      }
     }
   }
 }
