@@ -1,5 +1,5 @@
 import { FunctionComponent } from "react";
-import { FolderIcon } from '@heroicons/react/24/outline'
+import { FolderIcon } from '@heroicons/react/24/outline';
 import cn from 'classnames';
 import { observer } from "mobx-react-lite";
 
@@ -27,12 +27,12 @@ export const SceneListDirectoryItem: FunctionComponent<SceneListDirectoryItemPro
   const { ProjectController } = useLibrary();
 
   const [{ isDragOverThisZone }, DropTarget] = useSceneDrop(
-      ({ sceneData, }) => {
+      ({ sceneData }) => {
       const newPath = currentDirectory
         .concat(directory.name, baseName(sceneData.path))
         .join('/');
       ProjectController.mutator.apply(new MoveSceneMutation(sceneData, newPath));
-    }
+    },
   );
 
   return (
@@ -47,5 +47,5 @@ export const SceneListDirectoryItem: FunctionComponent<SceneListDirectoryItemPro
       }}
       innerRef={DropTarget}
     />
-  )
+  );
 });

@@ -1,6 +1,6 @@
 import { FunctionComponent } from "react";
 import { AssetType } from "@fantasy-console/runtime/src/cartridge";
-import { DocumentIcon, DocumentTextIcon, PhotoIcon, CubeIcon } from '@heroicons/react/24/outline'
+import { DocumentIcon, DocumentTextIcon, PhotoIcon, CubeIcon } from '@heroicons/react/24/outline';
 import { observer } from "mobx-react-lite";
 
 import { useAssetDrag } from "@app/interactions/assets";
@@ -13,10 +13,10 @@ export interface AssetListFileItemProps {
 }
 
 export const AssetListFileItem: FunctionComponent<AssetListFileItemProps> = observer(({ asset }) => {
-  let AssetIcon = getIconForAssetType(asset.data.type);
+  const AssetIcon = getIconForAssetType(asset.data.type);
 
   // Drag and drop hook
-  let [{ }, DragSource] = useAssetDrag(asset.data);
+  const [{ }, DragSource] = useAssetDrag(asset.data);
 
   return (
     <ListItemCommon
@@ -29,7 +29,7 @@ export const AssetListFileItem: FunctionComponent<AssetListFileItemProps> = obse
 });
 
 
-export function getIconForAssetType(assetType: AssetType) {
+export function getIconForAssetType(assetType: AssetType): typeof CubeIcon {
   switch (assetType) {
     case AssetType.Mesh:
       return CubeIcon;

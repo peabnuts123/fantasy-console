@@ -1,9 +1,8 @@
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { readFile, writeFile, rename, exists } from '@tauri-apps/plugin-fs';
-import { action, computed, makeAutoObservable, makeObservable, observable, runInAction } from 'mobx';
+import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 
 import { IFileSystem, VirtualFile } from "@fantasy-console/runtime/src/filesystem";
-import { invoke } from '@lib/util/TauriCommands';
 
 /**
  * Minimum amount of time the FS will stay in the 'Writing' state for,
@@ -48,7 +47,7 @@ export class TauriFileSystem extends IFileSystem {
   }
 
   public async readFile(path: string): Promise<VirtualFile> {
-    const fileBytes = await readFile(`${this.projectRootDir}/${path}`)
+    const fileBytes = await readFile(`${this.projectRootDir}/${path}`);
     return new VirtualFile(fileBytes);
   }
 
@@ -69,7 +68,7 @@ export class TauriFileSystem extends IFileSystem {
     } catch (e) {
       runInAction(() => {
         this.writingState = WritingState.Failed;
-      })
+      });
       console.error(`Failed to write file: `, e);
       throw e;
     }

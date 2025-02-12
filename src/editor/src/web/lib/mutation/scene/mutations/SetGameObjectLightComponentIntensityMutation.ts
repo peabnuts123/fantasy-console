@@ -1,4 +1,4 @@
-import { ClassReference, Color3 } from "@fantasy-console/core/src/util";
+import { ClassReference } from "@fantasy-console/core/src/util";
 import { GameObjectComponent } from "@fantasy-console/core/src/world";
 import { DirectionalLightComponent, PointLightComponent } from "@fantasy-console/runtime/src/world";
 import { DirectionalLightComponentDefinition, PointLightComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
@@ -46,7 +46,7 @@ export class SetGameObjectLightComponentIntensityMutation implements ISceneMutat
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentData = gameObjectData.getComponent(this.componentId, LightComponentDataTypes);
     const gameObject = gameObjectData.sceneInstance!;
-    const component = gameObject.getComponent(this.componentId, LightComponentTypes)
+    const component = gameObject.getComponent(this.componentId, LightComponentTypes);
 
     // - Store undo values
     this.dataIntensity = componentData.intensity;
@@ -57,7 +57,7 @@ export class SetGameObjectLightComponentIntensityMutation implements ISceneMutat
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentData = gameObjectData.getComponent(this.componentId, LightComponentDataTypes);
     const gameObject = gameObjectData.sceneInstance!;
-    const component = gameObject.getComponent(this.componentId, LightComponentTypes)
+    const component = gameObject.getComponent(this.componentId, LightComponentTypes);
 
     this.intensity = intensity;
     // - 1. Data
@@ -75,12 +75,12 @@ export class SetGameObjectLightComponentIntensityMutation implements ISceneMutat
     const mutationPath = resolvePathForSceneObjectMutation(
       this.gameObjectId,
       SceneViewController.sceneDefinition,
-      (gameObject) => (gameObject.components[componentIndex] as AnyLightComponentDefinition).intensity
+      (gameObject) => (gameObject.components[componentIndex] as AnyLightComponentDefinition).intensity,
     );
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
-  public undo(args: SceneViewMutationArguments): void {
+  public undo(_args: SceneViewMutationArguments): void {
     // @TODO
     // - Apply undo values
     throw new Error("Method not implemented.");
@@ -90,6 +90,6 @@ export class SetGameObjectLightComponentIntensityMutation implements ISceneMutat
     return `Change light intensity`;
   }
 
-  public get hasBeenApplied() { return this._hasBeenApplied; }
+  public get hasBeenApplied(): boolean { return this._hasBeenApplied; }
   public set hasBeenApplied(value: boolean) { this._hasBeenApplied = value; }
 }

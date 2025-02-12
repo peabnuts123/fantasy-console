@@ -32,11 +32,11 @@ export class AssetDependencyCache {
     makeAutoObservable(this);
   }
 
-  public onDestroy() {
+  public onDestroy(): void {
     this.projectAssetUnlistenFn();
   }
 
-  public registerDependency(assetIds: string[], componentInstance: GameObjectComponent, gameObjectData: GameObjectData) {
+  public registerDependency(assetIds: string[], componentInstance: GameObjectComponent, gameObjectData: GameObjectData): void {
     if (this.cacheByComponentId.get(componentInstance.id) !== undefined) {
       console.warn(`Overwriting asset dependency cache: ${componentInstance.id}`);
     }
@@ -54,9 +54,9 @@ export class AssetDependencyCache {
     // References are stored as an array of dependencies, per asset
     for (const assetId of assetIds) {
       // Look up list of asset's dependents (initialise if not-yet-defined)
-      let assetDependents = this.cacheByAssetId.get(assetId) || [];
+      const assetDependents = this.cacheByAssetId.get(assetId) || [];
 
-      let existingDependencyIndex = assetDependents.findIndex((dependency) => dependency.componentInstance.id === componentInstance.id);
+      const existingDependencyIndex = assetDependents.findIndex((dependency) => dependency.componentInstance.id === componentInstance.id);
       if (existingDependencyIndex !== -1) {
         // Replace reference
         assetDependents[existingDependencyIndex] = assetDependency;
@@ -72,8 +72,8 @@ export class AssetDependencyCache {
     }
   }
 
-  public unregisterDependency(componentInstance: GameObjectComponent) {
-    let assetDependency = this.cacheByComponentId.get(componentInstance.id);
+  public unregisterDependency(componentInstance: GameObjectComponent): void {
+    const assetDependency = this.cacheByComponentId.get(componentInstance.id);
     if (assetDependency === undefined) {
       console.warn(`[AssetDependencyCache] (unregisterDependency) Attempted to unregister component with no dependencies: (component='${componentInstance.id}')`);
       return;
@@ -86,12 +86,12 @@ export class AssetDependencyCache {
     }
   }
 
-  public clear() {
+  public clear(): void {
     this.cacheByAssetId.clear();
     this.cacheByComponentId.clear();
   }
 
-  private async onProjectAssetChanged(event: ProjectAssetEvent) {
+  private async onProjectAssetChanged(event: ProjectAssetEvent): Promise<void> {
 
     switch (event.type) {
       case ProjectAssetEventType.Modify:
@@ -103,8 +103,8 @@ export class AssetDependencyCache {
         const assetDependencies = this.cacheByAssetId.get(event.asset.id) || [];
         await Promise.all(assetDependencies.map((assetDependency) => {
           console.log(`[DEBUG] [AssetDependencyCache] (onProjectAssetChanged) Reinitializing component due to asset change: (assetId='${event.asset.id}') (gameObjectId='${assetDependency.gameObjectData.id}')`);
-          return this.sceneViewController.reinitializeComponentInstance(assetDependency.componentInstance, assetDependency.gameObjectData)
-        }
+          return this.sceneViewController.reinitializeComponentInstance(assetDependency.componentInstance, assetDependency.gameObjectData);
+        },
         ));
         break;
       case ProjectAssetEventType.Create:

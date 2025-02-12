@@ -22,5 +22,5 @@ export const ProjectSelect: FunctionComponent<ProjectSelectProps> = observer(({ 
         />
       )}
     </div>
-  )
+  );
 });

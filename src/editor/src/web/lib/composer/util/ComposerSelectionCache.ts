@@ -15,19 +15,19 @@ export class ComposerSelectionCache {
     return this.cache.get(asset);
   }
 
-  public add(gameObjectData: GameObjectData, assets: AbstractMesh[]) {
+  public add(gameObjectData: GameObjectData, assets: AbstractMesh[]): void {
     for (const asset of assets) {
       this.cache.set(asset, gameObjectData);
     }
   }
 
-  public remove(assets: AbstractMesh[]) {
+  public remove(assets: AbstractMesh[]): void {
     for (const asset of assets) {
       this.cache.delete(asset);
     }
   }
 
-  public clear() {
+  public clear(): void {
     this.cache.clear();
   }
 }

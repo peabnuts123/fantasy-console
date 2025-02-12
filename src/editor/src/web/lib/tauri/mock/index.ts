@@ -6,7 +6,7 @@ import { MockEventSystem } from "./MockEventSystem";
 /**
  * Activate the Tauri mock.
  */
-export function mockTauri() {
+export function mockTauri(): void {
   console.warn(`@NOTE: Mocking Tauri APIs`);
   const mock = new BrowserMock();
 
@@ -29,6 +29,6 @@ export function mockTauri() {
   }, TauriInternals);
 
   mockIPC((cmd, args) =>
-    mock.handle(cmd, args)
+    mock.handle(cmd, args),
   );
 }

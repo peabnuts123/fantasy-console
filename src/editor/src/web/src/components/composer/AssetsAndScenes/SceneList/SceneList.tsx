@@ -1,6 +1,6 @@
-import type { FunctionComponent } from "react";
+import type { FunctionComponent, MouseEventHandler } from "react";
 import { useState } from "react";
-import { PlusIcon } from '@heroicons/react/24/outline'
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { observer } from "mobx-react-lite";
 import cn from 'classnames';
 
@@ -42,23 +42,23 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
       id: scene.id,
       type: 'directory',
       name: directoryName,
-    } satisfies SceneListVirtualDirectory as SceneListVirtualDirectory)
+    } satisfies SceneListVirtualDirectory as SceneListVirtualDirectory),
   );
   const [{ isDragOverThisZone: isDragOverParentDirectory }, ParentDirectoryDropTarget] = useSceneDrop(
-    ({ sceneData, }) => {
+    ({ sceneData }) => {
       const newPath = currentDirectory.slice(0, currentDirectory.length - 1)
         .concat(baseName(sceneData.path))
         .join('/');
       ProjectController.mutator.apply(new MoveSceneMutation(sceneData, newPath));
-    }
+    },
   );
 
   // Functions
-  const onClickNewScene = () => {
+  const onClickNewScene: MouseEventHandler = () => {
     const namesInCurrentDirectory = scenesDirView.filter((item) => item.type === 'file').map((item) => baseName(item.scene.path));
-    const isUniqueName = (name: string) => {
-      return !namesInCurrentDirectory.some((otherName) => otherName.localeCompare(name, undefined, { sensitivity: 'accent' }) === 0)
-    }
+    const isUniqueName = (name: string): boolean => {
+      return !namesInCurrentDirectory.some((otherName) => otherName.localeCompare(name, undefined, { sensitivity: 'accent' }) === 0);
+    };
     let newSceneName = "new scene";
     let deduplicationNumber = 1;
     while (!isUniqueName(`${newSceneName}.pzscene`)) {
@@ -69,12 +69,12 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
     setTempCreatePath(newScenePath);
   };
 
-  const onFinishedNamingNewScene = (newScenePath: string) => {
+  const onFinishedNamingNewScene = (newScenePath: string): void => {
     setTempCreatePath(undefined);
     ProjectController.mutator.apply(new CreateNewSceneMutation(newScenePath));
-  }
+  };
 
-  const onCancelCreateNewScene = () => {
+  const onCancelCreateNewScene = (): void => {
     setTempCreatePath(undefined);
   };
 
@@ -111,7 +111,7 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
               file={item}
               onClick={() => openScene(item.scene)}
             />
-          )
+          );
         } else {
           return (
             <SceneListDirectoryItem
@@ -120,7 +120,7 @@ export const SceneList: FunctionComponent<Props> = observer(({ openScene }) => {
               currentDirectory={currentDirectory}
               setCurrentDirectory={setCurrentDirectory}
             />
-          )
+          );
         }
       })}
 

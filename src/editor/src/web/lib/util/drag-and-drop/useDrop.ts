@@ -48,7 +48,7 @@ export function useDrop<TDragData, TDropData = never, TElementType extends HTMLE
   /** Ref used to track which element is the the drag is currently over */
   const currentDragHoverTarget = useRef<EventTarget | null>(null);
 
-  const onDrop: typeof window.ondrop = (e) => {
+  const onDrop: typeof window.ondrop = (_e) => {
     if (!dragAndDropDataRef.current.isDragOfType(options.accepts)) return;
 
     if (options.onDrop) {
@@ -125,7 +125,7 @@ export function useDrop<TDragData, TDropData = never, TElementType extends HTMLE
 
   useEffect(() => {
     const dropZone = dropZoneRef.current;
-    let deregisterDropZone: Function | undefined = undefined;
+    let deregisterDropZone: (() => void) | undefined = undefined;
 
     if (dropZone) {
       [dropZoneIdRef.current, deregisterDropZone] = dragAndDropDataRef.current.registerDropZone(options.accepts, options.data);
@@ -145,7 +145,7 @@ export function useDrop<TDragData, TDropData = never, TElementType extends HTMLE
 
         deregisterDropZone!();
       }
-    }
+    };
   }, [dropZoneRef.current]);
 
   const dropState: UseDropState<TDragData, TDropData> = {
@@ -155,7 +155,7 @@ export function useDrop<TDragData, TDropData = never, TElementType extends HTMLE
     isDragOverThisZone: dragAndDropDataRef.current.isOverDropZone(options.accepts, dropZoneIdRef.current),
     currentActiveDropZoneData: dragAndDropDataRef.current.getActiveDropZoneDataForType<TDropData>(options.accepts),
     __dropZoneId: dropZoneIdRef.current,
-  }
+  };
 
   // @NOTE Watch `dropState.isDragging` and fire `onDragStart` / `onDragEnd` when it changes
   useEffect(() => {

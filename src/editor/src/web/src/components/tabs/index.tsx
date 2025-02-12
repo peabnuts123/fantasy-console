@@ -4,6 +4,7 @@ import cn from 'classnames';
 
 export type TabState = ReturnType<typeof createTabState>;
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const createTabState = (defaultTabId: string) => {
   const [currentTabPageId, setCurrentTabPageId] = useState<string | undefined>(defaultTabId);
 
@@ -20,7 +21,7 @@ const createTabState = (defaultTabId: string) => {
     currentTabPageId,
     /** Set the currently active tab page ID */
     setCurrentTabPageId,
-  }
+  };
 };
 
 export interface TabButtonCommonProps {
@@ -71,7 +72,7 @@ export const TabButton: FunctionComponent<TabButtonProps> = (props) => {
   const isTabActive = !isPageType || TabState.currentTabPageId === pageTypeProps.tabId;
 
   // Functions
-  const onClick = () => {
+  const onClick = (): void => {
     if (isPageType) {
       const { tabId } = pageTypeProps;
       TabState.setCurrentTabPageId(tabId);
@@ -125,7 +126,7 @@ export const TabPage: FunctionComponent<PropsWithChildren<TabPageProps>> = ({
         children
       )}
     </>
-  )
+  );
 };
 
 
@@ -194,7 +195,7 @@ export const TabBar: FunctionComponent<TabBarProps> = ({ tabs, bgColorClass }) =
         <div className={cn("h-2 grow border-t border-black", bgColorClass)}></div>
       </div>
     </div>
-  )
+  );
 };
 
 
@@ -213,8 +214,8 @@ export const TabProvider: FunctionComponent<PropsWithChildren<TabProviderProps>>
     <TabStateContext.Provider value={tabData}>
       {children}
     </TabStateContext.Provider>
-  )
-}
+  );
+};
 
 const TabStateContext = createContext<TabState>(undefined!);
-export const useTabState = () => useContext(TabStateContext);
+export const useTabState = (): TabState => useContext(TabStateContext);

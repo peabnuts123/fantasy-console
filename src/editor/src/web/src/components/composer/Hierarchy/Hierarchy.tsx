@@ -1,7 +1,7 @@
 import { SceneViewController } from "@lib/composer/scene";
-import type { FunctionComponent } from "react";
+import type { FunctionComponent, MouseEventHandler } from "react";
 import { Menu, MenuItem } from "@tauri-apps/api/menu";
-import { PlusIcon } from '@heroicons/react/24/outline'
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { observer } from "mobx-react-lite";
 
 import { CreateBlankGameObjectMutation, DeleteGameObjectMutation } from "@lib/mutation/scene/mutations";
@@ -17,13 +17,13 @@ interface Props {
 
 export const Hierarchy: FunctionComponent<Props> = observer(({ controller }) => {
   // Functions
-  const createNewObject = (parent: GameObjectData | undefined = undefined) => {
+  const createNewObject = (parent: GameObjectData | undefined = undefined): void => {
     controller.mutator.apply(new CreateBlankGameObjectMutation(parent));
   };
-  const deleteObject = (gameObjectData: GameObjectData) => {
+  const deleteObject = (gameObjectData: GameObjectData): void => {
     controller.mutator.apply(new DeleteGameObjectMutation(gameObjectData));
   };
-  const showContextMenu = async (e: React.MouseEvent) => {
+  const showContextMenu: MouseEventHandler = async (e) => {
     // @NOTE Skip context menu in browser
     if (isRunningInBrowser()) return;
 

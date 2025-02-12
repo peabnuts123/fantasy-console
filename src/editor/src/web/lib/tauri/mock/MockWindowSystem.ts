@@ -2,7 +2,7 @@
 export class MockWindowSystem {
   public static openWindows: Record<string, Window> = {};
 
-  public static open(url: string, name: string) {
+  public static open(url: string, name: string): void {
     if (this.openWindows[name]) {
       throw new Error(`Attempted to open new web view with the same name: '${name}'`);
     }
@@ -19,13 +19,13 @@ export class MockWindowSystem {
       this.openWindows[name] = webview;
 
       // Bind "onClose" event
-      webview.addEventListener('beforeunload', (e) => {
-        delete this.openWindows[name]
+      webview.addEventListener('beforeunload', (_e) => {
+        delete this.openWindows[name];
       });
     });
   }
 
-  public static close(name: string) {
+  public static close(name: string): void {
     // @TODO if we have child windows closing each other, we'll need to make the `main` window
     //  coordinate this through channel messages (because it is just a local cache)
     const webview = MockWindowSystem.openWindows[name];

@@ -7,4 +7,4 @@ export const Paths = {
   MagicFileRoot: '%%magic_file_root%%',
   MockCartridgeFile: 'sample-cartridge.pzcart',
   MockProjectFile: 'project/sample.pzproj',
-}
+};

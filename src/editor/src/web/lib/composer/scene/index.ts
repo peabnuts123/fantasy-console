@@ -1,2 +1,2 @@
 export * from './SceneViewController';
-export * from './components'
+export * from './components';

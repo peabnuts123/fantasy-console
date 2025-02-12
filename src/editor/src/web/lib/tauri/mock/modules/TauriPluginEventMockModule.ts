@@ -1,9 +1,10 @@
-import { EventCallback, EventName } from "@tauri-apps/api/event";
+import { EventName } from "@tauri-apps/api/event";
 
-import { MockHandlerWith2Args, MockHandlerWithRestArg, throwUnhandled } from "../util";
+import { throwUnhandled } from "../util";
 import { MockEventSystem } from '../MockEventSystem';
 
 export class TauriPluginEventMockModule {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public static handle(action: string, args: any) {
     switch (action) {
       case 'listen':

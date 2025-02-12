@@ -39,7 +39,7 @@ export class MoveSceneMutation implements IProjectMutation {
     );
   }
 
-  undo(args: ProjectMutationArguments): void {
+  undo(_args: ProjectMutationArguments): void {
     // @TODO prompt for undo?
     throw new Error("Method not implemented.");
   }

@@ -36,7 +36,7 @@ export const NewProjectScreen: FunctionComponent<NewProjectScreenProps> = ({ can
 
   const isFormValid = !projectNameValidationError;
 
-  async function onClickCreate() {
+  async function onClickCreate(): Promise<void> {
     setShowProjectNameValidation(true);
     if (!isFormValid) return;
 
@@ -49,7 +49,7 @@ export const NewProjectScreen: FunctionComponent<NewProjectScreenProps> = ({ can
       filters: [{
         name: 'PolyZone Project',
         extensions: ['pzproj'],
-      }]
+      }],
     });
     if (!savePath) return;
 
@@ -109,7 +109,7 @@ interface CreateNewProjectArgs {
   projectName: string;
   projectPath: string;
 }
-async function createNewProject({ projectName, projectPath }: CreateNewProjectArgs) {
+async function createNewProject({ projectName, projectPath }: CreateNewProjectArgs): Promise<void> {
   const projectDirRoot = await path.resolve(projectPath, '..');
 
   // New data
@@ -159,9 +159,9 @@ async function createNewProject({ projectName, projectPath }: CreateNewProjectAr
             color: { r: 255, g: 214, b: 253 },
             intensity: 0.4,
           } satisfies DirectionalLightComponentDefinition,
-        ]
-      }
-    ]
+        ],
+      },
+    ],
   };
   const newSceneJson = JSON.stringify(newSceneDefinition, null, 2);
   const newScenePath = `scenes/game.pzscene`;
@@ -177,9 +177,9 @@ async function createNewProject({ projectName, projectPath }: CreateNewProjectAr
         hash: await invoke('hash_data', {
           data: Array.from(new TextEncoder().encode(newSceneJson)),
         }),
-      }
-    ]
-  }
+      },
+    ],
+  };
 
   // Create top-level folders (if they do not already exist)
   const TopLevelFolders = [

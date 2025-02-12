@@ -40,6 +40,6 @@ export async function loadApplicationData(appDataPath: string): Promise<Applicat
   const json = await readTextFile(appDataPath);
   const appDataRaw = JSON.parse(json) as unknown;
   return makeAutoObservable(
-    ApplicationDataSchema.parseAsync(appDataRaw)
+    ApplicationDataSchema.parseAsync(appDataRaw),
   );
 }

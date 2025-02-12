@@ -1,6 +1,6 @@
 import { ReactEventHandler, type FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 import { useLibrary } from "@lib/index";
 import { RecentProjectData } from "@lib/application";
@@ -15,7 +15,7 @@ export const RecentProjectTile: FunctionComponent<RecentProjectTileProps> = obse
   const { ProjectController, ApplicationDataController } = useLibrary();
 
   // Functions
-  const loadProject = () => {
+  const loadProject = (): void => {
     void ProjectController.loadProject(project.path)
       .catch((e) => {
         if (e instanceof ProjectFileNotFoundError) {
@@ -26,14 +26,14 @@ export const RecentProjectTile: FunctionComponent<RecentProjectTileProps> = obse
         } else {
           throw e;
         }
-      })
+      });
   };
-  const removeProjectFromRecentProjects = async () => {
+  const removeProjectFromRecentProjects = async (): Promise<void> => {
     await ApplicationDataController.mutateAppData((appData) => {
       appData.recentProjects = appData.recentProjects.filter((recentProjectData) => recentProjectData.path !== project.path);
       return appData;
     });
-  }
+  };
   const onClickRemoveButton: ReactEventHandler = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -52,7 +52,7 @@ export const RecentProjectTile: FunctionComponent<RecentProjectTileProps> = obse
         // Odd token: Append to previous
         if (index % 2 === 1) curr[curr.length - 1] += next;
         // Even token: Add new
-        else curr.push(next)
+        else curr.push(next);
         return curr;
       }, [] as string[]);
   };

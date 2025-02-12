@@ -57,7 +57,7 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
-  public undo(args: SceneViewMutationArguments): void {
+  public undo(_args: SceneViewMutationArguments): void {
     // @TODO
     // - Apply undo values
     throw new Error("Method not implemented.");
@@ -67,6 +67,6 @@ export class SetGameObjectPositionMutation implements ISceneMutation, IContinuou
     return `Move '${this.gameObject.name}'`;
   }
 
-  public get hasBeenApplied() { return this._hasBeenApplied; }
+  public get hasBeenApplied(): boolean { return this._hasBeenApplied; }
   public set hasBeenApplied(value: boolean) { this._hasBeenApplied = value; }
 }

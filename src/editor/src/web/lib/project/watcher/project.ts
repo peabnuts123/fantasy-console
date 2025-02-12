@@ -11,7 +11,7 @@ import { ProjectData } from "../data/ProjectData";
 // @NOTE Project file has no "Create" event
 /** Event from the backend specifying the project file has been deleted. */
 export interface RawProjectFileDeletedEvent {
-  delete: {},
+  delete: object,
 }
 /** Event from the backend specifying the project file has been modified. */
 export interface RawProjectFileModifiedEvent {
@@ -68,7 +68,7 @@ export class ProjectFileWatcher {
     this.projectController = projectController;
   }
 
-  public async startListening() {
+  public async startListening(): Promise<void> {
     this.stopListeningForEvents = await listen<RawProjectFileEvent[]>(TauriEvents.OnProjectFileUpdated, (e) => {
       void this.onProjectFileUpdated(e.payload);
     });
@@ -83,16 +83,16 @@ export class ProjectFileWatcher {
       if (listenerIndex !== -1) {
         this.eventListeners.splice(listenerIndex, 1);
       }
-    }
+    };
   }
 
-  public onDestroy() {
+  public onDestroy(): void {
     if (this.stopListeningForEvents) {
       this.stopListeningForEvents();
     }
   }
 
-  private async onProjectFileUpdated(updates: RawProjectFileEvent[]) {
+  private async onProjectFileUpdated(updates: RawProjectFileEvent[]): Promise<void> {
     console.log(`[ProjectFileWatcher] (onProjectFileUpdated)`, updates);
 
     const eventPromises: Promise<ProjectFileEvent>[] = [];

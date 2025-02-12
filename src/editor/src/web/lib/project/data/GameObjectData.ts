@@ -67,7 +67,7 @@ export class GameObjectData {
     const instanceOfAnyComponentType = expectedComponentTypes.some((ComponentType) => component instanceof ComponentType);
     if (!instanceOfAnyComponentType) {
       const expectedComponentTypeNames = expectedComponentTypes.map((x) => x.name).join('|');
-      throw new Error(`Component with ID '${componentId}' on GameObjectData '${this.name}' (${this.id}) is not of expected type. (Expected='${expectedComponentTypeNames}') (Actual='${component.constructor.name}')`)
+      throw new Error(`Component with ID '${componentId}' on GameObjectData '${this.name}' (${this.id}) is not of expected type. (Expected='${expectedComponentTypeNames}') (Actual='${component.constructor.name}')`);
     }
 
     // Sadly we have to launder as the `instanceof` check is inside a `some()` aggregation

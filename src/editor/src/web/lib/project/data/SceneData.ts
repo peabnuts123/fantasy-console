@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 
-import { SceneDataConfiguration, SceneDefinition as RuntimeSceneDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { SceneDataConfiguration } from "@fantasy-console/runtime/src/cartridge";
 import { toColor3Core } from "@fantasy-console/runtime/src/util";
 
 import { AssetDb } from "@lib/project/data/AssetDb";
@@ -29,16 +29,16 @@ export class SceneData {
           intensity: sceneDefinition.config.lighting.ambient.intensity,
           color: toColor3Core(sceneDefinition.config.lighting.ambient.color),
         },
-      }
+      },
     };
 
     /* Game Objects */
     this.objects = [];
-    for (let objectDefinition of sceneDefinition.objects) {
+    for (const objectDefinition of sceneDefinition.objects) {
       this.objects.push(loadObjectDefinition(objectDefinition, assetDb));
     }
 
-    makeAutoObservable(this)
+    makeAutoObservable(this);
   }
 
   /**
@@ -93,7 +93,7 @@ export class SceneData {
         // Look for object as descendent of top-level object's children
         const childResult = object.findGameObjectInChildren(gameObjectId);
         if (childResult !== undefined) {
-          return childResult
+          return childResult;
         }
       }
     }

@@ -31,7 +31,7 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
   const isAnyObjectSelected = selectedObject !== undefined;
   const isNoObjectSelected = selectedObject === undefined;
 
-  const onAddNewComponent = (type: ComponentDefinitionType) => {
+  const onAddNewComponent = (type: ComponentDefinitionType): void => {
     const selectControl = addNewComponentElement.current!;
 
     // Ensure select control doesn't change to the selected value
@@ -60,9 +60,9 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
 
     sceneViewController.mutator.apply(new AddGameObjectComponentMutation(
       selectedObject!,
-      newComponent
+      newComponent,
     ));
-  }
+  };
 
   return (
     <>
@@ -91,8 +91,8 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
                       SetGameObjectNameMutation,
                       selectedObject!,
                       () => new SetGameObjectNameMutation(selectedObject!),
-                      () => ({ name: newName })
-                    )
+                      () => ({ name: newName }),
+                    );
                   }
                 }}
               />
@@ -105,7 +105,7 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
                   SetGameObjectPositionMutation,
                   selectedObject!,
                   () => new SetGameObjectPositionMutation(selectedObject!),
-                  () => ({ position: newValue, resetGizmo: true })
+                  () => ({ position: newValue, resetGizmo: true }),
                 )}
               />
 
@@ -119,7 +119,7 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
                   SetGameObjectRotationMutation,
                   selectedObject!,
                   () => new SetGameObjectRotationMutation(selectedObject!),
-                  () => ({ rotation: newValue, resetGizmo: true })
+                  () => ({ rotation: newValue, resetGizmo: true }),
                 )}
               />
 
@@ -132,7 +132,7 @@ export const Inspector: FunctionComponent<Props> = observer(({ sceneViewControll
                   SetGameObjectScaleMutation,
                   selectedObject!,
                   () => new SetGameObjectScaleMutation(selectedObject!),
-                  () => ({ scale: newValue, resetGizmo: true })
+                  () => ({ scale: newValue, resetGizmo: true }),
                 )}
               />
             </div>

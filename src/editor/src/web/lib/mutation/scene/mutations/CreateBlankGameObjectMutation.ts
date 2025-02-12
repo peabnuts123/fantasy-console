@@ -18,7 +18,7 @@ export class CreateBlankGameObjectMutation implements ISceneMutation {
 
   apply({ SceneViewController, ProjectController }: SceneViewMutationArguments): void {
     // Create new object
-    let newObjectDefinition: GameObjectDefinition = {
+    const newObjectDefinition: GameObjectDefinition = {
       id: uuid(),
       name: "New Object",
       transform: {
@@ -51,7 +51,7 @@ export class CreateBlankGameObjectMutation implements ISceneMutation {
       const mutationPath = resolvePathForSceneObjectMutation(
         this.parentGameObjectId,
         SceneViewController.sceneDefinition,
-        (parentGameObject) => parentGameObject.children![parentGameObjectData.children.length]
+        (parentGameObject) => parentGameObject.children![parentGameObjectData.children.length],
       );
       SceneViewController.sceneJson.mutate(mutationPath, newObjectDefinition, { isArrayInsertion: true });
     } else {

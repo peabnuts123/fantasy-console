@@ -17,7 +17,7 @@ export const PointLightInspector: InspectorComponent<PointLightComponentData> = 
           SetGameObjectLightComponentColorMutation,
           gameObject,
           () => new SetGameObjectLightComponentColorMutation(gameObject, component),
-          () => ({ color: newValue })
+          () => ({ color: newValue }),
         )}
       />
 
@@ -29,9 +29,9 @@ export const PointLightInspector: InspectorComponent<PointLightComponentData> = 
           SetGameObjectLightComponentIntensityMutation,
           gameObject,
           () => new SetGameObjectLightComponentIntensityMutation(gameObject, component),
-          () => ({ intensity: newValue })
+          () => ({ intensity: newValue }),
         )}
       />
     </InspectorComponentBase>
-  )
+  );
 });

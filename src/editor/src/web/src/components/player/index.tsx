@@ -16,7 +16,7 @@ const Player: FunctionComponent<Props> = ({ cartridge }) => {
 
       void runtime.loadCartridge(cartridge)
         .then(() =>
-          runtime.run()
+          runtime.run(),
         );
 
       return () => {

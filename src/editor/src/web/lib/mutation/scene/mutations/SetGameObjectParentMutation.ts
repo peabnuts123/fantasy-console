@@ -57,7 +57,7 @@ export class SetGameObjectParentMutation implements ISceneMutation {
     // 1A. Update data
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const newParentData = this.newParentId !== undefined ? SceneViewController.scene.getGameObject(this.newParentId) : undefined;
-    let newSiblingDataCollection = newParentData !== undefined ?
+    const newSiblingDataCollection = newParentData !== undefined ?
       newParentData.children :
       SceneViewController.scene.objects;
     const currentParentData = SceneViewController.scene.getGameObjectParent(this.gameObjectId);
@@ -160,12 +160,12 @@ export class SetGameObjectParentMutation implements ISceneMutation {
         newJsonPath = resolvePathForSceneObjectMutation(
           this.newParentId!,
           SceneViewController.sceneDefinition,
-          (newParent) => newParent.children![newParentDefinition?.children?.length ?? 0]
-        )
+          (newParent) => newParent.children![newParentDefinition?.children?.length ?? 0],
+        );
       }
     } else {
       // Add object before/after specific child sibling
-      let indexOffset = this.siblingTarget.type === 'before' ? 0 : 1;
+      const indexOffset = this.siblingTarget.type === 'before' ? 0 : 1;
       if (newParentDefinition === undefined) {
         // Sibling is a top-level object
         const siblingJsonIndex = SceneViewController.sceneDefinition.objects.findIndex((object) => object.id === this.siblingTarget!.gameObjectId);
@@ -179,7 +179,7 @@ export class SetGameObjectParentMutation implements ISceneMutation {
         newJsonPath = resolvePathForSceneObjectMutation(
           this.newParentId!,
           SceneViewController.sceneDefinition,
-          (newParent) => newParent.children![siblingJsonIndex + indexOffset]
+          (newParent) => newParent.children![siblingJsonIndex + indexOffset],
         );
       }
     }
@@ -188,7 +188,7 @@ export class SetGameObjectParentMutation implements ISceneMutation {
     SceneViewController.sceneJson.mutate(newJsonPath, currentDefinitionValue, { isArrayInsertion: true });
   }
 
-  public undo(args: SceneViewMutationArguments): void {
+  public undo(_args: SceneViewMutationArguments): void {
     throw new Error("Method not implemented.");
   }
 

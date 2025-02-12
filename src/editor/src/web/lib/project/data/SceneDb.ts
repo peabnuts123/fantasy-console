@@ -36,7 +36,7 @@ export class SceneDb {
     return newRecord;
   }
 
-  public remove(sceneId: string) {
+  public remove(sceneId: string): void {
     const sceneIndex = this.records.findIndex((record) => record.data.id === sceneId);
     if (sceneIndex === -1) {
       console.warn(`[SceneDb] (remove) Could not remove scene with ID '${sceneId}' from SceneDb - no scene exists with this ID`);
@@ -67,7 +67,7 @@ export class SceneDb {
 
   public getAllRuntimeDefinitions(): RuntimeSceneDefinition[] {
     return this.records.map((record) =>
-      toRuntimeSceneDefinition(record.jsonc.value, record.manifest.path)
+      toRuntimeSceneDefinition(record.jsonc.value, record.manifest.path),
     );
   }
 
@@ -75,7 +75,7 @@ export class SceneDb {
     return this.records.map((record) => record.data);
   }
 
-  public static async new(sceneManifests: SceneManifest[], assetDb: AssetDb, fileSystem: IFileSystem) {
+  public static async new(sceneManifests: SceneManifest[], assetDb: AssetDb, fileSystem: IFileSystem): Promise<SceneDb> {
     const records: SceneDbRecord[] = [];
 
     for (const sceneManifest of sceneManifests) {
@@ -85,7 +85,7 @@ export class SceneDb {
         sceneJsonc.value,
         sceneManifest,
         assetDb,
-      )
+      );
 
       records.push({
         jsonc: sceneJsonc,
@@ -97,7 +97,7 @@ export class SceneDb {
     return new SceneDb(records, assetDb);
   }
 
-  public get length() {
+  public get length(): number {
     return this.records.length;
   }
 }

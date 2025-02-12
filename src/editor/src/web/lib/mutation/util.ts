@@ -68,7 +68,7 @@ export function resolvePathForSceneObjectMutation<TPathTarget>(gameObjectId: str
   }
 
   if (target === undefined) {
-    throw new Error(`Could not find any object in scene with id: '${gameObjectId}'`)
+    throw new Error(`Could not find any object in scene with id: '${gameObjectId}'`);
   }
 
   // @NOTE No need for the actual game object at this time, but left it in anyways 🤷‍♀️

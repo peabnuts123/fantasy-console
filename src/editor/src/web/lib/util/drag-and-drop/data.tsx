@@ -29,6 +29,7 @@ interface DropZoneState {
 
 export type DragAndDropData = ReturnType<typeof createDragAndDropData>;
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createDragAndDropData() {
   // Data associated with the current drag
   const [currentDrag, setCurrentDrag] = useState<CurrentDragData | undefined>(undefined);
@@ -41,7 +42,7 @@ function createDragAndDropData() {
       if (dropZoneStates[type] === undefined) {
         return dropZoneStates;
       } else {
-        let statesForType = { ...(dropZoneStates[type] ?? {}) };
+        const statesForType = { ...(dropZoneStates[type] ?? {}) };
 
         delete statesForType[dropZoneId];
 
@@ -72,7 +73,7 @@ function createDragAndDropData() {
       setCurrentDrag(undefined);
       // Reset data of all associated drop zones
       setDropZoneStates((dropZoneStates) => {
-        let statesForType = dropZoneStates[currentDragType] ?? {};
+        const statesForType = dropZoneStates[currentDragType] ?? {};
 
         for (const dropZoneId in statesForType) {
           statesForType[dropZoneId].isOver = false;
@@ -116,9 +117,9 @@ function createDragAndDropData() {
           ...dropZoneStates,
           [type]: {
             ...dropZoneStates[type],
-            [dropZoneId]: newValue
-          }
-        }
+            [dropZoneId]: newValue,
+          },
+        };
       });
     },
     /**
@@ -135,7 +136,7 @@ function createDragAndDropData() {
      */
     getDropEffectForType(type: DragTypeIdentifier): CurrentDragData['dropEffect'] {
       if (currentDrag?.type === type) {
-        return currentDrag.dropEffect
+        return currentDrag.dropEffect;
       } else {
         return undefined;
       }
@@ -196,10 +197,10 @@ function createDragAndDropData() {
      * @param dropZoneData Data associated with this drop zone
      * @returns Tuple of the ID associated with the drop zone, and a function for deregistering it from the state
      */
-    registerDropZone<TDropData>(type: DragTypeIdentifier, dropZoneData: TDropData | undefined): [string, Function] {
+    registerDropZone<TDropData>(type: DragTypeIdentifier, dropZoneData: TDropData | undefined): [string, () => void] {
       const dropZoneId = uuid();
       setDropZoneStates((dropZoneStates) => {
-        let statesForType = dropZoneStates[type] ?? {};
+        const statesForType = dropZoneStates[type] ?? {};
 
         return {
           ...dropZoneStates,
@@ -217,7 +218,7 @@ function createDragAndDropData() {
 
       return [dropZoneId, () => {
         deregisterDropZone(type, dropZoneId);
-      }]
+      }];
     },
   };
 }
@@ -233,7 +234,7 @@ export const DragAndDropDataProvider: FunctionComponent<PropsWithChildren> = ({ 
       {children}
     </DragAndDropDataContext.Provider>
   );
-}
+};
 
-const DragAndDropDataContext = createContext<DragAndDropData>(undefined!)
-export const useDragAndDropData = () => useContext(DragAndDropDataContext);
+const DragAndDropDataContext = createContext<DragAndDropData>(undefined!);
+export const useDragAndDropData = (): DragAndDropData => useContext(DragAndDropDataContext);

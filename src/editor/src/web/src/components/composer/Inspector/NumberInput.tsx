@@ -1,6 +1,6 @@
-import type { ChangeEventHandler, FunctionComponent, MouseEventHandler, FocusEvent, KeyboardEvent } from "react";
+import type { ChangeEventHandler, FunctionComponent, MouseEventHandler, FocusEvent, KeyboardEvent, KeyboardEventHandler } from "react";
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
+import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 import cn from 'classnames';
 
 import { Vector2 } from "@fantasy-console/core/src/util";
@@ -48,7 +48,7 @@ export const NumberInput: FunctionComponent<NumberInputProps> = ({ label, value,
   const buttonDownRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
+    const onMouseMove = (e: MouseEvent): void => {
       if (isDragging && originalPreDragValue !== undefined) {
         const mousePosition = new Vector2(e.clientX, e.clientY);
         const delta = mousePosition.subtract(dragStartPosition).multiplySelf(DragSensitivity / 100);
@@ -56,14 +56,14 @@ export const NumberInput: FunctionComponent<NumberInputProps> = ({ label, value,
         const size = delta.x;
         onChange(roundValue(originalPreDragValue + size));
       }
-    }
-    const onMouseUp = () => {
+    };
+    const onMouseUp = (): void => {
       setDragStartPosition(undefined);
       setOriginalPreDragValue(undefined);
     };
 
     if (isDragging) {
-      window.addEventListener('mousemove', onMouseMove)
+      window.addEventListener('mousemove', onMouseMove);
     }
     window.addEventListener('mouseup', onMouseUp);
 
@@ -86,29 +86,29 @@ export const NumberInput: FunctionComponent<NumberInputProps> = ({ label, value,
     }
   };
 
-  const isElementFocused = (element: Element | null) => (
+  const isElementFocused = (element: Element | null): boolean => (
     element !== null && (
       element === inputRef.current ||
       element === buttonUpRef.current ||
       element === buttonDownRef.current
     ));
 
-  const onBlurInputElement = (e: FocusEvent<Element, Element>) => {
+  const onBlurInputElement = (e: FocusEvent<Element, Element>): void => {
     const newActiveElement = e.relatedTarget;
     const newIsFocused = isElementFocused(newActiveElement);
     if (newIsFocused !== isFocused) {
       setTimeout(() =>
-        setIsFocused(newIsFocused)
+        setIsFocused(newIsFocused),
       );
     }
   };
 
-  const onFocusTextInput = () => {
+  const onFocusTextInput = (): void => {
     setInputText(`${value}`);
     setIsTextInputFocused(true);
   };
 
-  const onBlurTextInput = () => {
+  const onBlurTextInput = (): void => {
     setIsTextInputFocused(false);
   };
 
@@ -118,19 +118,19 @@ export const NumberInput: FunctionComponent<NumberInputProps> = ({ label, value,
   };
 
   // @TODO Hold shift or something to do bigger increments
-  const incrementValue = () => {
+  const incrementValue = (): void => {
     const newValue = roundValue(value + incrementInterval);
     onChange(newValue);
     setInputText(`${newValue}`);
   };
 
-  const decrementValue = () => {
+  const decrementValue = (): void => {
     const newValue = roundValue(value - incrementInterval);
     onChange(newValue);
     setInputText(`${newValue}`);
   };
 
-  const onKeyPressInput = (e: KeyboardEvent<HTMLInputElement>) => {
+  const onKeyPressInput: KeyboardEventHandler = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       incrementValue();
@@ -157,7 +157,7 @@ export const NumberInput: FunctionComponent<NumberInputProps> = ({ label, value,
             className="w-full px-1 h-10 grow"
             value={displayValue}
             onChange={onInputChange}
-            onFocus={() => { onFocusTextInput(); setIsFocused(true) }}
+            onFocus={() => { onFocusTextInput(); setIsFocused(true); }}
             onBlur={(e) => { onBlurTextInput(); onBlurInputElement(e); }}
             onKeyDown={onKeyPressInput}
           />
@@ -187,4 +187,4 @@ export const NumberInput: FunctionComponent<NumberInputProps> = ({ label, value,
       </label>
     </div>
   );
-}
+};

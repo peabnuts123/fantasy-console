@@ -16,16 +16,16 @@ export const MeshComponentScanner: IComponentScanner = {
           reportProblem(
             `MeshComponent/ReferencedAssetDoesNotExist/id=${component.meshFileId}`,
             componentPath,
-            `Referencing asset that does not exist (asset id='${component.meshFileId}')`
+            `Referencing asset that does not exist (asset id='${component.meshFileId}')`,
           );
         } else if (!(asset instanceof MeshAssetData)) {
           reportProblem(
             `MeshComponent/ReferencedAssetIsWrongType/id=${component.meshFileId}`,
             componentPath,
-            `Referencing asset (with id='${component.meshFileId}') that is not a mesh asset (actual type='${asset.type}')`
+            `Referencing asset (with id='${component.meshFileId}') that is not a mesh asset (actual type='${asset.type}')`,
           );
         }
       }
     }
-  }
-}
+  },
+};

@@ -15,6 +15,7 @@ export interface SceneDragData {
 
 const SceneDragType = `scene`;
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useSceneDrag<TElement extends HTMLElement = HTMLDivElement>(scene: SceneData) {
   return useDrag<SceneDragData, TElement>({
     type: SceneDragType,
@@ -25,10 +26,11 @@ export function useSceneDrag<TElement extends HTMLElement = HTMLDivElement>(scen
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useSceneDrop<TElement extends HTMLElement = HTMLDivElement>(
-  onDrop: (data: SceneDragData) => void
-) {
-  return useDrop<SceneDragData, {}, TElement>({
+  onDrop: (data: SceneDragData) => void,
+){
+  return useDrop<SceneDragData, never, TElement>({
     accepts: SceneDragType,
     onDrop,
   });

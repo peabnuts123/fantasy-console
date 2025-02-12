@@ -1,7 +1,7 @@
 import { FunctionComponent } from "react";
 import cn from 'classnames';
 import { observer } from "mobx-react-lite";
-import { TrashIcon } from '@heroicons/react/24/solid'
+import { TrashIcon } from '@heroicons/react/24/solid';
 
 import { AssetType } from "@fantasy-console/runtime/src/cartridge";
 
@@ -19,7 +19,7 @@ interface Props<TAssetType extends AssetType> {
   onAssetChange?: (asset: AssetDataOfType<TAssetType> | undefined) => void;
 }
 
-export function createAssetReferenceComponentOfType<TAssetType extends AssetType>() {
+export function createAssetReferenceComponentOfType<TAssetType extends AssetType>(): FunctionComponent<Props<TAssetType>> {
   const AssetReference: FunctionComponent<Props<TAssetType>> = observer(({
     label,
     assetType,
@@ -38,14 +38,14 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
     // Drag and drop hook
     const [{ isDragOverThisZone }, DropTarget] = useAssetDrop<TAssetType, HTMLButtonElement>(assetType,
       /* @NOTE On drop */
-      ({ assetData, }) => onAssetChange(assetData)
+      ({ assetData }) => onAssetChange(assetData),
     );
 
     // Functions
-    const onClickDelete = () => {
+    const onClickDelete = (): void => {
       onAssetChange(undefined);
     };
-    const onClickAssetButton = async () => {
+    const onClickAssetButton = async (): Promise<void> => {
       // Map asset data into modal data
       const assets = ProjectController.project.assets.getAll()
         .filter((asset) => asset.type === assetType)
@@ -59,7 +59,7 @@ export function createAssetReferenceComponentOfType<TAssetType extends AssetType
       // Show modal
       const result = await showModal<AssetReferenceModalData<TAssetType>, AssetReferenceResultPayload>(
         '/modal/asset-reference',
-        { assets }
+        { assets },
       );
 
       // Handle result from modal

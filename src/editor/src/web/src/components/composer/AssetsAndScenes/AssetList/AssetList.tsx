@@ -32,8 +32,8 @@ export const AssetList: FunctionComponent = observer(({ }) => {
       id: asset.id,
       type: 'directory',
       name: directoryName,
-    } satisfies AssetDbVirtualDirectory as AssetDbVirtualDirectory)
-  )
+    } satisfies AssetDbVirtualDirectory as AssetDbVirtualDirectory),
+  );
 
 
   return (
@@ -54,7 +54,7 @@ export const AssetList: FunctionComponent = observer(({ }) => {
               key={asset.id}
               asset={asset}
             />
-          )
+          );
         } else {
           return (
             <AssetListDirectoryItem
@@ -63,7 +63,7 @@ export const AssetList: FunctionComponent = observer(({ }) => {
               currentDirectory={currentDirectory}
               setCurrentDirectory={setCurrentDirectory}
             />
-          )
+          );
         }
       })}
     </div>

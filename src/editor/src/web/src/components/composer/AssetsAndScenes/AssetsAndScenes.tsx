@@ -19,13 +19,13 @@ export const AssetsAndScenes: FunctionComponent<Props> = observer(({ openScene }
             {
               type: 'page',
               tabId: 'assets',
-              label: "Assets"
+              label: "Assets",
             },
             {
               type: 'page',
               tabId: 'scenes',
-              label: "Scenes"
-            }
+              label: "Scenes",
+            },
           ]} />
         </div>
 

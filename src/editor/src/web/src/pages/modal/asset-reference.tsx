@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from "react";
-import { FolderIcon } from '@heroicons/react/24/outline'
+import { FolderIcon } from '@heroicons/react/24/outline';
 import cn from 'classnames';
 
 import { AssetType } from "@fantasy-console/runtime/src/cartridge";
@@ -67,17 +67,17 @@ const AssetReferenceModal: FunctionComponent = ({ }) => {
       id: asset.id,
       type: 'directory',
       name: directoryName,
-    } satisfies AssetReferenceModalVirtualDirectory as AssetReferenceModalVirtualDirectory)
+    } satisfies AssetReferenceModalVirtualDirectory as AssetReferenceModalVirtualDirectory),
   );
 
-  const onClickSelect = async () => {
+  const onClickSelect = async (): Promise<void> => {
     await modal.close({
       selected: true,
       assetId: selectedAssetId!,
     } satisfies AssetReferenceSelectedResultPayload);
   };
 
-  const onClickCancel = async () => {
+  const onClickCancel = async (): Promise<void> => {
     await modal.close({
       selected: false,
     } satisfies AssetReferenceCancelledResultPayload);
@@ -115,7 +115,7 @@ const AssetReferenceModal: FunctionComponent = ({ }) => {
                     selectedAssetId={selectedAssetId}
                     onSelectAsset={setSelectedAssetId}
                   />
-                )
+                );
               } else {
                 return (
                   <AssetReferenceModalListDirectoryItem
@@ -124,7 +124,7 @@ const AssetReferenceModal: FunctionComponent = ({ }) => {
                     currentDirectory={currentDirectory}
                     setCurrentDirectory={setCurrentDirectory}
                   />
-                )
+                );
               }
             })}
           </div>
@@ -148,7 +148,7 @@ export interface AssetReferenceModalListFileItemProps {
   onSelectAsset: (assetId: string) => void;
 }
 export const AssetReferenceModalListFileItem: FunctionComponent<AssetReferenceModalListFileItemProps> = ({ asset, selectedAssetId, onSelectAsset }) => {
-  let AssetIcon = getIconForAssetType(asset.data.type);
+  const AssetIcon = getIconForAssetType(asset.data.type);
   const isSelected = asset.id === selectedAssetId;
   return (
     <ListItemCommon
@@ -177,12 +177,13 @@ export const AssetReferenceModalListDirectoryItem: FunctionComponent<AssetRefere
         setCurrentDirectory([...currentDirectory, asset.name]);
       }}
     />
-  )
+  );
 };
 
 /*
  * Like AssetDbVirtual_____, but different
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type AssetReferenceModalVirtualNode<TAssetType extends AssetType> = AssetReferenceModalVirtualFile<TAssetType> | AssetReferenceModalVirtualDirectory;
 interface AssetReferenceModalVirtualNodeBase {
   id: string;

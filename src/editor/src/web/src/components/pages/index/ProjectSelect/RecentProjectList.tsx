@@ -1,6 +1,6 @@
-import { useEffect, useState, type FunctionComponent, JSX, useRef } from "react";
+import { useEffect, useState, type FunctionComponent, useRef } from "react";
 import { open } from '@tauri-apps/plugin-dialog';
-import { ArrowUpTrayIcon, DocumentIcon } from '@heroicons/react/24/outline'
+import { ArrowUpTrayIcon, DocumentIcon } from '@heroicons/react/24/outline';
 
 import { useLibrary } from "@lib/index";
 import { ApplicationData } from "@lib/application";
@@ -30,12 +30,12 @@ export const RecentProjectList: FunctionComponent<RecentProjectListProps> = obse
   }, [ApplicationDataController.hasLoadedAppData]);
 
   // Functions
-  const loadProject = async () => {
+  const loadProject = async (): Promise<void> => {
     const selected = await open({
       filters: [{
         name: 'PolyZone Project',
-        extensions: ['pzproj']
-      }]
+        extensions: ['pzproj'],
+      }],
     }) as string | null;
 
     if (selected === null) return;
@@ -73,7 +73,7 @@ export const RecentProjectList: FunctionComponent<RecentProjectListProps> = obse
         )}
       </div>
     </>
-  )
+  );
 });
 
 const PlsGiveWall: FunctionComponent = () => {
@@ -91,7 +91,7 @@ const PlsGiveWall: FunctionComponent = () => {
     // Observe container size
     const resizeObserver = new ResizeObserver((entries) => {
       const containerSize = entries[0].contentRect;
-      const rowHeight = firstRowRef.current?.clientHeight
+      const rowHeight = firstRowRef.current?.clientHeight;
 
       if (rowHeight) {
         // Fire resize event, rate-limited to `ResizeMaxFrequency`
@@ -108,7 +108,7 @@ const PlsGiveWall: FunctionComponent = () => {
 
     // Fire initial resize
     const containerHeight = containerRef.current?.clientHeight;
-    const rowHeight = firstRowRef.current?.clientHeight
+    const rowHeight = firstRowRef.current?.clientHeight;
     if (containerHeight && rowHeight) {
       onContainerResize(containerHeight, rowHeight);
     }
@@ -118,7 +118,7 @@ const PlsGiveWall: FunctionComponent = () => {
   /**
    * Recalculate the number of rows visible, based on the container and row heights.
    */
-  function onContainerResize(containerHeight: number, rowHeight: number) {
+  function onContainerResize(containerHeight: number, rowHeight: number): void {
     setNumRows(Math.floor(containerHeight / rowHeight));
   }
 
@@ -126,7 +126,7 @@ const PlsGiveWall: FunctionComponent = () => {
    * Really silly utility function to aggregate results from an iteration
    * into an array.
    */
-  function repeat<TOutput>(count: number, getValue: (index: number) => TOutput) {
+  function repeat<TOutput>(count: number, getValue: (index: number) => TOutput): TOutput[] {
     const results: TOutput[] = [];
     for (let i = 0; i < count; i++) {
       results.push(getValue(i));
@@ -145,12 +145,12 @@ const PlsGiveWall: FunctionComponent = () => {
               className="pr-8"
               style={{
                 animationDelay: `-${lineIndex * 200}ms`,
-                opacity: `${Math.pow((numRows - Math.min(numRows, lineIndex)) / numRows, 2) * 100}%`
+                opacity: `${Math.pow((numRows - Math.min(numRows, lineIndex)) / numRows, 2) * 100}%`,
               }} key={index}
             >༼ つ ◕_◕ ༽つ</span>
           ))}
         </div>
       ))
     }</div>
-  )
-}
+  );
+};

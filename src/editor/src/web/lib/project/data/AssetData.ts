@@ -1,6 +1,5 @@
 import { makeObservable, observable } from "mobx";
 import { AssetType } from "@fantasy-console/runtime/src/cartridge/data";
-import type Resolver from "@fantasy-console/runtime/src/Resolver";
 import { baseName, getFileExtension, toPathList } from "@fantasy-console/runtime/src/util";
 
 export type AssetData = MeshAssetData | MeshSupplementaryAssetData | ScriptAssetData | SoundAssetData | TextureAssetData | UnknownAssetData;
@@ -66,7 +65,7 @@ export abstract class BaseAssetData {
   }
 
   public toString(): string {
-    return `Asset(${this.id}, ${this.type}, ${this.path})`
+    return `Asset(${this.id}, ${this.type}, ${this.path})`;
   }
 
   /**

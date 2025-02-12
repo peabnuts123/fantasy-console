@@ -7,7 +7,7 @@ const DefaultOptions: ModificationOptions = {
     insertSpaces: true,
     tabSize: 2,
   },
-}
+};
 
 const LogMutationDiffs = false;
 
@@ -49,14 +49,14 @@ export class JsoncContainer<TRawType extends object> {
 
     if (LogMutationDiffs) console.log(`[JsoncContainer] (mutate) Before: `, this.text);
 
-    let edits = modify(this.text, path, value, options);
+    const edits = modify(this.text, path, value, options);
     this.text = applyEdits(this.text, edits);
     if (LogMutationDiffs) console.log(`[JsoncContainer] (mutate) After: `, this.text);
   }
 
-  public delete(path: JSONPath) {
+  public delete(path: JSONPath): void {
     if (LogMutationDiffs) console.log(`[JsoncContainer] (delete) Before: `, this.text);
-    let edits = modify(this.text, path, undefined, DefaultOptions);
+    const edits = modify(this.text, path, undefined, DefaultOptions);
     this.text = applyEdits(this.text, edits);
     if (LogMutationDiffs) console.log(`[JsoncContainer] (delete) After: `, this.text);
   }
@@ -115,7 +115,7 @@ export function resolvePath<TContext extends object, TTarget>(selector: ResolveP
  * Indexing a path proxy with `ResolvePathTerminatingSymbol` will return the path value.
  * @param path Persistent state passed down through recursive calls
  */
-function createPathProxy<TTarget extends object>(path: MutationPath<any> = []) {
+function createPathProxy<TTarget extends object>(path: MutationPath<any> = []): TTarget {
   /* @NOTE Capture `path` in a closure */
   return new Proxy<TTarget>({} as TTarget, {
     get(_, prop) {
@@ -135,12 +135,8 @@ function createPathProxy<TTarget extends object>(path: MutationPath<any> = []) {
         path.push(prop);
       }
 
-      // @NOTE Type laundering
-      const propName: keyof TTarget = prop as keyof TTarget;
-
       // Recursively create a new proxy for the sub property
-      // @NOTE Type launder so that if child property is not an object, create a plain proxy
-      return createPathProxy<TTarget[typeof propName] extends object ? TTarget[typeof propName] : object>(path);
-    }
+      return createPathProxy(path);
+    },
   });
 }

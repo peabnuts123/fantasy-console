@@ -13,7 +13,7 @@ export function createDirView<TItem, TFile, TDirectory>(
   toPath: (item: TItem) => string[],
   toFile: (item: TItem) => TFile,
   toDirectory: (directoryName: string, item: TItem) => TDirectory,
-) {
+): (TFile | TDirectory)[] {
   // Find all items that are at this node or below
   const itemsMatchingPrefix = items.filter((item) => {
     for (let i = 0; i < cwd.length; i++) {
@@ -27,12 +27,12 @@ export function createDirView<TItem, TFile, TDirectory>(
   });
 
   // Map nodes into files and directories that are inside this path
-  let files: TFile[] = [];
-  let directories: TDirectory[] = [];
-  let alreadyProcessedSubDirectories: string[] = [];
+  const files: TFile[] = [];
+  const directories: TDirectory[] = [];
+  const alreadyProcessedSubDirectories: string[] = [];
 
   itemsMatchingPrefix.forEach((item) => {
-    let itemPath = toPath(item).slice(cwd.length);
+    const itemPath = toPath(item).slice(cwd.length);
 
     if (itemPath.length === 0) {
       // Item is a file directly in the directory

@@ -12,7 +12,7 @@ const ModalEventPrefix = `__polyzone_modal`;
  * Construct the key to be used for reading/writing to local storage
  * for a given dataId. Abstracted to a function for consistency.
  */
-function localStorageKey(dataId: string) {
+function localStorageKey(dataId: string): string {
   return `${LocalStoragePrefix}__${dataId}`;
 }
 
@@ -23,7 +23,7 @@ enum ModalEvent {
  * Construct an event name to emit / listen to for a given well-known ModalEvent.
  * Abstracted to a function for consistency.
  */
-function eventName(eventId: ModalEvent) {
+function eventName(eventId: ModalEvent): string {
   return `${ModalEventPrefix}-${eventId}`;
 }
 
@@ -33,7 +33,7 @@ export interface CreateModalOptions {
   /** Whether the modal window should be in the center of the screen */
   center?: boolean;
   /** Callback fired after the modal window is successfully created */
-  onCreated?: () => {};
+  onCreated?: () => void;
 }
 
 /**
@@ -60,8 +60,8 @@ export function showModal<TData, TResult>(modalUri: string, data: TData, options
     center: options.center ?? true,
     // hiddenTitle: true,
     skipTaskbar: true,
-    title: options.title ?? ""
-  })
+    title: options.title ?? "",
+  });
 
   return new Promise<TResult>((resolve, reject) => {
     webview.once(eventName(ModalEvent.Result), (e) => {
@@ -72,10 +72,10 @@ export function showModal<TData, TResult>(modalUri: string, data: TData, options
       if (options.onCreated !== undefined) {
         options.onCreated();
       }
-    })
+    });
     webview.once('tauri://error', function (e) {
       reject(e);
-    })
+    });
   });
 }
 
@@ -95,7 +95,7 @@ export function useModal<TExpected>(initialData: TExpected): ModalInstance<TExpe
     const storageId = localStorageKey(modalDataId);
     const modalDataJson = localStorage.getItem(storageId);
     if (modalDataJson !== null) {
-      localStorage.removeItem(storageId)
+      localStorage.removeItem(storageId);
 
       const modalData = JSON.parse(modalDataJson) as TExpected;
       setModalData(modalData);
@@ -117,7 +117,7 @@ export class ModalInstance<TData> {
     this.currentWindow = getCurrentWebviewWindow();
   }
 
-  public async close<TResult>(result: TResult) {
+  public async close<TResult>(result: TResult): Promise<void> {
     // Send result payload
     await emit(eventName(ModalEvent.Result), result);
     // Close modal

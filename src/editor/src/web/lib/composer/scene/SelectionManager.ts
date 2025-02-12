@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { GizmoManager } from "@babylonjs/core/Gizmos/gizmoManager";
 import { PositionGizmo } from "@babylonjs/core/Gizmos/positionGizmo";
 import { BoundingBoxGizmo } from "@babylonjs/core/Gizmos/boundingBoxGizmo";
@@ -92,7 +92,7 @@ export class SelectionManager {
     this.rotateGizmo.onDragEndObservable.add((_eventData) => {
       mutator.apply(this.currentRotateMutation!);
       this.currentRotateMutation = undefined;
-    })
+    });
 
     // Scale
     this.scaleGizmo = new ScaleGizmo(utilityLayer, 2, this.gizmoManager);
@@ -135,7 +135,7 @@ export class SelectionManager {
     this.selectedObject = undefined;
   }
 
-  public updateGizmos() {
+  public updateGizmos(): void {
     // Clear all gizmos
     this.moveGizmo.attachedNode = null;
     this.rotateGizmo.attachedNode = null;
@@ -191,7 +191,7 @@ export class SelectionManager {
           this.rotateGizmo.attachedNode = this.fakeTransformTarget;
           break;
         case CurrentSelectionTool.Scale:
-          this.scaleGizmo.attachedNode = this.fakeTransformTarget
+          this.scaleGizmo.attachedNode = this.fakeTransformTarget;
           break;
         default:
           console.error(`[SelectionManager] (updateGizmos) Unimplemented tool type: ${this.currentTool}`);
@@ -204,7 +204,7 @@ export class SelectionManager {
     }
   }
 
-  public destroy() {
+  public destroy(): void {
     this.moveGizmo.dispose();
     this.rotateGizmo.dispose();
     this.scaleGizmo.dispose();

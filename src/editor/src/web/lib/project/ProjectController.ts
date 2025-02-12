@@ -41,7 +41,7 @@ export class ProjectController {
     if (!await exists(projectPath)) {
       runInAction(() => {
         this._isLoadingProject = false;
-      })
+      });
       throw new ProjectFileNotFoundError(projectPath);
     }
 
@@ -92,7 +92,7 @@ export class ProjectController {
     runInAction(() => {
       this._projectDefinition = projectJson;
       this._project = project;
-      this._isLoadingProject = false
+      this._isLoadingProject = false;
     });
 
     // Start asset watcher
@@ -105,7 +105,7 @@ export class ProjectController {
     // @TODO Run an initial scan for problems
   }
 
-  public async reloadProjectFileFromFs() {
+  public async reloadProjectFileFromFs(): Promise<ProjectData> {
     const oldProject = this.project;
     const projectFile = await this.fileSystem.readFile(oldProject.fileName);
 
@@ -126,7 +126,7 @@ export class ProjectController {
     return project;
   }
 
-  public onDestroy() {
+  public onDestroy(): void {
     // Attempt to stop watching the FS before the page unloads
     // Generally sends a request to Tauri backend which is received but logs some
     // warnings when the response is sent back after the page has reloaded.
@@ -138,11 +138,11 @@ export class ProjectController {
     this.problemScanner?.onDestroy();
   }
 
-  public get isLoadingProject() {
+  public get isLoadingProject(): boolean {
     return this._isLoadingProject;
   }
 
-  public get hasLoadedProject() {
+  public get hasLoadedProject(): boolean {
     return this._project !== undefined;
   }
 

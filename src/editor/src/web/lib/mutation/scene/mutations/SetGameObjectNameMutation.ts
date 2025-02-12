@@ -46,7 +46,7 @@ export class SetGameObjectNameMutation implements ISceneMutation, IContinuousSce
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
-  public undo(args: SceneViewMutationArguments): void {
+  public undo(_args: SceneViewMutationArguments): void {
     // @TODO
     // - Apply undo values
     throw new Error("Method not implemented.");
@@ -63,6 +63,6 @@ export class SetGameObjectNameMutation implements ISceneMutation, IContinuousSce
     return `Rename '${oldName}' => '${this.name}'`;
   }
 
-  public get hasBeenApplied() { return this._hasBeenApplied; }
+  public get hasBeenApplied(): boolean { return this._hasBeenApplied; }
   public set hasBeenApplied(value: boolean) { this._hasBeenApplied = value; }
 }

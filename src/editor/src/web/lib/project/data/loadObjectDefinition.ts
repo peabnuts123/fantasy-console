@@ -9,8 +9,8 @@ import { TransformData } from "./TransformData";
 
 
 export function loadObjectDefinition(objectDefinition: GameObjectDefinition, assetDb: AssetDb): GameObjectData {
-  let components: IComposerComponentData[] = [];
-  for (let componentDefinition of objectDefinition.components) {
+  const components: IComposerComponentData[] = [];
+  for (const componentDefinition of objectDefinition.components) {
     switch (componentDefinition.type) {
       case ComponentDefinitionType.Mesh: {
         const meshComponentDefinition = componentDefinition as MeshComponentDefinition;
@@ -33,7 +33,7 @@ export function loadObjectDefinition(objectDefinition: GameObjectDefinition, ass
       }
       case ComponentDefinitionType.Camera: {
         const cameraComponentDefinition = componentDefinition as CameraComponentDefinition;
-        components.push(new CameraComponentData(componentDefinition.id));
+        components.push(new CameraComponentData(cameraComponentDefinition.id));
         break;
       }
       case ComponentDefinitionType.DirectionalLight: {
@@ -69,6 +69,6 @@ export function loadObjectDefinition(objectDefinition: GameObjectDefinition, ass
       toVector3Core(objectDefinition.transform.scale),
     ),
     components,
-    children
+    children,
   );
 }

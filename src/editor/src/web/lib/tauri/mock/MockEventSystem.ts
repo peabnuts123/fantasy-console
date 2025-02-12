@@ -17,14 +17,14 @@ export class MockEventSystem {
 
   private static subscriptions: Record<string, number[]> = {};
 
-  public static on<T>(event: EventName, handlerId: number) {
+  public static on(event: EventName, handlerId: number): void {
     if (this.subscriptions[event] === undefined) {
       this.subscriptions[event] = [];
     }
     this.subscriptions[event].push(handlerId);
   }
 
-  public static off<T>(event: EventName, handlerId: number) {
+  public static off(event: EventName, handlerId: number): void {
     if (this.subscriptions[event] === undefined) {
       return;
     }
@@ -34,7 +34,7 @@ export class MockEventSystem {
     }
   }
 
-  public static emit(event: string, payload: any) {
+  public static emit(event: string, payload: any): void {
     this.channel.postMessage(JSON.stringify({
       event,
       payload,
@@ -52,11 +52,11 @@ export class MockEventSystem {
       handler({
         ...data,
         id: handlerId,
-      })
-    }
+      });
+    };
   }
 
-  private static onMessage(e: MessageEvent) {
+  private static onMessage(e: MessageEvent): void {
     const { event, payload, windowLabel } = JSON.parse(e.data) as MockEventSystemMessage;
 
     if (this.subscriptions[event] === undefined) {

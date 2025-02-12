@@ -68,15 +68,15 @@ export class AssetDb {
     return asset;
   }
 
-  public findById(assetId: string) {
+  public findById(assetId: string): AssetData | undefined {
     return this.assets.find((asset) => asset.id === assetId);
   }
 
-  public add(asset: AssetData) {
+  public add(asset: AssetData): void {
     this.assets.push(asset);
   }
 
-  public remove(assetId: string) {
+  public remove(assetId: string): void {
     const assetIndex = this.assets.findIndex((asset) => asset.id === assetId);
     if (assetIndex === -1) {
       console.warn(`[AssetDb] (remove) Could not remove asset with ID '${assetId}' from AssetDb - no asset exists with this ID`);

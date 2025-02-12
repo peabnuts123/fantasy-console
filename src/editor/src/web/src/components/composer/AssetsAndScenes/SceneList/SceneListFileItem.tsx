@@ -1,5 +1,6 @@
-import { ChangeEventHandler, FunctionComponent, useEffect, useRef, useState } from "react";
-import { BuildingOffice2Icon } from '@heroicons/react/24/outline'
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEventHandler, FocusEventHandler, FunctionComponent, KeyboardEventHandler, MouseEventHandler } from "react";
+import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { observer } from "mobx-react-lite";
 import { Menu, MenuItem } from "@tauri-apps/api/menu";
 
@@ -29,7 +30,7 @@ export const SceneListFileItem: FunctionComponent<SceneListFileItemProps> = obse
   onClick ??= () => { };
 
   // Hooks
-  let [{ }, DragSource] = useSceneDrag(file.scene);
+  const [{ }, DragSource] = useSceneDrag(file.scene);
   const { ProjectController } = useLibrary();
 
   // State
@@ -40,7 +41,7 @@ export const SceneListFileItem: FunctionComponent<SceneListFileItemProps> = obse
   const fileNameWithoutExtension = fileName.replace(/\.pzscene$/, '');
 
   // Functions
-  const showContextMenu = async (e: React.MouseEvent) => {
+  const showContextMenu: MouseEventHandler = async (e) => {
     // @NOTE Skip context menu in browser
     if (isRunningInBrowser()) return;
 
@@ -61,16 +62,16 @@ export const SceneListFileItem: FunctionComponent<SceneListFileItemProps> = obse
     });
 
     await menu.popup();
-  }
+  };
 
-  const onRenamed = (newBaseName: string) => {
+  const onRenamed = (newBaseName: string): void => {
     console.log(`New path: ${newBaseName}`);
     setIsRenaming(false);
     if (newBaseName !== fileName) {
       const newPath = rename(file.scene.path, newBaseName);
       ProjectController.mutator.apply(new MoveSceneMutation(file.scene, newPath));
     }
-  }
+  };
 
   return (
     isRenaming ? (
@@ -113,10 +114,10 @@ export const CreateNewSceneListFileItem: FunctionComponent<CreateNewSceneListFil
   const fileNameWithoutExtension = fileName.replace(/\.pzscene$/, '');
 
   // Functions
-  const onFinishedNaming = (newBaseName: string) => {
+  const onFinishedNaming = (newBaseName: string): void => {
     const createPath = rename(newPath, newBaseName);
     onCreate(createPath);
-  }
+  };
 
   return (
     <div
@@ -159,18 +160,18 @@ const SceneNameTextInput: FunctionComponent<SceneNameTextInputProps> = ({ value,
     setInputText(inputText);
   };
 
-  const onBlurTextInput = () => {
+  const onBlurTextInput: FocusEventHandler = () => {
     // @TODO should blur cancel or accept?
     onFinishedEditing(toSceneFileName(inputText));
   };
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown: KeyboardEventHandler = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       onCanceledEditing();
     } else if (e.key === 'Enter') {
       onFinishedEditing(toSceneFileName(inputText));
     }
-  }
+  };
 
   return (
     <div className="flex flex-row">
@@ -187,4 +188,4 @@ const SceneNameTextInput: FunctionComponent<SceneNameTextInputProps> = ({ value,
       <span>.pzscene</span>
     </div>
   );
-}
+};

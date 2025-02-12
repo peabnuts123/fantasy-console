@@ -35,12 +35,12 @@ export class SetGameObjectScriptComponentAssetMutation implements ISceneMutation
     const mutationPath = resolvePathForSceneObjectMutation(
       this.gameObjectId,
       SceneViewController.sceneDefinition,
-      (gameObject) => (gameObject.components[componentIndex] as ScriptComponentDefinition).scriptFileId
+      (gameObject) => (gameObject.components[componentIndex] as ScriptComponentDefinition).scriptFileId,
     );
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
 
   }
-  undo(args: SceneViewMutationArguments): void {
+  undo(_args: SceneViewMutationArguments): void {
     throw new Error("Method not implemented.");
   }
 

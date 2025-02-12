@@ -1,6 +1,6 @@
 import { type FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/outline';
 
 import { useLibrary } from "@lib/index";
 import { AppTile } from "./AppTile";

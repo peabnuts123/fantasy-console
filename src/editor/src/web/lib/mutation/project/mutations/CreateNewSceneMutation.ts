@@ -25,7 +25,7 @@ export class CreateNewSceneMutation implements IProjectMutation {
     };
     const newSceneJsonc = this.createNewSceneDefinition();
     const newSceneJsoncBytes = new TextEncoder().encode(
-      newSceneJsonc.toString()
+      newSceneJsonc.toString(),
     );
 
     // 0. Calculate hash (asynchronously)
@@ -43,9 +43,9 @@ export class CreateNewSceneMutation implements IProjectMutation {
         scene.manifest.hash = newSceneHash;
       }
 
-      let sceneIndex = ProjectController.projectDefinition.value.scenes.findIndex((scene) => scene.id === newSceneManifest.id);
+      const sceneIndex = ProjectController.projectDefinition.value.scenes.findIndex((scene) => scene.id === newSceneManifest.id);
       if (ProjectController.projectDefinition.value.scenes[sceneIndex].hash !== newSceneHash) {
-        let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[sceneIndex].hash);
+        const jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[sceneIndex].hash);
         ProjectController.projectDefinition.mutate(jsonPath, newSceneHash);
         // @NOTE re-invoke persistChanges() after editing project file a second time
         return ProjectController.mutator.persistChanges();
@@ -57,7 +57,7 @@ export class CreateNewSceneMutation implements IProjectMutation {
 
     // 2. Update JSON
     const jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[ProjectController.project.scenes.length]);
-    ProjectController.projectDefinition.mutate(jsonPath, newSceneManifest, { isArrayInsertion: true })
+    ProjectController.projectDefinition.mutate(jsonPath, newSceneManifest, { isArrayInsertion: true });
 
     // 3. Create new asset on disk
     void ProjectController.fileSystem.writeFile(
@@ -66,7 +66,7 @@ export class CreateNewSceneMutation implements IProjectMutation {
     );
   }
 
-  undo(args: ProjectMutationArguments): void {
+  undo(_args: ProjectMutationArguments): void {
     // @TODO prompt for undo?
     throw new Error("Method not implemented.");
   }
@@ -104,8 +104,8 @@ export class CreateNewSceneMutation implements IProjectMutation {
             {
               id: uuid(),
               type: ComponentDefinitionType.Camera,
-            }
-          ]
+            },
+          ],
         },
         {
           id: uuid(),
@@ -126,8 +126,8 @@ export class CreateNewSceneMutation implements IProjectMutation {
                 b: 255,
               },
               intensity: 1,
-            }
-          ]
+            },
+          ],
         },
       ],
     };

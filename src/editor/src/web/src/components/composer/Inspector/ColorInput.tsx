@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { KeyboardEventHandler, useEffect, useMemo, useRef, useState, type FunctionComponent } from "react";
-import { ColorResult, getContrastingColor, rgbaToHex, rgbStringToHsva } from '@uiw/color-convert';
+import { ColorResult, getContrastingColor, rgbaToHex } from '@uiw/color-convert';
 import Sketch from '@uiw/react-color-sketch';
 
 import { Color3 } from "@fantasy-console/core/src/util";
@@ -33,7 +33,7 @@ export const ColorInput: FunctionComponent<Props> = observer(({ label, color, on
    * focus. Close enough for what we're doing here.
    */
   useEffect(() => {
-    const onFocus = (e: FocusEvent) => {
+    const onFocus = (e: FocusEvent): void => {
       const isTargetChildOfThisControl = divRef.current!.contains(e.target as Node);
       setIsColorPickerVisible(isTargetChildOfThisControl);
     };
@@ -58,11 +58,11 @@ export const ColorInput: FunctionComponent<Props> = observer(({ label, color, on
   /**
    * Hide the colour picker when user clicks outside of it
    */
-  const onClickFacade = () => {
+  const onClickFacade = (): void => {
     setIsColorPickerVisible(false);
-  }
+  };
 
-  const onColorChange = ({ rgb }: ColorResult) => {
+  const onColorChange = ({ rgb }: ColorResult): void => {
     const result = new Color3(rgb.r, rgb.g, rgb.b);
     onChange(result);
   };

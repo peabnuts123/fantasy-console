@@ -19,7 +19,7 @@ class MyObject extends ScriptComponent {
   }
 
   public override onUpdate(deltaTime: number): void {
-    let moveDelta = new Vector2(0, 0);
+    const moveDelta = new Vector2(0, 0);
 
     /* MOVEMENT */
     if (Input.isButtonPressed(InputButton.Right)) moveDelta.x += 1;
@@ -56,21 +56,21 @@ class MyObject extends ScriptComponent {
     }
 
     /* CAMERA */
-    let cameraDelta = this.gameObject.position.subtract(this.cameraPoint);
+    const cameraDelta = this.gameObject.position.subtract(this.cameraPoint);
     this.cameraPoint = this.cameraPoint.addSelf(
-      cameraDelta.multiplySelf(CAMERA_SPEED)
+      cameraDelta.multiplySelf(CAMERA_SPEED),
     );
     this.camera.pointAt(this.cameraPoint);
   }
 
-  private requestJump() {
+  private requestJump(): void {
     this.jumpRequested = true;
     setTimeout(() => {
       this.jumpRequested = false;
     }, 100);
   }
 
-  private jump() {
+  private jump(): void {
     this.velocity.y = JUMP_POWER;
     this.jumpRequested = false;
   }

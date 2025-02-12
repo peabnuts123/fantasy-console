@@ -1,6 +1,7 @@
 import { Html, Head, Main, NextScript } from "next/document";
+import { FunctionComponent } from "react";
 
-export default function Document() {
+const Document: FunctionComponent = () => {
   return (
     <Html lang="en" className="h-full overscroll-none">
       <Head />
@@ -10,4 +11,7 @@ export default function Document() {
       </body>
     </Html>
   );
-}
+};
+
+
+export default Document;

@@ -49,7 +49,7 @@ export const AppTile: FunctionComponent<AppTileProps> = ({ content, label, descr
           {props.children}
         </div>
       );
-    }
+    };
   }
 
   // Common styles between both buttons
@@ -60,7 +60,7 @@ export const AppTile: FunctionComponent<AppTileProps> = ({ content, label, descr
       `[&:not(:active)]:retro-shadow [&:not(:active)]:mb-1 [&:not(:active)]:mr-1`,
       // Active styles
       `active:[border-style:inset] active:mt-1 active:ml-1`,
-      className
+      className,
     )}>
       <div className="flex flex-col">
         {content ? (

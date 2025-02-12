@@ -15,13 +15,13 @@ export const SceneObjectsScanner: ISceneScanner = {
       reportProblem(
         problemKey,
         [path, ...objectPath],
-        description
+        description,
       );
     };
 
     scanObjects(scene.objects, [], reportObjectProblem, context);
-  }
-}
+  },
+};
 
 /**
  * Recursively run object scanners over a collection of objects

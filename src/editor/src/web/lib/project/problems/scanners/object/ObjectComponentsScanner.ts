@@ -18,7 +18,7 @@ export const ObjectComponentsScanner: IObjectScanner = {
       reportProblem(
         problemKey,
         [objectPath, ...componentPath],
-        description
+        description,
       );
     };
 
@@ -28,5 +28,5 @@ export const ObjectComponentsScanner: IObjectScanner = {
         componentScanner.scan(component, reportComponentProblem, context);
       }
     }
-  }
-}
+  },
+};

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type * as TauriFs from '@tauri-apps/plugin-fs';
 
 import { MockHandlerWith2Args, throwUnhandled } from "../util";
@@ -6,6 +7,7 @@ import { DebouncedWatchOptions, WatchEvent } from '@tauri-apps/plugin-fs';
 import { Channel } from '@tauri-apps/api/core';
 
 export class TauriPluginFsMockModule {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public static handle(action: string, args: any) {
     switch (action) {
       case 'read_file':
@@ -43,11 +45,11 @@ export class TauriPluginFsMockModule {
     }
   };
 
-  private static writeFile(data: Uint8Array) {
+  private static writeFile(data: Uint8Array): void {
     console.warn(`[TauriPluginFsMockModule] (writeFile) Tauri is mocked - no file actually written`);
   }
 
-  private static writeTextFile(data: Uint8Array) {
+  private static writeTextFile(data: Uint8Array): void {
     console.warn(`[TauriPluginFsMockModule] (writeTextFile) Tauri is mocked - no file actually written`);
   }
 
@@ -59,5 +61,5 @@ export class TauriPluginFsMockModule {
   private static exists: MockHandlerWith2Args<'path', 'options', typeof TauriFs.exists> = ({ path, options }) => {
     console.warn(`[TauriPluginFsMockModule] (watch) Tauri is mocked - 'exists()' will always return true`);
     return true;
-  }
+  };
 }

@@ -14,6 +14,7 @@ export interface AssetDragData<TAssetData extends AssetData> {
   assetData: TAssetData;
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useAssetDrag<TAssetData extends AssetData, TElement extends HTMLElement = HTMLDivElement>(asset: TAssetData) {
   return useDrag<AssetDragData<TAssetData>, TElement>({
     type: asset.type,
@@ -24,11 +25,12 @@ export function useAssetDrag<TAssetData extends AssetData, TElement extends HTML
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useAssetDrop<TAssetType extends AssetType, TElement extends HTMLElement = HTMLDivElement>(
   acceptedAssetType: TAssetType,
-  onDrop: (data: AssetDragData<AssetDataOfType<TAssetType>>) => void
+  onDrop: (data: AssetDragData<AssetDataOfType<TAssetType>>) => void,
 ) {
-  return useDrop<AssetDragData<AssetDataOfType<TAssetType>>, {}, TElement>({
+  return useDrop<AssetDragData<AssetDataOfType<TAssetType>>, never, TElement>({
     accepts: acceptedAssetType,
     onDrop,
   });

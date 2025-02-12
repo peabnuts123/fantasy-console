@@ -4,11 +4,10 @@ import { v4 as uuid } from 'uuid';
 import { AssetType, CartridgeArchiveManifest } from '@fantasy-console/runtime/src/cartridge';
 
 import { ProjectController } from '@lib/project/ProjectController';
-import { SceneManifest, toRuntimeSceneDefinition } from '@lib/project/definition';
+import { toRuntimeSceneDefinition } from '@lib/project/definition';
 import { SceneData } from '@lib/project/data';
 import { invoke } from '@lib/util/TauriCommands';
 import { SceneViewController } from './scene/SceneViewController';
-
 
 
 export interface TabData {
@@ -33,15 +32,15 @@ export class ComposerController {
     this.openNewTab();
   }
 
-  public async onEnter(): Promise<void> {
+  public onEnter(): void {
     // @TODO remove?
   }
 
-  public onExit() {
+  public onExit(): void {
     // @TODO remove?
   }
 
-  public async loadSceneForTab(tabId: string, sceneManifest: SceneData) {
+  public async loadSceneForTab(tabId: string, sceneManifest: SceneData): Promise<void> {
     for (const tab of this.currentlyOpenTabs) {
       if (tab.id === tabId) {
         // Look up scene data
@@ -56,7 +55,7 @@ export class ComposerController {
         const sceneViewController = new SceneViewController(
           scene.data,
           scene.jsonc,
-          this.projectController
+          this.projectController,
         );
 
         runInAction(() => {
@@ -69,7 +68,7 @@ export class ComposerController {
     throw new Error(`Could not load scene for tab - no tab exists with ID '${tabId}'`);
   }
 
-  public openNewTab() {
+  public openNewTab(): TabData {
     const newTabData: TabData = {
       id: uuid(),
     };
@@ -81,7 +80,7 @@ export class ComposerController {
     return newTabData;
   }
 
-  public closeTab(tabId: string) {
+  public closeTab(tabId: string): void {
     const tabIndex = this.currentlyOpenTabs.findIndex((tab) => tab.id === tabId);
     if (tabIndex === -1) {
       throw new Error(`Could not load scene for tab - no tab exists with ID '${tabId}'`);
@@ -146,7 +145,7 @@ export class ComposerController {
           }
         }),
       scenes: scenes.map((scene) =>
-        toRuntimeSceneDefinition(scene.jsonc.value, scene.manifest.path)
+        toRuntimeSceneDefinition(scene.jsonc.value, scene.manifest.path),
       ),
     };
 
@@ -160,7 +159,7 @@ export class ComposerController {
       scriptPaths: this.projectController.project.assets.getAll()
         .filter((asset) => asset.type === AssetType.Script)
         .map((asset) => asset.path),
-    })
+    });
 
     return new Uint8Array(createCartridgeResult);
   }

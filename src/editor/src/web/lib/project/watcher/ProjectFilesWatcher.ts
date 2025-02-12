@@ -17,7 +17,7 @@ export class ProjectFilesWatcher {
     this.projectFileWatcher = new ProjectFileWatcher(projectController);
   }
 
-  public async watch() {
+  public async watch(): Promise<void> {
     // Start watching project for file changes on disk
     await invoke('start_watching_project_files');
 
@@ -28,19 +28,19 @@ export class ProjectFilesWatcher {
     ]);
   }
 
-  public onAssetChanged(callback: ProjectAssetEventListener) {
+  public onAssetChanged(callback: ProjectAssetEventListener): () => void {
     return this.assetsWatcher.onAssetChanged(callback);
   }
 
-  public onSceneChanged(callback: ProjectSceneEventListener) {
+  public onSceneChanged(callback: ProjectSceneEventListener): () => void {
     return this.scenesWatcher.onSceneChanged(callback);
   }
 
-  public onProjectFileChanged(callback: ProjectFileEventListener) {
+  public onProjectFileChanged(callback: ProjectFileEventListener): () => void {
     return this.projectFileWatcher.onProjectFileChanged(callback);
   }
 
-  public onDestroy() {
+  public onDestroy(): void {
     this.assetsWatcher.onDestroy();
     this.scenesWatcher.onDestroy();
     this.projectFileWatcher.onDestroy();

@@ -1,6 +1,6 @@
 import type { FunctionComponent, PropsWithChildren } from "react";
 import { observer } from "mobx-react-lite";
-import { TrashIcon } from '@heroicons/react/24/solid'
+import { TrashIcon } from '@heroicons/react/24/solid';
 
 
 import type { IComposerComponentData } from "@lib/project/data";
@@ -8,9 +8,9 @@ import type { InspectorComponentProps } from "./InspectorComponent";
 import { RemoveGameObjectComponentMutation } from "@lib/mutation/scene/mutations";
 
 export const InspectorComponentBase: FunctionComponent<PropsWithChildren<InspectorComponentProps<IComposerComponentData>>> = observer(({ children, gameObject, component, controller }) => {
-  const onClickDeleteComponent = () => {
+  const onClickDeleteComponent = (): void => {
     controller.mutator.apply(new RemoveGameObjectComponentMutation(gameObject, component));
-  }
+  };
 
   return (
     <div className="mb-2">

@@ -42,7 +42,7 @@ export class ProblemScanner {
     };
   }
 
-  private onFileChanged(event: ProjectAssetEvent | ProjectSceneEvent | ProjectFileEvent) {
+  private onFileChanged(event: ProjectAssetEvent | ProjectSceneEvent | ProjectFileEvent): void {
     console.log(`[DEBUG] [ProblemScanner] (onFileChanged) Got event:`, event);
 
     // Cancel debounce timer if there is one ongoing
@@ -60,14 +60,14 @@ export class ProblemScanner {
     // Store new cancel function
     this.cancelDebounce = () => {
       clearTimeout(cancelDebounceKey);
-    }
+    };
   }
 
-  private scanForProblems() {
+  private scanForProblems(): void {
     // @TODO where do these go?
     const reportProblem: ReportProblemFn = (problemKey, path, description) => {
       this.debug_printProblem(problemKey, path, description);
-    }
+    };
     const scannerContext: ScannerContext = {
       projectController: this.projectController,
       assetDb: this.projectController.project.assets,
@@ -91,11 +91,11 @@ export class ProblemScanner {
     }
   }
 
-  private debug_printProblem(problemKey: string, path: string[], description: string) {
+  private debug_printProblem(problemKey: string, path: string[], description: string): void {
     console.log(`[ProblemScanner] (debug_printProblem) Found problem: (key='${problemKey}') "${path.join(' > ')}: ${description}"`);
   }
 
-  public onDestroy() {
+  public onDestroy(): void {
     this.stopListeningToFileSystemEvents();
     if (this.cancelDebounce !== undefined) {
       this.cancelDebounce();

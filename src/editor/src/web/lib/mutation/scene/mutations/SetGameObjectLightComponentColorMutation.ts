@@ -46,7 +46,7 @@ export class SetGameObjectLightComponentColorMutation implements ISceneMutation,
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentData = gameObjectData.getComponent(this.componentId, LightComponentDataTypes);
     const gameObject = gameObjectData.sceneInstance!;
-    const component = gameObject.getComponent(this.componentId, LightComponentTypes)
+    const component = gameObject.getComponent(this.componentId, LightComponentTypes);
 
     // - Store undo values
     this.dataColor = componentData.color;
@@ -57,7 +57,7 @@ export class SetGameObjectLightComponentColorMutation implements ISceneMutation,
     const gameObjectData = SceneViewController.scene.getGameObject(this.gameObjectId);
     const componentData = gameObjectData.getComponent(this.componentId, LightComponentDataTypes);
     const gameObject = gameObjectData.sceneInstance!;
-    const component = gameObject.getComponent(this.componentId, LightComponentTypes)
+    const component = gameObject.getComponent(this.componentId, LightComponentTypes);
 
     this.color = color;
     // - 1. Data
@@ -75,12 +75,12 @@ export class SetGameObjectLightComponentColorMutation implements ISceneMutation,
     const mutationPath = resolvePathForSceneObjectMutation(
       this.gameObjectId,
       SceneViewController.sceneDefinition,
-      (gameObject) => (gameObject.components[componentIndex] as AnyLightComponentDefinition).color
+      (gameObject) => (gameObject.components[componentIndex] as AnyLightComponentDefinition).color,
     );
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
   }
 
-  public undo(args: SceneViewMutationArguments): void {
+  public undo(_args: SceneViewMutationArguments): void {
     // @TODO
     // - Apply undo values
     throw new Error("Method not implemented.");
@@ -90,6 +90,6 @@ export class SetGameObjectLightComponentColorMutation implements ISceneMutation,
     return `Change light color`;
   }
 
-  public get hasBeenApplied() { return this._hasBeenApplied; }
+  public get hasBeenApplied(): boolean { return this._hasBeenApplied; }
   public set hasBeenApplied(value: boolean) { this._hasBeenApplied = value; }
 }

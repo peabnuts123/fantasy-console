@@ -34,7 +34,7 @@ export class PointLightComponentData implements IComposerComponentData {
       uuid(),
       1,
       Color3.white(),
-    )
+    );
   }
 
   get componentName(): string {

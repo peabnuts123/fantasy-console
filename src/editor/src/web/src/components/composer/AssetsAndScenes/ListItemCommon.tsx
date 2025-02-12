@@ -30,7 +30,7 @@ export const ListItemCommon: FunctionComponent<ListItemCommonProps> = observer((
         {
           // Default to `pointer` if no cursor class provided
           "cursor-pointer": !/\bcursor-/.test(classNames),
-        }
+        },
       ),
       tabIndex: 0,
       onClick,
@@ -44,5 +44,5 @@ export const ListItemCommon: FunctionComponent<ListItemCommonProps> = observer((
         {label || innerContent}
       </>
     ))
-  )
+  );
 });

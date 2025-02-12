@@ -28,7 +28,7 @@ const UnimplementedComponentInspector: InspectorComponent<IComposerComponentData
     <InspectorComponentBase component={component} controller={controller} gameObject={gameObject}>
       <p className="italic">Unimplemented Inspector UI!</p>
     </InspectorComponentBase>
-  )
+  );
 };
 
 export function getInspectorFor<TComponentType extends IComposerComponentData>(gameObjectComponentConfig: TComponentType): InspectorComponent<TComponentType> {

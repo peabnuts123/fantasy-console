@@ -3,6 +3,7 @@ import { MockHandlerWith1Arg, throwUnhandled } from '../util';
 import { Paths } from '../config';
 
 export class TauriPluginDialogMockModule {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public static handle(action: string, args: any) {
     switch (action) {
       case 'open':

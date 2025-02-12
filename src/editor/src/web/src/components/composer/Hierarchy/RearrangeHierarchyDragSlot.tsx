@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import cn from 'classnames';
 
 import { GameObjectData } from "@lib/project/data";
-import { useDrop } from '@lib/util/drag-and-drop'
+import { useDrop } from '@lib/util/drag-and-drop';
 import { HierarchyObjectDragData, HierarchyObjectDropZoneData } from "./util";
 import { HierarchyObjectFacade } from "./HierarchyObjectFacade";
 
@@ -23,7 +23,7 @@ export const RearrangeHierarchyDragSlot: FunctionComponent<RearrangeHierarchyDra
   const wasDropIntoThisSlot = useRef<boolean>(false);
 
   // Hooks
-  const [{ isDragging, isDragOverThisZone: isDragOverThisTarget, dragData, currentActiveDropZoneData }, DropTarget] = useDrop({
+  const [{ isDragging, isDragOverThisZone: isDragOverThisTarget, dragData, currentActiveDropZoneData: _ }, DropTarget] = useDrop({
     accepts: `SceneHierarchyObject`,
     onDrop(data: HierarchyObjectDragData) {
       onDrop(data);
@@ -65,16 +65,16 @@ export const RearrangeHierarchyDragSlot: FunctionComponent<RearrangeHierarchyDra
   const { gameObject: dragSourceGameObject } = dragData || {};
 
   useEffect(() => {
-    const inverseLerp = (value: number, min: number, max: number) => {
+    const inverseLerp = (value: number, min: number, max: number): number => {
       return (value - min) / (max - min);
-    }
+    };
     const clamp01 = (value: number): number => {
       return Math.min(Math.max(0, value), 1);
-    }
+    };
 
     // Animate the size of the drop zones based on the distance to the mouse
     // Controlled via min-height so as to not animate
-    const onMouseMove = (e: globalThis.MouseEvent) => {
+    const onMouseMove = (e: globalThis.MouseEvent): void => {
       if (!isDragging) return;
       if (isLastTopLevelSlot) return;
 
@@ -98,7 +98,7 @@ export const RearrangeHierarchyDragSlot: FunctionComponent<RearrangeHierarchyDra
     window.addEventListener('drag', onMouseMove);
     return () => {
       window.removeEventListener('drag', onMouseMove);
-    }
+    };
   }, []);
 
   const isDraggingOverThisZone = isDragging && isDragOverThisTarget;
@@ -121,5 +121,5 @@ export const RearrangeHierarchyDragSlot: FunctionComponent<RearrangeHierarchyDra
         </div>
       </div >
     </>
-  )
+  );
 };

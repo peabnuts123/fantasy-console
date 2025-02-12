@@ -84,7 +84,7 @@ export class BrowserMock {
     }
   }
 
-  public mockConvertFileSrc(filePath: string, protocol: string = 'asset'): string {
+  public mockConvertFileSrc(filePath: string, _protocol: string = 'asset'): string {
     return filePath.replace(Paths.MagicFileRoot, '');
   }
 }

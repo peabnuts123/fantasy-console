@@ -15,7 +15,7 @@ export class ApplicationDataController {
     // Eagerly load app data
     // @TODO I'd rather not have mock stuff laying around - is there a more opaque way we can do this?
     if (isRunningInBrowser()) {
-      this.initMockAppData()
+      this.initMockAppData();
     } else {
       this.initAppData();
     }
@@ -58,7 +58,7 @@ export class ApplicationDataController {
     runInAction(() => {
       this._isLoadingAppData = false;
       this._appData = appData;
-    })
+    });
   }
 
   /**
@@ -83,7 +83,7 @@ export class ApplicationDataController {
             resolve(this.appData);
           }
         }, 50);
-      })
+      });
     }
 
     const appDataDir = await path.appDataDir();
@@ -97,7 +97,7 @@ export class ApplicationDataController {
       // Sort recent projects by date opened, limited to max number
       appData.recentProjects = appData.recentProjects
         .sort((projectA, projectB) => {
-          return projectB.lastOpened.valueOf() - projectA.lastOpened.valueOf()
+          return projectB.lastOpened.valueOf() - projectA.lastOpened.valueOf();
         })
         .slice(0, MAX_RECENT_PROJECTS);
     });
@@ -129,22 +129,22 @@ export class ApplicationDataController {
         {
           name: "Санкт-Петербург: Origins",
           lastOpened: new Date(),
-          path: `${Paths.MagicFileRoot}/${Paths.MockProjectFile}`
+          path: `${Paths.MagicFileRoot}/${Paths.MockProjectFile}`,
         },
         {
           name: "Mystery of Myanmar",
           lastOpened: new Date(),
-          path: `${Paths.MagicFileRoot}/${Paths.MockProjectFile}`
+          path: `${Paths.MagicFileRoot}/${Paths.MockProjectFile}`,
         },
       ],
     });
   }
 
-  public get isLoadingAppData() {
+  public get isLoadingAppData(): boolean {
     return this._isLoadingAppData;
   }
 
-  public get hasLoadedAppData() {
+  public get hasLoadedAppData(): boolean {
     return this._appData !== undefined;
   }
 

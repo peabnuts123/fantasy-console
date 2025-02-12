@@ -17,7 +17,7 @@ export const DirectionalLightInspector: InspectorComponent<DirectionalLightCompo
           SetGameObjectLightComponentColorMutation,
           gameObject,
           () => new SetGameObjectLightComponentColorMutation(gameObject, component),
-          () => ({ color: newValue })
+          () => ({ color: newValue }),
         )}
       />
 
@@ -29,9 +29,9 @@ export const DirectionalLightInspector: InspectorComponent<DirectionalLightCompo
           SetGameObjectLightComponentIntensityMutation,
           gameObject,
           () => new SetGameObjectLightComponentIntensityMutation(gameObject, component),
-          () => ({ intensity: newValue })
+          () => ({ intensity: newValue }),
         )}
       />
     </InspectorComponentBase>
-  )
+  );
 });

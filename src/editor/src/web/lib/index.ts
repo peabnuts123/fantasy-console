@@ -12,9 +12,11 @@ export interface Library {
   onPageUnload: () => void;
 }
 
+/* eslint-disable react-hooks/rules-of-hooks */ // I guess eslint is sad because the function is not called `use____()`
 export function createLibrary(): Library {
+
   // Poor-man's dependency injection
-  const [applicationDataController, setApplicationDataController] = useState<ApplicationDataController>(new ApplicationDataController());
+  const [applicationDataController, _setApplicationDataController] = useState<ApplicationDataController>(new ApplicationDataController());
   const [projectController, setProjectController] = useState<ProjectController>(new ProjectController(applicationDataController));
   const [composerController, setComposerController] = useState<ComposerController>(new ComposerController(projectController));
 
@@ -39,6 +41,7 @@ export function createLibrary(): Library {
     },
   };
 }
+/* eslint-enable react-hooks/rules-of-hooks */
 
 export const LibraryContext = createContext<Library>(undefined!);
-export const useLibrary = () => useContext(LibraryContext);
+export const useLibrary = (): Library => useContext(LibraryContext);

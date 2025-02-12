@@ -1,13 +1,13 @@
 import { SceneViewController } from "@lib/composer/scene";
-import type { FunctionComponent, MouseEvent } from "react";
+import type { FunctionComponent, MouseEventHandler } from "react";
 import { useState } from 'react';
-import { ChevronRightIcon, ChevronDownIcon, ArrowTurnDownRightIcon, TrashIcon } from '@heroicons/react/24/solid'
+import { ChevronRightIcon, ChevronDownIcon, ArrowTurnDownRightIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { Menu, MenuItem } from "@tauri-apps/api/menu";
 import cn from 'classnames';
 
 import { SetGameObjectParentMutation } from "@lib/mutation/scene/mutations";
 import { GameObjectData } from "@lib/project/data";
-import { useDrag, useDrop } from '@lib/util/drag-and-drop'
+import { useDrag, useDrop } from '@lib/util/drag-and-drop';
 import { isRunningInBrowser } from "@lib/tauri";
 import { observer } from "mobx-react-lite";
 import { gameObjectAt, HierarchyObjectDragData, HierarchyObjectDropZoneData } from "./util";
@@ -110,7 +110,7 @@ export const HierarchyObject: FunctionComponent<HierarchyObjectProps> = observer
   );
 
   // Functions
-  const showContextMenu = async (e: React.MouseEvent) => {
+  const showContextMenu: MouseEventHandler = async (e) => {
     // @NOTE Skip context menu in browser
     if (isRunningInBrowser()) return;
 
@@ -163,13 +163,13 @@ export const HierarchyObject: FunctionComponent<HierarchyObjectProps> = observer
     });
 
     await menu.popup();
-  }
-  const onClickDelete = (e: MouseEvent) => {
+  };
+  const onClickDelete: MouseEventHandler = (e) => {
     e.stopPropagation();
     contextActions.deleteObject(gameObject);
-  }
+  };
 
-  const onDropIntoRearrangeSlot = (data: HierarchyObjectDragData, type: 'before' | 'after') => {
+  const onDropIntoRearrangeSlot = (data: HierarchyObjectDragData, type: 'before' | 'after'): void => {
     // @NOTE TypeScript isn't smart enough to recognise use of property indexer `[type]` will satisfy the constraint
     //  so, manually specify properties `before` and `after`
     if (type === 'before') {
@@ -187,7 +187,7 @@ export const HierarchyObject: FunctionComponent<HierarchyObjectProps> = observer
     }
   };
 
-  const onDropIntoNewParent = (data: HierarchyObjectDragData) => {
+  const onDropIntoNewParent = (data: HierarchyObjectDragData): void => {
     controller.mutator.apply(new SetGameObjectParentMutation({
       gameObject: data.gameObject,
       newParent: gameObject,
@@ -273,7 +273,7 @@ export const HierarchyObject: FunctionComponent<HierarchyObjectProps> = observer
         {/* Drag preview for reparenting */}
         <div className={cn('transition-[height] duration-200 overflow-hidden',
           // { 'h-6': isDragOverThisZone },
-          { 'h-0': !isDragOverThisZone }
+          { 'h-0': !isDragOverThisZone },
         )}>
           <HierarchyObjectFacade
             gameObject={currentDragObjectData}
@@ -291,5 +291,5 @@ export const HierarchyObject: FunctionComponent<HierarchyObjectProps> = observer
         />
       )}
     </div>
-  )
+  );
 });

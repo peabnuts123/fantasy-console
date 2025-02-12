@@ -1,6 +1,6 @@
 import { useState, type FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { ExclamationTriangleIcon } from '@heroicons/react/24/solid'
+import { ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 
 import { useLibrary } from "@lib/index";
 import Spinner from "@app/components/spinner";

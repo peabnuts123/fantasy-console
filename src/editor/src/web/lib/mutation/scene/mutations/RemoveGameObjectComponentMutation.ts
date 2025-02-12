@@ -10,7 +10,7 @@ import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 const ComponentTypesThatDontExistInTheComposer = [
   CameraComponentData,
   ScriptComponentData,
-]
+];
 
 export class RemoveGameObjectComponentMutation implements ISceneMutation {
   // Mutation parameters
@@ -28,8 +28,8 @@ export class RemoveGameObjectComponentMutation implements ISceneMutation {
     const componentToRemoveDataIndex = gameObjectData.components.findIndex((component) => component.id === this.componentToRemove.id);
     gameObjectData.components.splice(
       componentToRemoveDataIndex,
-      1
-    )
+      1,
+    );
 
     // 2. Update scene
     // @NOTE Don't need to update scene for certain types (since they aren't instantiated in the composer)
@@ -51,12 +51,12 @@ export class RemoveGameObjectComponentMutation implements ISceneMutation {
     const mutationPath = resolvePathForSceneObjectMutation(
       this.gameObjectId,
       SceneViewController.sceneDefinition,
-      (gameObject) => gameObject.components[componentToRemoveDataIndex]
+      (gameObject) => gameObject.components[componentToRemoveDataIndex],
     );
     SceneViewController.sceneJson.delete(mutationPath);
   }
 
-  undo(args: SceneViewMutationArguments): void {
+  undo(_args: SceneViewMutationArguments): void {
     throw new Error("Method not implemented.");
   }
 

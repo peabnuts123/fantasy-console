@@ -3,7 +3,7 @@ import { useState } from "react";
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
 import Link from "next/link";
-import { ArrowLeftEndOnRectangleIcon, FolderIcon } from '@heroicons/react/24/solid'
+import { ArrowLeftEndOnRectangleIcon, FolderIcon } from '@heroicons/react/24/solid';
 
 import Player from "@app/components/player";
 
@@ -12,12 +12,12 @@ interface Props { }
 const PlayerPage: FunctionComponent<Props> = ({ }) => {
   const [cartridge, setCartridge] = useState<Uint8Array | undefined>(undefined);
 
-  const loadCartridge = async () => {
+  const loadCartridge = async (): Promise<void> => {
     const selected = await open({
       filters: [{
         name: 'PolyZone Cartridge',
-        extensions: ['pzcart']
-      }]
+        extensions: ['pzcart'],
+      }],
     }) as string | null;
     if (selected === null) return;
 
@@ -44,7 +44,7 @@ const PlayerPage: FunctionComponent<Props> = ({ }) => {
     {cartridge !== undefined && (
       <Player cartridge={cartridge} />
     )}
-  </>
+  </>;
 };
 
 export default PlayerPage;

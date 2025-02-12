@@ -29,13 +29,13 @@ export function useDrag<TDragData, TElementType extends HTMLElement = HTMLDivEle
   useEffect(() => {
     const dragItem = dragItemRef.current;
 
-    const dragStart: typeof window.ondragstart = (e) => {
+    const dragStart: typeof window.ondragstart = (_e) => {
       // @NOTE Use `setTimeout()` to fix bug in drag and drop API
       // See: https://codepen.io/peabnuts123/pen/wvVYypz?editors=1111
       // See: https://github.com/react-dnd/react-dnd/issues/3649
       setTimeout(() => {
         setIsDragging(true);
-        dragAndDropDataRef.current.beginDrag({ type: options.type, dragData: options.data, dropEffect: options.dropEffect, });
+        dragAndDropDataRef.current.beginDrag({ type: options.type, dragData: options.data, dropEffect: options.dropEffect });
       });
     };
 

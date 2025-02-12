@@ -95,7 +95,7 @@ export class ProjectScenesWatcher {
     this.projectController = projectController;
   }
 
-  public async startListening() {
+  public async startListening(): Promise<void> {
     this.stopListeningForEvents = await listen<RawSceneEvent[]>(TauriEvents.OnProjectScenesUpdated, (e) => {
       void this.onProjectScenesUpdated(e.payload);
     });
@@ -110,19 +110,19 @@ export class ProjectScenesWatcher {
       if (listenerIndex !== -1) {
         this.eventListeners.splice(listenerIndex, 1);
       }
-    }
+    };
   }
 
-  public onDestroy() {
+  public onDestroy(): void {
     if (this.stopListeningForEvents) {
       this.stopListeningForEvents();
     }
   }
 
-  private async onProjectScenesUpdated(updates: RawSceneEvent[]) {
+  private async onProjectScenesUpdated(updates: RawSceneEvent[]): Promise<void> {
     console.log(`[ProjectScenesWatcher] (onProjectScenesUpdated)`, updates);
 
-    let eventPromises: Promise<ProjectSceneEvent>[] = [];
+    const eventPromises: Promise<ProjectSceneEvent>[] = [];
     for (const update of updates) {
       if ('create' in update) {
         eventPromises.push(this.applyCreate(update));
@@ -169,7 +169,7 @@ export class ProjectScenesWatcher {
 
       // 2. Update JSON
       const jsonIndex = this.projectController.projectDefinition.value.scenes.length;
-      let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[jsonIndex]);
+      const jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[jsonIndex]);
       this.projectController.projectDefinition.mutate(jsonPath, newSceneManifest, { isArrayInsertion: true });
 
       return {
@@ -193,7 +193,7 @@ export class ProjectScenesWatcher {
       // 2. Update JSON
       const jsonIndex = this.projectController.projectDefinition.value.scenes.findIndex((scene) => scene.id === sceneId);
       if (jsonIndex === -1) throw new Error(`Cannot apply 'Delete' event: No scene found in ProjectDefinition with id: ${sceneId}`);
-      let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[jsonIndex]);
+      const jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[jsonIndex]);
       this.projectController.projectDefinition.delete(jsonPath);
 
       return {
@@ -229,7 +229,7 @@ export class ProjectScenesWatcher {
       // 2. Update JSON
       const jsonIndex = this.projectController.projectDefinition.value.scenes.findIndex((scene) => scene.id === sceneId);
       if (jsonIndex === -1) throw new Error(`Cannot apply 'Modify' event: No scene found in ProjectDefinition with id: ${sceneId}`);
-      let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[jsonIndex].hash);
+      const jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[jsonIndex].hash);
       this.projectController.projectDefinition.mutate(jsonPath, newHash);
 
       return {
@@ -260,7 +260,7 @@ export class ProjectScenesWatcher {
       // 2. Update JSON
       const jsonIndex = this.projectController.projectDefinition.value.scenes.findIndex((scene) => scene.id === sceneId);
       if (jsonIndex === -1) throw new Error(`Cannot apply 'Rename' event: No scene found in ProjectDefinition with id: ${sceneId}`);
-      let jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[jsonIndex].path);
+      const jsonPath = resolvePath((project: ProjectDefinition) => project.scenes[jsonIndex].path);
       this.projectController.projectDefinition.mutate(jsonPath, newPath);
 
       return {

@@ -1,6 +1,6 @@
 import type { FunctionComponent } from "react";
-import { useEffect, useMemo, useRef } from "react";
-import { ArrowsPointingOutIcon, ArrowPathIcon, ArrowsPointingInIcon } from '@heroicons/react/24/solid'
+import { useEffect, useRef } from "react";
+import { ArrowsPointingOutIcon, ArrowPathIcon, ArrowsPointingInIcon } from '@heroicons/react/24/solid';
 import { observer } from "mobx-react-lite";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 

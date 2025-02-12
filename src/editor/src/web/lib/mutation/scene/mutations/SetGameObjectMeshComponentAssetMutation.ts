@@ -1,5 +1,3 @@
-import { AssetContainer } from "@babylonjs/core/assetContainer";
-
 import type { MeshComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
 
 import { GameObjectData, MeshComponentData } from "@lib/project/data";
@@ -40,12 +38,12 @@ export class SetGameObjectMeshComponentAssetMutation implements ISceneMutation {
     const mutationPath = resolvePathForSceneObjectMutation(
       this.gameObjectId,
       SceneViewController.sceneDefinition,
-      (gameObject) => (gameObject.components[componentIndex] as MeshComponentDefinition).meshFileId
+      (gameObject) => (gameObject.components[componentIndex] as MeshComponentDefinition).meshFileId,
     );
     SceneViewController.sceneJson.mutate(mutationPath, updatedValue);
 
   }
-  undo(args: SceneViewMutationArguments): void {
+  undo(_args: SceneViewMutationArguments): void {
     throw new Error("Method not implemented.");
   }
 

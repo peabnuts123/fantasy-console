@@ -1,7 +1,4 @@
-import { invoke as tauriInvoke } from '@tauri-apps/api/core'
-
-import { AssetDefinition } from '@lib/project/definition';
-import { RawProjectScene } from '@lib/project/watcher/scenes';
+import { invoke as tauriInvoke } from '@tauri-apps/api/core';
 
 /**
  * A list of all commands available in Tauri, as well

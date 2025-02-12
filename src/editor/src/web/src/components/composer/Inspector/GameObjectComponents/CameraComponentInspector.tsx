@@ -11,5 +11,5 @@ export const CameraComponentInspector: InspectorComponent<CameraComponentData> =
         <p className="italic">I am a camera! *takes photo of nearby tree*</p>
       </label>
     </InspectorComponentBase>
-  )
+  );
 });

@@ -70,7 +70,7 @@ export class SceneViewController {
           sceneViewController.scene.path,
           sceneDefinitionBytes,
         );
-      }
+      },
     );
 
     this._canvas = document.createElement('canvas');
@@ -108,14 +108,14 @@ export class SceneViewController {
     this.unlistenToFileSystemEvents = () => {
       stopListeningToProjectFileEvents();
       stopListeningToSceneFileEvents();
-    }
+    };
 
     // @NOTE Class properties MUST have a value explicitly assigned
     // by this point otherwise mobx won't pick them up.
     makeAutoObservable(this);
   }
 
-  private async buildScene() {
+  private async buildScene(): Promise<void> {
     // @DEBUG Random camera constants
     const camera = this.sceneCamera = new FreeCameraBabylon("main", new Vector3Babylon(6, 2, -1), this.babylonScene);
     camera.setTarget(Vector3Babylon.Zero());
@@ -141,7 +141,7 @@ export class SceneViewController {
           this.selectionManager.deselectAll();
         } else if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh !== null) {
           // Resolve GameObjectData from reverse lookup cache
-          let pickedGameObject = this.babylonToWorldSelectionCache.get(pointerInfo.pickInfo.pickedMesh);
+          const pickedGameObject = this.babylonToWorldSelectionCache.get(pointerInfo.pickInfo.pickedMesh);
 
           if (pickedGameObject === undefined) {
             console.error(`Picked mesh but found no corresponding GameObject in cache. Has it been populated or updated? Picked mesh:`, pointerInfo.pickInfo.pickedMesh);
@@ -153,8 +153,8 @@ export class SceneViewController {
     });
   }
 
-  public startBabylonView() {
-    const renderLoop = () => {
+  public startBabylonView(): () => void {
+    const renderLoop = (): void => {
       this.babylonScene.render();
     };
     this.engine.runRenderLoop(renderLoop);
@@ -166,14 +166,14 @@ export class SceneViewController {
     resizeObserver.observe(this.canvas as unknown as Element); // @TODO FUCK YOU REACT!!!!!!
 
     /* Teardown - when scene view is unloaded */
-    const onDestroyView = () => {
+    const onDestroyView = (): void => {
       resizeObserver.unobserve(this.canvas as unknown as Element); // @TODO FUCK YOU REACT!!!!!!
       this.engine.stopRenderLoop(renderLoop);
     };
     return onDestroyView;
   }
 
-  public destroy() {
+  public destroy(): void {
     this.assetCache.forEach((asset) => asset.dispose());
     this.assetDependencyCache.onDestroy();
     this.selectionManager.destroy();
@@ -184,7 +184,7 @@ export class SceneViewController {
     this._canvas.remove();
   }
 
-  private async createScene() {
+  private async createScene(): Promise<void> {
     /* Scene clear color */
     this.babylonScene.clearColor = toColor3Babylon(this.scene.config.clearColor).toColor4();
 
@@ -195,24 +195,24 @@ export class SceneViewController {
     ambientLight.groundColor = toColor3Babylon(this.scene.config.lighting.ambient.color);
     ambientLight.specular = Color3Babylon.Black();
 
-    for (let sceneObject of this.scene.objects) {
+    for (const sceneObject of this.scene.objects) {
       // @TODO do this more in parallel?
       // @TODO store this in a World or something
       //  - remove need for `sceneInstance`
       //  - call `destroy` on the objects, lol
-      const gameObject = await this.createGameObject(sceneObject);
+      const _gameObject = await this.createGameObject(sceneObject);
     }
   }
 
-  public setCurrentTool(tool: CurrentSelectionTool) {
+  public setCurrentTool(tool: CurrentSelectionTool): void {
     this.selectionManager.currentTool = tool;
   }
 
-  public addToSelectionCache(gameObjectData: GameObjectData, component: ISelectableObject) {
+  public addToSelectionCache(gameObjectData: GameObjectData, component: ISelectableObject): void {
     this.babylonToWorldSelectionCache.add(gameObjectData, component.allSelectableMeshes);
   }
 
-  public removeFromSelectionCache(component: ISelectableObject) {
+  public removeFromSelectionCache(component: ISelectableObject): void {
     this.babylonToWorldSelectionCache.remove(component.allSelectableMeshes);
   }
 
@@ -224,7 +224,7 @@ export class SceneViewController {
       gameObjectData.name,
       this.babylonScene!,
       parentTransform,
-      gameObjectData.transform
+      gameObjectData.transform,
     );
 
     // Create all child objects first
@@ -245,7 +245,7 @@ export class SceneViewController {
 
     // Load game object components
     await Promise.all(gameObjectData.components.map((componentData) =>
-      this.createGameObjectComponent(gameObjectData, gameObject, componentData)
+      this.createGameObjectComponent(gameObjectData, gameObject, componentData),
     ));
 
     return gameObject;
@@ -308,7 +308,7 @@ export class SceneViewController {
    * @param componentInstance Current instance of the component. This instance will be destroyed.
    * @param gameObjectData GameObject on which this component lives
    */
-  public async reinitializeComponentInstance(componentInstance: GameObjectComponent, gameObjectData: GameObjectData) {
+  public async reinitializeComponentInstance(componentInstance: GameObjectComponent, gameObjectData: GameObjectData): Promise<void> {
     const gameObjectInstance = componentInstance.gameObject as GameObjectRuntime;
     const componentData = gameObjectData.components.find((component) => component.id === componentInstance.id);
     if (componentData === undefined) throw new Error(`Cannot reinitialize component. Component with ID '${componentInstance.id}' is not a component of GameObject with ID '${gameObjectData.id}'`);
@@ -353,7 +353,7 @@ export class SceneViewController {
     await this.createScene();
   }
 
-  public invalidateAssetCache(assetId: string) {
+  public invalidateAssetCache(assetId: string): void {
     this.assetCache.delete(assetId);
   }
 
@@ -363,16 +363,16 @@ export class SceneViewController {
    * @returns The new asset, or a reference to the existing asset if it existed in the cache.
    */
   public async loadAssetCached(asset: AssetData): Promise<AssetContainer> {
-    let cached = this.assetCache.get(asset.id);
+    const cached = this.assetCache.get(asset.id);
     if (cached) {
       return cached;
     } else {
-      let assetContainer = await SceneLoader.LoadAssetContainerAsync(
+      const assetContainer = await SceneLoader.LoadAssetContainerAsync(
         asset.babylonFetchUrl,
         undefined,
         this.babylonScene,
         undefined,
-        asset.fileExtension
+        asset.fileExtension,
       );
       this.assetCache.set(asset.id, assetContainer);
       return assetContainer;

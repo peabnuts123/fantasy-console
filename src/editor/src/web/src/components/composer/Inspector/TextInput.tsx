@@ -26,12 +26,12 @@ export const TextInput: FunctionComponent<Props> = observer(({ label, value, onC
     onChange(inputText);
   };
 
-  const onFocusTextInput = () => {
+  const onFocusTextInput = (): void => {
     setInputText(`${value}`);
     setIsTextInputFocused(true);
   };
 
-  const onBlurTextInput = () => {
+  const onBlurTextInput = (): void => {
     setIsTextInputFocused(false);
   };
 

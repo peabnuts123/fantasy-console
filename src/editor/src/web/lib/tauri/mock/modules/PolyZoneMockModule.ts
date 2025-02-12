@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { unzip, zip } from 'fflate';
 
 import { TauriCommandArgs, TauriCommandReturnType } from '@lib/util/TauriCommands';
@@ -9,6 +10,7 @@ const unzipAsync = promisify(unzip);
 const zipAsync = promisify(zip);
 
 export class PolyZoneMockModule {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public static handle(action: string, args: any) {
     switch (action) {
       case 'create_cartridge':

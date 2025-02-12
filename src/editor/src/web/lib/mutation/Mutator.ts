@@ -33,14 +33,14 @@ class CurrentDebounceState<TMutationArgs> {
     this.onDebounceExpire = () => {
       window.clearTimeout(this.timeoutKey);
       onDebounceExpire();
-    }
+    };
     this.timeoutKey = undefined!;
   }
 
   public isSameDebounceAction(
     typeCtor: Constructor<AnyContinuousMutation<TMutationArgs>>,
     mutationTarget: GameObjectData,
-  ) {
+  ): boolean {
     return this.typeCtor === typeCtor && this.mutationTarget === mutationTarget;
   }
 }
@@ -141,7 +141,7 @@ export abstract class Mutator<TMutationArgs> {
     console.log(`Mutation stack: `, this.mutationStack.map((mutation) => mutation.description));
 
     // Save to disk
-    void this.persistChanges()
+    void this.persistChanges();
   }
 
   public undo(): void {
@@ -198,7 +198,7 @@ export abstract class Mutator<TMutationArgs> {
       );
 
       // Create debounce and store timeout key for resetting the debounce
-      debounceState.timeoutKey = window.setTimeout(() => debounceState.onDebounceExpire(), timeoutMs)
+      debounceState.timeoutKey = window.setTimeout(() => debounceState.onDebounceExpire(), timeoutMs);
     } else {
       // Prior debounce state exists
       if (this.currentDebounceState.isSameDebounceAction(typeCtor, mutationTarget)) {
@@ -209,7 +209,7 @@ export abstract class Mutator<TMutationArgs> {
         // Clear previous timeout (debounce)
         window.clearTimeout(this.currentDebounceState.timeoutKey);
         // Create new debounce and store timeout key for resetting the debounce
-        this.currentDebounceState.timeoutKey = window.setTimeout(() => this.currentDebounceState!.onDebounceExpire(), timeoutMs)
+        this.currentDebounceState.timeoutKey = window.setTimeout(() => this.currentDebounceState!.onDebounceExpire(), timeoutMs);
       } else {
         // This is a new debounced action, apply the previous action first
         // Apply and expire the previous debounce action immediately
