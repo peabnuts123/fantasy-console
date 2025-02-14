@@ -8,11 +8,17 @@
   "scripts": {
     "start": "nodemon --watch src --ext 'ts' --exec npm run build",
     "build": "rm -rf dist && tsc --project tsconfig.json",
+    "simulate-ci": "npm run typecheck && npm run lint && npm run test && npm run build && echo 'Build succeeded'",
+    "test": "echo \"No tests yet, sorry\"",
+    "lint": "eslint --max-warnings 0 --no-error-on-unmatched-pattern \"*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}\" \"src/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}\" \"test/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}\"",
     "typecheck": "npm run build"
   },
   "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "eslint": "^9.20.1",
     "nodemon": "^3.1.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.0"
   },
   "author": "peabnuts123",
   "license": "UNLICENSED"

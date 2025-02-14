@@ -19,7 +19,7 @@ export class Vector2 {
     return new Vector2(
       this.x + value.x,
       this.y + value.y,
-    )
+    );
   }
 
   public subtractSelf(value: AnyVector): Vector2 {
@@ -31,7 +31,7 @@ export class Vector2 {
     return new Vector2(
       this.x - value.x,
       this.y - value.y,
-    )
+    );
   }
 
   public multiplySelf(factor: number): Vector2;
@@ -53,12 +53,12 @@ export class Vector2 {
       return new Vector2(
         this.x * operand.x,
         this.y * operand.y,
-      )
+      );
     } else {
       return new Vector2(
         this.x * operand,
         this.y * operand,
-      )
+      );
     }
   }
 

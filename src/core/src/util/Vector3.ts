@@ -28,7 +28,7 @@ export class Vector3 {
       this.x + value.x,
       this.y + value.y,
       this.z + zValue,
-    )
+    );
   }
 
   public subtractSelf(value: AnyVector): Vector3 {
@@ -48,7 +48,7 @@ export class Vector3 {
       this.x - value.x,
       this.y - value.y,
       this.z - zValue,
-    )
+    );
   }
 
   public multiplySelf(factor: number): Vector3;
@@ -74,13 +74,13 @@ export class Vector3 {
         this.x * operand.x,
         this.y * operand.y,
         this.z * operand.z,
-      )
+      );
     } else {
       return new Vector3(
         this.x * operand,
         this.y * operand,
         this.z * operand,
-      )
+      );
     }
   }
 
@@ -115,7 +115,7 @@ export class Vector3 {
         this.x / operand.x,
         this.y / operand.y,
         this.z / operand.z,
-      )
+      );
     } else {
       if (operand === 0) {
         throw new Error(`Cannot divide Vector3 by 0`);
@@ -124,7 +124,7 @@ export class Vector3 {
         this.x / operand,
         this.y / operand,
         this.z / operand,
-      )
+      );
     }
   }
 

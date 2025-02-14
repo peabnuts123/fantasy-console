@@ -20,7 +20,7 @@ export class WorldModule implements IModule {
   /**
    * @internal
    */
-  public onInit() {
+  public onInit(): void {
   }
 
   /**
@@ -34,7 +34,7 @@ export class WorldModule implements IModule {
   /**
    * Destroy the world and everything in it.
    */
-  public addObject(gameObject: GameObject) {
+  public addObject(gameObject: GameObject): void {
     this.gameObjects.push(gameObject);
   }
 
@@ -42,7 +42,7 @@ export class WorldModule implements IModule {
    * Destroys a {@link GameObject}, removing it from the world.
    * @param gameObject The {@link GameObject} to remove.
    */
-  public destroyObject(gameObject: GameObject) {
+  public destroyObject(gameObject: GameObject): void {
     const index = this.gameObjects.indexOf(gameObject);
     if (index !== -1) {
       this.gameObjects.splice(index, 1);

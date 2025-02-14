@@ -1,4 +1,4 @@
-import { GameObject } from "./GameObject"
+import { GameObject } from "./GameObject";
 
 /**
  * A component that lives on a GameObject.
@@ -17,6 +17,7 @@ export abstract class GameObjectComponent {
    * Called once per frame
    * @param deltaTime Time (in seconds) since the previous frame
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public onUpdate(deltaTime: number): void { }
   /**
    * Called right before the GameObject this component is attached to

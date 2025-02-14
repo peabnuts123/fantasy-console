@@ -38,7 +38,7 @@ export class QueryUtils {
      * Full stack of segments that have been processed (including the current segment).
      * This is just used for diagnostic messages.
      */
-    let processedSegments: string[] = [];
+    const processedSegments: string[] = [];
 
     // Iterate from the initial context, one segment at a time
     for (const segment of pathSegments) {
@@ -46,7 +46,7 @@ export class QueryUtils {
 
       // Look up the heirarchy, i.e. the current state's parent
       if (segment === '..') {
-        let parent = currentTransform?.parent;
+        const parent = currentTransform?.parent;
         if (parent === undefined) {
           throw new Error(`Could not resolve path: '${processedSegments.join('/')}'. Attempted to resolve parent node '..' from the world root`);
         } else {
@@ -55,10 +55,10 @@ export class QueryUtils {
         }
       } else {
         // Find the transform with the matching name as the current segment
-        let matchingTransform = currentTransformList.find((transform) => transform.gameObject.name === segment);
+        const matchingTransform = currentTransformList.find((transform) => transform.gameObject.name === segment);
         if (matchingTransform === undefined) {
           // Iteration ended since path does not match any transforms
-          throw new Error(`No object exists at path: '${processedSegments.join('/')}'`)
+          throw new Error(`No object exists at path: '${processedSegments.join('/')}'`);
         }
 
         // Update iteration state
@@ -88,7 +88,7 @@ export class WorldQuery {
 
   public path(pathString: string): GameObjectQuery {
     const allWorldTransforms = this.world.gameObjects.map((gameObject) => gameObject.transform);
-    let transform = QueryUtils.resolvePath(pathString, allWorldTransforms, undefined);
+    const transform = QueryUtils.resolvePath(pathString, allWorldTransforms, undefined);
     return new GameObjectQuery(transform.gameObject);
   }
 }
@@ -104,7 +104,7 @@ export class GameObjectQuery implements IQueryResult<GameObject> {
   }
 
   public path(pathString: string): GameObjectQuery {
-    let transform = QueryUtils.resolvePath(pathString, this.gameObject.transform.children, this.gameObject.transform);
+    const transform = QueryUtils.resolvePath(pathString, this.gameObject.transform.children, this.gameObject.transform);
     return new GameObjectQuery(transform.gameObject);
   }
 

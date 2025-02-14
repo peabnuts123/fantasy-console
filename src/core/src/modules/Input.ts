@@ -85,7 +85,7 @@ class InputModule implements IModule {
   private getCurrentKeyboardState(): InputState {
     // @NOTE mild type laundering
     const state = {} as InputState;
-    for (let inputButton of Object.values(InputButton)) {
+    for (const inputButton of Object.values(InputButton)) {
       state[inputButton] = this.isButtonPressed(inputButton);
     }
     return state;
@@ -95,14 +95,14 @@ class InputModule implements IModule {
    * @internal
    */
   // @TODO this has `init()` and also `onInit()` 🤔
-  public init(manager: NativeInputManager) {
+  public init(manager: NativeInputManager): void {
     this.manager = manager;
   }
 
   /**
    * @internal
    */
-  public dispose() {
+  public dispose(): void {
     this.manager = undefined!;
   }
 }
