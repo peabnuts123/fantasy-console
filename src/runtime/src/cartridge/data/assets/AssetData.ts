@@ -1,5 +1,5 @@
-import type Resolver from "@fantasy-console/runtime/src/Resolver";
-import { baseName, getFileExtension, toPathList } from "@fantasy-console/runtime/src/util";
+import type Resolver from "@polyzone/runtime/src/Resolver";
+import { baseName, getFileExtension, toPathList } from "@polyzone/runtime/src/util";
 
 import { AssetType } from "./AssetType";
 

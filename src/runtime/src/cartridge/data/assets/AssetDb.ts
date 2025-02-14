@@ -1,9 +1,9 @@
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 
-import { ClassReference } from '@fantasy-console/core/src/util';
-import type { AssetDefinition } from '@fantasy-console/runtime/src/cartridge/archive'
-import { getFileExtension } from "@fantasy-console/runtime/src/util";
-import type { IFileSystem, VirtualFile } from '@fantasy-console/runtime/src/filesystem';
+import { ClassReference } from '@polyzone/core/src/util';
+import type { AssetDefinition } from '@polyzone/runtime/src/cartridge/archive'
+import { getFileExtension } from "@polyzone/runtime/src/util";
+import type { IFileSystem, VirtualFile } from '@polyzone/runtime/src/filesystem';
 
 import { createAssetData } from './AssetData';
 import type { AssetData } from './AssetData';

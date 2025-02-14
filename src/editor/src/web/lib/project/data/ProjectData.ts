@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { IFileSystem } from "@fantasy-console/runtime/src/filesystem";
+import { IFileSystem } from "@polyzone/runtime/src/filesystem";
 import { ProjectDefinition, ProjectManifest } from "../definition";
 import { AssetDb } from "./AssetDb";
 import { SceneDb } from "./SceneDb";

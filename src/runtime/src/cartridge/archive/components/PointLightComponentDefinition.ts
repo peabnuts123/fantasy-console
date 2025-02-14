@@ -1,4 +1,4 @@
-import type { PointLightComponentData } from '@fantasy-console/runtime/src/cartridge';
+import type { PointLightComponentData } from '@polyzone/runtime/src/cartridge';
 import type { CartridgeArchive } from '../CartridgeArchive';
 import { ColorDefinition } from "../util";
 import { ComponentDefinitionBase } from "./ComponentDefinition";

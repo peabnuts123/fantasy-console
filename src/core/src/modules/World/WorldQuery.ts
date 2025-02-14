@@ -1,5 +1,4 @@
-import type { ClassReference } from '@fantasy-console/core/src/util';
-
+import { ClassReference } from "../../util";
 import { GameObjectComponent, Transform } from "../../world";
 import { GameObject } from "../../world/GameObject";
 import { WorldModule } from './WorldModule';

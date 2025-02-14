@@ -1,5 +1,5 @@
-import { GameObjectDefinition } from "@fantasy-console/runtime/src/cartridge";
-import { toVector3Definition } from "@fantasy-console/runtime/src/util";
+import { GameObjectDefinition } from "@polyzone/runtime/src/cartridge";
+import { toVector3Definition } from "@polyzone/runtime/src/util";
 
 import { GameObjectData } from "@lib/project/data";
 import { readPathInScene, resolvePathForSceneObjectMutation } from "@lib/mutation/util";

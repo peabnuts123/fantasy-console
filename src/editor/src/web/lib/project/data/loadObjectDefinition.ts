@@ -1,5 +1,5 @@
-import { CameraComponentDefinition, ComponentDefinitionType, DirectionalLightComponentDefinition, MeshComponentDefinition, PointLightComponentDefinition, GameObjectDefinition, ScriptComponentDefinition } from "@fantasy-console/runtime/src/cartridge/archive";
-import { isDefined, toColor3Core, toVector3Core } from "@fantasy-console/runtime/src/util";
+import { CameraComponentDefinition, ComponentDefinitionType, DirectionalLightComponentDefinition, MeshComponentDefinition, PointLightComponentDefinition, GameObjectDefinition, ScriptComponentDefinition } from "@polyzone/runtime/src/cartridge/archive";
+import { isDefined, toColor3Core, toVector3Core } from "@polyzone/runtime/src/util";
 
 import { AssetDb } from "@lib/project/data/AssetDb";
 import { MeshAssetData, ScriptAssetData } from "@lib/project/data/AssetData";

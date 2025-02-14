@@ -2,7 +2,7 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import { readFile, writeFile, rename, exists } from '@tauri-apps/plugin-fs';
 import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 
-import { IFileSystem, VirtualFile } from "@fantasy-console/runtime/src/filesystem";
+import { IFileSystem, VirtualFile } from "@polyzone/runtime/src/filesystem";
 
 /**
  * Minimum amount of time the FS will stay in the 'Writing' state for,

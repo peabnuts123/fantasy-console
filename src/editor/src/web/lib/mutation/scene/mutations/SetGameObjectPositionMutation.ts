@@ -1,5 +1,5 @@
-import { Vector3Definition as Vector3Archive } from "@fantasy-console/runtime/src/cartridge/archive/util";
-import { Vector3 } from "@fantasy-console/core/src/util";
+import { Vector3Definition as Vector3Archive } from "@polyzone/runtime/src/cartridge/archive/util";
+import { Vector3 } from "@polyzone/core/src/util";
 
 import { GameObjectData } from "@lib/project/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";

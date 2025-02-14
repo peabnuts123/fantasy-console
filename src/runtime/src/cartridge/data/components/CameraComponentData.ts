@@ -1,4 +1,4 @@
-import type { CameraComponent } from '@fantasy-console/runtime/src/world/components'
+import type { CameraComponent } from '@polyzone/runtime/src/world/components'
 
 import { ComponentData } from "./ComponentData";
 

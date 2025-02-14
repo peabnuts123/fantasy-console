@@ -1,6 +1,6 @@
 import { Color3 as Color3Babylon, Color4 as Color4Babylon } from '@babylonjs/core/Maths/math.color';
 import { IColor3Like, IColor4Like } from '@babylonjs/core/Maths/math.like';
-import { Color3 as Color3Core, Color4 as Color4Core } from '@fantasy-console/core/src/util';
+import { Color3 as Color3Core, Color4 as Color4Core } from '@polyzone/core/src/util';
 import { ColorDefinition } from '../../cartridge/archive/util'
 
 export * from './WrappedColor3Babylon';

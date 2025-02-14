@@ -1,4 +1,4 @@
-import type { CameraComponentData } from '@fantasy-console/runtime/src/cartridge';
+import type { CameraComponentData } from '@polyzone/runtime/src/cartridge';
 
 import type { CartridgeArchive } from '../CartridgeArchive';
 

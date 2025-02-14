@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 
-import { GameObjectComponent } from "@fantasy-console/core/src/world";
+import { GameObjectComponent } from "@polyzone/core/src/world";
 
 import { GameObjectData } from "@lib/project/data";
 import { ProjectFilesWatcher } from "@lib/project/watcher/ProjectFilesWatcher";

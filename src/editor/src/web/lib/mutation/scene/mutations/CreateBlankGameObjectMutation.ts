@@ -1,12 +1,12 @@
 import { v4 as uuid } from 'uuid';
 
-import { GameObjectDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { GameObjectDefinition } from "@polyzone/runtime/src/cartridge";
 
 import { GameObjectData, loadObjectDefinition } from "@lib/project/data";
 import { ISceneMutation } from '../ISceneMutation';
 import { SceneViewMutationArguments } from "../SceneViewMutationArguments";
 import { resolvePathForSceneObjectMutation } from '@lib/mutation/util';
-import { toVector3Core } from '@fantasy-console/runtime/src/util';
+import { toVector3Core } from '@polyzone/runtime/src/util';
 
 export class CreateBlankGameObjectMutation implements ISceneMutation {
   // Mutation state

@@ -1,4 +1,4 @@
-import { toVector3Core, toColor3Core, isDefined } from '@fantasy-console/runtime/src/util';
+import { toVector3Core, toColor3Core, isDefined } from '@polyzone/runtime/src/util';
 
 import { CameraComponentDefinition, ComponentDefinitionType, MeshComponentDefinition, ScriptComponentDefinition, DirectionalLightComponentDefinition, PointLightComponentDefinition, GameObjectDefinition } from "../../archive";
 import { GameObjectData } from "../GameObjectData";

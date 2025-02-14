@@ -1,4 +1,4 @@
-import type { GameObjectComponent } from '@fantasy-console/core/src/world'
+import type { GameObjectComponent } from '@polyzone/core/src/world'
 
 /**
  * Configuration data for a {@link GameObjectComponent}.

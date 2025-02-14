@@ -1,7 +1,7 @@
-import type { GameObjectComponent } from '@fantasy-console/core/src/world';
-import { GameObject as GameObjectCore } from '@fantasy-console/core/src/world';
-import type { ClassReference, Vector3 } from '@fantasy-console/core';
-import { World } from '@fantasy-console/core';
+import type { GameObjectComponent } from '@polyzone/core/src/world';
+import { GameObject as GameObjectCore } from '@polyzone/core/src/world';
+import type { ClassReference, Vector3 } from '@polyzone/core';
+import { World } from '@polyzone/core';
 
 import type { Transform } from './Transform';
 

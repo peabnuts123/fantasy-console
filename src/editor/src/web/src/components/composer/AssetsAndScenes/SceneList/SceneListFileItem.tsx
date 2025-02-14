@@ -4,7 +4,7 @@ import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { observer } from "mobx-react-lite";
 import { Menu, MenuItem } from "@tauri-apps/api/menu";
 
-import { baseName, rename } from "@fantasy-console/runtime/src/util";
+import { baseName, rename } from "@polyzone/runtime/src/util";
 import { SceneData } from "@lib/project/data";
 import { useLibrary } from "@lib/index";
 import { isRunningInBrowser } from "@lib/tauri";

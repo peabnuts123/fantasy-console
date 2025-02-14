@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import type { Vector3 } from '@fantasy-console/core/src/util';
+import type { Vector3 } from '@polyzone/core/src/util';
 import { ObservableVector3 } from "@lib/util/vector";
 
 export class TransformData {

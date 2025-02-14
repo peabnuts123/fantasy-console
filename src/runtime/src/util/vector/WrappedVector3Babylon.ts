@@ -1,6 +1,6 @@
 import { Vector3 as Vector3Babylon } from '@babylonjs/core/Maths/math.vector';
 
-import { Vector3 as Vector3Core } from '@fantasy-console/core/src/util/Vector3';
+import { Vector3 as Vector3Core } from '@polyzone/core/src/util/Vector3';
 
 /**
 * A Vector3 that is implemented around wrapping a Babylon Vector3 internally.

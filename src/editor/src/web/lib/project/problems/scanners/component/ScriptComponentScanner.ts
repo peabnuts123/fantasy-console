@@ -1,5 +1,5 @@
-import { ComponentDefinition, ComponentDefinitionType } from "@fantasy-console/runtime/src/cartridge";
-import { isDefined } from "@fantasy-console/runtime/src/util";
+import { ComponentDefinition, ComponentDefinitionType } from "@polyzone/runtime/src/cartridge";
+import { isDefined } from "@polyzone/runtime/src/util";
 import { ScriptAssetData } from "@lib/project/data/AssetData";
 import { ReportProblemFn, ScannerContext } from "../../ProblemScanner";
 import { IComponentScanner } from "./IComponentScanner";

@@ -1,8 +1,8 @@
 {
-  "name": "@fantasy-console/root",
+  "name": "@polyzone/root",
   "private": true,
   "version": "0.1.0",
-  "description": "Fantasy Console is a fully integrated environment to quickly and easily build, publish and share PS1 and N64 style games.",
+  "description": "PolyZone is a fully integrated environment to quickly and easily build, share, and play PS1 and N64 style games.",
   "author": "peabnuts123",
   "license": "UNLICENSED",
   "workspaces": [

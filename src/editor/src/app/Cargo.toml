@@ -1,7 +1,7 @@
 [package]
-name = "fantasy-console-editor"
+name = "polyzone_editor"
 version = "0.0.0"
-description = "A fantasy console"
+description = "PolyZone is a fully integrated environment to quickly and easily build, share, and play PS1 and N64 style games."
 authors = ["peabnuts123"]
 edition = "2021"
 
@@ -11,13 +11,13 @@ edition = "2021"
 # The `_lib` suffix may seem redundant but it is necessary
 # to make the lib name unique, such that it won't conflict with the bin name.
 # This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
-name = "fantasy_console_editor_lib"
+name = "polyzone_editor_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 
 # @TODO (one day)
 # [[bin]]
-# name = "fantasy-console-cli"
+# name = "polyzone_cli"
 # path = "src/cli.rs"
 
 [build-dependencies]

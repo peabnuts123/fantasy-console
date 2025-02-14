@@ -1,5 +1,5 @@
 
-import { AssetType } from "@fantasy-console/runtime/src/cartridge";
+import { AssetType } from "@polyzone/runtime/src/cartridge";
 import { observer } from "mobx-react-lite";
 
 import type { MeshComponentData } from "@lib/project/data";

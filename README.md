@@ -1,6 +1,6 @@
-# Fantasy Console
+# PolyZone
 
-Fantasy Console is a fully integrated environment to quickly and easily build, publish and share PS1 and N64 style games.
+PolyZone is a fully integrated environment to quickly and easily build, share, and play PS1 and N64 style games.
 
 This project is current early in development and is somewhat functional, but lacks a lot of functionality.
 

@@ -1,4 +1,4 @@
-import { GameObjectDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { GameObjectDefinition } from "@polyzone/runtime/src/cartridge";
 import { ReportProblemFn, ScannerContext } from "../../ProblemScanner";
 import { ComponentScanners } from "../component";
 import { IObjectScanner } from "./IObjectScanner";

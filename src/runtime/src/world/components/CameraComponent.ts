@@ -1,8 +1,8 @@
 import { FreeCamera } from "@babylonjs/core/Cameras/freeCamera";
 import { Quaternion } from "@babylonjs/core/Maths/math.vector";
 
-import { CameraComponent as CameraComponentCore } from "@fantasy-console/core/src/world/components";
-import { Vector3 } from "@fantasy-console/core/src/util";
+import { CameraComponent as CameraComponentCore } from "@polyzone/core/src/world/components";
+import { Vector3 } from "@polyzone/core/src/util";
 
 import { GameObject } from "../GameObject";
 import { toVector3Babylon } from "../../util";

@@ -1,11 +1,15 @@
 {
-  "name": "@fantasy-console/web-player",
+  "name": "@polyzone/web-player",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
+    "simulate-ci": "npm run typecheck && npm run lint && npm run test && npm run build && echo 'Build succeeded'",
+    "test": "echo \"No tests yet, sorry\"",
+    "lint": "echo \"No linting yet, sorry\"",
+    "lint:todo": "eslint --max-warnings 0 --no-error-on-unmatched-pattern \"*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}\" \"src/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}\" \"test/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}\"",
     "typecheck": "tsc"
   },
   "devDependencies": {

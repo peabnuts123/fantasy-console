@@ -1,8 +1,8 @@
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 
-import { DirectionalLightComponent as DirectionalLightComponentCore } from "@fantasy-console/core/src/world/components";
-import { Color3 } from "@fantasy-console/core/src/util";
-import { toColor3Babylon, WrappedColor3Babylon } from '@fantasy-console/runtime/src/util';
+import { DirectionalLightComponent as DirectionalLightComponentCore } from "@polyzone/core/src/world/components";
+import { Color3 } from "@polyzone/core/src/util";
+import { toColor3Babylon, WrappedColor3Babylon } from '@polyzone/runtime/src/util';
 
 import { GameObject } from "../GameObject";
 

@@ -1,6 +1,6 @@
 import { Unzipped } from "fflate";
 
-import { CartridgeFileSystem } from '@fantasy-console/runtime/src/filesystem';
+import { CartridgeFileSystem } from '@polyzone/runtime/src/filesystem';
 
 import { CartridgeArchiveManifest } from "./CartridgeArchiveManifest";
 

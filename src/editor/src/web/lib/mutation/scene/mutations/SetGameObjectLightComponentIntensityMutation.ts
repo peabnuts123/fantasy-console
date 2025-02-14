@@ -1,7 +1,7 @@
-import { ClassReference } from "@fantasy-console/core/src/util";
-import { GameObjectComponent } from "@fantasy-console/core/src/world";
-import { DirectionalLightComponent, PointLightComponent } from "@fantasy-console/runtime/src/world";
-import { DirectionalLightComponentDefinition, PointLightComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { ClassReference } from "@polyzone/core/src/util";
+import { GameObjectComponent } from "@polyzone/core/src/world";
+import { DirectionalLightComponent, PointLightComponent } from "@polyzone/runtime/src/world";
+import { DirectionalLightComponentDefinition, PointLightComponentDefinition } from "@polyzone/runtime/src/cartridge";
 
 import { DirectionalLightComponentData, GameObjectData, IComposerComponentData, PointLightComponentData } from "@lib/project/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";

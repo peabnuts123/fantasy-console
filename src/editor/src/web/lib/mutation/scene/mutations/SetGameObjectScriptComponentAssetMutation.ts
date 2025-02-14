@@ -1,4 +1,4 @@
-import type { ScriptComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
+import type { ScriptComponentDefinition } from "@polyzone/runtime/src/cartridge";
 
 import { GameObjectData, ScriptComponentData } from "@lib/project/data";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";

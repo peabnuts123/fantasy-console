@@ -2,8 +2,8 @@ import { Matrix, Quaternion, Vector3 as Vector3Babylon } from '@babylonjs/core/M
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import type { Scene as BabylonScene } from '@babylonjs/core/scene';
 
-import { Vector3 } from '@fantasy-console/core/src/util/Vector3';
-import { Transform as TransformCore } from '@fantasy-console/core/src/world';
+import { Vector3 } from '@polyzone/core/src/util/Vector3';
+import { Transform as TransformCore } from '@polyzone/core/src/world';
 
 import type { TransformData } from '../cartridge';
 import { toVector3Babylon, WrappedVector3Babylon } from '../util';

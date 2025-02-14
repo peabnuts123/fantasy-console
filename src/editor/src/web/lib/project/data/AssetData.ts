@@ -1,6 +1,6 @@
 import { makeObservable, observable } from "mobx";
-import { AssetType } from "@fantasy-console/runtime/src/cartridge/data";
-import { baseName, getFileExtension, toPathList } from "@fantasy-console/runtime/src/util";
+import { AssetType } from "@polyzone/runtime/src/cartridge/data";
+import { baseName, getFileExtension, toPathList } from "@polyzone/runtime/src/util";
 
 export type AssetData = MeshAssetData | MeshSupplementaryAssetData | ScriptAssetData | SoundAssetData | TextureAssetData | UnknownAssetData;
 export type AssetDataOfType<TAssetType extends AssetType> = Extract<AssetData, { type: TAssetType }>;

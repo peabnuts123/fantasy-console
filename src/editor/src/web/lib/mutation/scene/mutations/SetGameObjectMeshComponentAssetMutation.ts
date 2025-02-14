@@ -1,4 +1,4 @@
-import type { MeshComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
+import type { MeshComponentDefinition } from "@polyzone/runtime/src/cartridge";
 
 import { GameObjectData, MeshComponentData } from "@lib/project/data";
 import { MeshComponent } from "@lib/composer/scene";

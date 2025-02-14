@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 
-import { ClassReference } from "@fantasy-console/core/src/util";
-import type { GameObject as GameObjectRuntime } from "@fantasy-console/runtime/src/world";
+import { ClassReference } from "@polyzone/core/src/util";
+import type { GameObject as GameObjectRuntime } from "@polyzone/runtime/src/world";
 
 import type { IComposerComponentData } from "./components";
 import type { TransformData } from "./TransformData";

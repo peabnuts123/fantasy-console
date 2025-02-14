@@ -1,4 +1,4 @@
-import { GameObjectComponent } from "@fantasy-console/core";
+import { GameObjectComponent } from "@polyzone/core";
 import { CameraComponentData, GameObjectData, IComposerComponentData, MeshComponentData, ScriptComponentData } from "@lib/project/data";
 import { isSelectableObject } from "@lib/composer/scene/components";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";

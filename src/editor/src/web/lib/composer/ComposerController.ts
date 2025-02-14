@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { v4 as uuid } from 'uuid';
 
-import { AssetType, CartridgeArchiveManifest } from '@fantasy-console/runtime/src/cartridge';
+import { AssetType, CartridgeArchiveManifest } from '@polyzone/runtime/src/cartridge';
 
 import { ProjectController } from '@lib/project/ProjectController';
 import { toRuntimeSceneDefinition } from '@lib/project/definition';

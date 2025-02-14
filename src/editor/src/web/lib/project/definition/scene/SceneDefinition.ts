@@ -1,4 +1,4 @@
-import { SceneDefinition as RuntimeSceneDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { SceneDefinition as RuntimeSceneDefinition } from "@polyzone/runtime/src/cartridge";
 
 // @NOTE In the editor, `path` comes from the scene's location on disk
 // It is not stored as a property on the scene definition.

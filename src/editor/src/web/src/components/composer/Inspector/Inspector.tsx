@@ -1,7 +1,7 @@
 import { useRef, type FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 
-import { ComponentDefinitionType } from "@fantasy-console/runtime/src/cartridge";
+import { ComponentDefinitionType } from "@polyzone/runtime/src/cartridge";
 
 import {
   SetGameObjectPositionMutation,

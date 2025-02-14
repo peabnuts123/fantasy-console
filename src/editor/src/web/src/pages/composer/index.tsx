@@ -58,7 +58,7 @@ const ComposerPage: FunctionComponent<Props> = observer(({ }) => {
     const bytes = await ComposerController.debug_buildCartridge();
     const savePath = await save({
       filters: [{
-        name: 'Fantasy Console Cartridge',
+        name: 'PolyZone Cartridge',
         extensions: ['pzcart'],
       }],
     });

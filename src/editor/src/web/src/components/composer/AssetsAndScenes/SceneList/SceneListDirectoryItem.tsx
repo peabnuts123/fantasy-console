@@ -3,7 +3,7 @@ import { FolderIcon } from '@heroicons/react/24/outline';
 import cn from 'classnames';
 import { observer } from "mobx-react-lite";
 
-import { baseName } from "@fantasy-console/runtime/src/util";
+import { baseName } from "@polyzone/runtime/src/util";
 
 import { ListItemCommon } from '../ListItemCommon';
 import { useSceneDrop } from "@app/interactions";

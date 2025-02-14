@@ -2,7 +2,7 @@ import { FunctionComponent, useState } from "react";
 import { FolderIcon } from '@heroicons/react/24/outline';
 import cn from 'classnames';
 
-import { AssetType } from "@fantasy-console/runtime/src/cartridge";
+import { AssetType } from "@polyzone/runtime/src/cartridge";
 
 import { useModal } from '@lib/modal';
 import { createDirView } from "@lib/util/path";

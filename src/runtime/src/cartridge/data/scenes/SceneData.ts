@@ -1,5 +1,5 @@
-import { toColor3Core } from "@fantasy-console/runtime/src/util";
-import { Color3 } from "@fantasy-console/core/src/util";
+import { toColor3Core } from "@polyzone/runtime/src/util";
+import { Color3 } from "@polyzone/core/src/util";
 
 import { SceneDefinition } from "../../archive";
 import { AssetDb } from "../assets/AssetDb";

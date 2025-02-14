@@ -2,7 +2,7 @@ import { DeviceType } from "@babylonjs/core/DeviceInput/InputDevices/deviceEnums
 import { DeviceSourceManager } from "@babylonjs/core/DeviceInput/InputDevices/deviceSourceManager";
 import { Engine } from "@babylonjs/core/Engines/engine";
 
-import { InputButton, NativeInputManager } from '@fantasy-console/core/src/modules/Input'
+import { InputButton, NativeInputManager } from '@polyzone/core/src/modules/Input'
 
 // @NOTE Find keycodes here: https://www.babylonjs-playground.com/#CIBK2P
 enum KeyCodes {

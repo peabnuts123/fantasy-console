@@ -1,4 +1,4 @@
-import { IFileSystem, VirtualFile } from "@fantasy-console/runtime/src/filesystem";
+import { IFileSystem, VirtualFile } from "@polyzone/runtime/src/filesystem";
 
 export const DebugFileSystemRoot: string = `/project`;
 

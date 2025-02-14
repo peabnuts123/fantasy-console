@@ -3,7 +3,7 @@ import cn from 'classnames';
 import { observer } from "mobx-react-lite";
 import { TrashIcon } from '@heroicons/react/24/solid';
 
-import { AssetType } from "@fantasy-console/runtime/src/cartridge";
+import { AssetType } from "@polyzone/runtime/src/cartridge";
 
 import { useLibrary } from "@lib/index";
 import { showModal } from '@lib/modal';

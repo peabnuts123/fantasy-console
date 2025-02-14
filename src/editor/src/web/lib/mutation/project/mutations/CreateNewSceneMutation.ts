@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-import { ComponentDefinitionType } from '@fantasy-console/runtime/src/cartridge';
+import { ComponentDefinitionType } from '@polyzone/runtime/src/cartridge';
 
 import { JsoncContainer, resolvePath } from '@lib/util/JsoncContainer';
 import { ProjectDefinition, SceneManifest } from '@lib/project/definition';

@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import { v4 as uuid } from 'uuid';
 
-import { CameraComponentDefinition, ComponentDefinition, ComponentDefinitionType } from "@fantasy-console/runtime/src/cartridge";
+import { CameraComponentDefinition, ComponentDefinition, ComponentDefinitionType } from "@polyzone/runtime/src/cartridge";
 
 import type { IComposerComponentData } from "./IComposerComponentData";
 

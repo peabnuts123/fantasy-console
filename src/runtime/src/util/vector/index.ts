@@ -1,6 +1,6 @@
 import { Vector3 as Vector3Babylon } from '@babylonjs/core/Maths/math.vector'
 import { IVector3Like } from '@babylonjs/core/Maths/math.like';
-import { Vector3 as Vector3Core } from '@fantasy-console/core/src/util';
+import { Vector3 as Vector3Core } from '@polyzone/core/src/util';
 import { Vector3Definition } from '../../cartridge/archive/util/vector';
 
 export * from './WrappedVector3Babylon';

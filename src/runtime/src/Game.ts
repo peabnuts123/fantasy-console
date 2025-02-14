@@ -8,8 +8,8 @@ import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { PointLight } from "@babylonjs/core/Lights/pointLight";
 
-import { ScriptComponent } from "@fantasy-console/core/src/world";
-import { World } from '@fantasy-console/core/src/modules/World';
+import { ScriptComponent } from "@polyzone/core/src/world";
+import { World } from '@polyzone/core/src/modules/World';
 
 import { ScriptLoader } from './ScriptLoader';
 import {

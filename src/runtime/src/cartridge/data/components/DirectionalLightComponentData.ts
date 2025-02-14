@@ -1,5 +1,5 @@
-import type { Color3 } from '@fantasy-console/core/src/util';
-import type { DirectionalLightComponent } from '@fantasy-console/runtime/src/world/components';
+import type { Color3 } from '@polyzone/core/src/util';
+import type { DirectionalLightComponent } from '@polyzone/runtime/src/world/components';
 
 import { ComponentData } from "./ComponentData";
 

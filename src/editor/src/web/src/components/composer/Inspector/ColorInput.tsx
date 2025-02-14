@@ -3,7 +3,7 @@ import { KeyboardEventHandler, useEffect, useMemo, useRef, useState, type Functi
 import { ColorResult, getContrastingColor, rgbaToHex } from '@uiw/color-convert';
 import Sketch from '@uiw/react-color-sketch';
 
-import { Color3 } from "@fantasy-console/core/src/util";
+import { Color3 } from "@polyzone/core/src/util";
 
 interface Props {
   label: string;

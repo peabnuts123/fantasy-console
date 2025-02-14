@@ -1,8 +1,8 @@
 import { PointLight } from "@babylonjs/core/Lights/pointLight";
 
-import { PointLightComponent as PointLightComponentCore } from "@fantasy-console/core/src/world/components";
-import { Color3 } from "@fantasy-console/core/src/util";
-import { toColor3Babylon, WrappedColor3Babylon } from '@fantasy-console/runtime/src/util';
+import { PointLightComponent as PointLightComponentCore } from "@polyzone/core/src/world/components";
+import { Color3 } from "@polyzone/core/src/util";
+import { toColor3Babylon, WrappedColor3Babylon } from '@polyzone/runtime/src/util';
 
 import { GameObject } from "../GameObject";
 

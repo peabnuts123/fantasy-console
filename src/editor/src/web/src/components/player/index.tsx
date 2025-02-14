@@ -1,7 +1,7 @@
 import type { FunctionComponent } from "react";
 import { useEffect, useRef } from "react";
 
-import { Runtime } from '@fantasy-console/runtime';
+import { Runtime } from '@polyzone/runtime';
 
 interface Props {
   cartridge: Uint8Array | string;

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 import cn from 'classnames';
 
-import { Vector2 } from "@fantasy-console/core/src/util";
+import { Vector2 } from "@polyzone/core/src/util";
 
 export interface NumberInputProps {
   value: number;

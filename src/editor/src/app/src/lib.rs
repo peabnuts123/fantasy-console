@@ -30,7 +30,7 @@ pub fn run() {
         .plugin(
             tauri_plugin_log::Builder::new()
             .level(log::LevelFilter::Info)
-            .level_for("fantasy_console_editor_lib", log::LevelFilter::Debug)
+            .level_for("polyzone_editor_lib", log::LevelFilter::Debug)
             .build()
         )
         .invoke_handler(tauri::generate_handler![

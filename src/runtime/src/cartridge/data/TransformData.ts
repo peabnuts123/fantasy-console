@@ -1,4 +1,4 @@
-import type { Vector3 } from '@fantasy-console/core/src/util';
+import type { Vector3 } from '@polyzone/core/src/util';
 
 export class TransformData {
   public position: Vector3;

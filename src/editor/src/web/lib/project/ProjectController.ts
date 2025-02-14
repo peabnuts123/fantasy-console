@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import * as path from "@tauri-apps/api/path";
 
-import Resolver from '@fantasy-console/runtime/src/Resolver';
+import Resolver from '@polyzone/runtime/src/Resolver';
 
 import { TauriFileSystem } from '@lib/filesystem/TauriFileSystem';
 import { JsoncContainer } from "@lib/util/JsoncContainer";

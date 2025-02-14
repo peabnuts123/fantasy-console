@@ -1,9 +1,9 @@
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 
-import { ClassReference } from '@fantasy-console/core/src/util';
-import { getFileExtension } from "@fantasy-console/runtime/src/util";
-import type { IFileSystem, VirtualFile } from '@fantasy-console/runtime/src/filesystem';
-import { AssetType, AssetTypeMap } from '@fantasy-console/runtime/src/cartridge/data';
+import { ClassReference } from '@polyzone/core/src/util';
+import { getFileExtension } from "@polyzone/runtime/src/util";
+import type { IFileSystem, VirtualFile } from '@polyzone/runtime/src/filesystem';
+import { AssetType, AssetTypeMap } from '@polyzone/runtime/src/cartridge/data';
 
 import { AssetData, createAssetData } from './AssetData';
 import { makeAutoObservable } from 'mobx';

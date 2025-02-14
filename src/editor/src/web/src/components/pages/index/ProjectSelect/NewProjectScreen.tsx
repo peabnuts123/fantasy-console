@@ -6,7 +6,7 @@ import * as path from '@tauri-apps/api/path';
 import { exists, mkdir, writeTextFile } from "@tauri-apps/plugin-fs";
 import { v4 as uuid } from 'uuid';
 
-import { CameraComponentDefinition, ComponentDefinitionType, DirectionalLightComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { CameraComponentDefinition, ComponentDefinitionType, DirectionalLightComponentDefinition } from "@polyzone/runtime/src/cartridge";
 
 import { convertToSafeFileName } from "@lib/util/path";
 import { ProjectDefinition, SceneDefinition } from "@lib/project";

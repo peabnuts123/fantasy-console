@@ -9,7 +9,7 @@ import path from 'path';
 /** Path to write generated bindings to */
 const OutputPath = 'src/core.g.ts';
 /** Root import alias of all modules in the core project */
-const ImportAliasRoot = '@fantasy-console/core';
+const ImportAliasRoot = '@polyzone/core';
 
 // Load all .ts files in the core project
 let modules = (await readdir('../core/src', { recursive: true }))
@@ -88,8 +88,8 @@ function pathToModuleName(path) {
 
 /**
  * Turn a path like `world/GameObject` into the name of a
- * module to be imported by the fantasy-console project itself
- * like `@fantasy-console/core/src/world/GameObject`
+ * module to be imported by the PolyZone project itself
+ * like `@polyzone/core/src/world/GameObject`
  * i.e. imports used by THIS workspace
  * @param {string} path
  */
@@ -113,7 +113,7 @@ function pathToDevImport(path) {
 /**
  * Turn a path like `world/GameObject` and turn it into the name of a
  * module to be imported by consumers of the public API
- * like `@fantasy-console/core/world/GameObject`
+ * like `@polyzone/core/world/GameObject`
  * i.e. imports used by developers custom scripts
  * @param {string} path
  */

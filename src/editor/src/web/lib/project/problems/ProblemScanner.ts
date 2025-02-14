@@ -22,6 +22,7 @@ export interface ScannerContext {
 // - Shouldn't the scanner hierarchy really be project -> (scene manifests/assets) -> scenes -> objects -> components
 // - Duplicate files in asset list will cause problems in zip archive
 // - Duplicate scenes in scene list
+// - Types referenced in package.json don't match editor version
 
 export class ProblemScanner {
   private readonly projectController: ProjectController;

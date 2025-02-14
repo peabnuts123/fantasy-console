@@ -1,4 +1,4 @@
-import { ComponentDefinition } from "@fantasy-console/runtime/src/cartridge/archive";
+import { ComponentDefinition } from "@polyzone/runtime/src/cartridge/archive";
 
 /**
  * Component data that is specific to the composer.

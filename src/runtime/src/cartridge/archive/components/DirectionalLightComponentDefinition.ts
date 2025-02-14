@@ -1,4 +1,4 @@
-import type { DirectionalLightComponentData } from '@fantasy-console/runtime/src/cartridge';
+import type { DirectionalLightComponentData } from '@polyzone/runtime/src/cartridge';
 import type { CartridgeArchive } from '../CartridgeArchive';
 import { ColorDefinition } from "../util";
 

@@ -1,7 +1,7 @@
-import { Vector2, Vector3 } from '@fantasy-console/core/util';
-import { Input, InputButton } from '@fantasy-console/core/modules/Input';
-import { World } from '@fantasy-console/core/modules/World';
-import { CameraComponent, ScriptComponent } from '@fantasy-console/core/world';
+import { Vector2, Vector3 } from '@polyzone/core/util';
+import { Input, InputButton } from '@polyzone/core/modules/Input';
+import { World } from '@polyzone/core/modules/World';
+import { CameraComponent, ScriptComponent } from '@polyzone/core/world';
 
 const MOVE_SPEED_PER_SECOND = 3.0;
 const GRAVITY_PER_SECOND = 0.3;

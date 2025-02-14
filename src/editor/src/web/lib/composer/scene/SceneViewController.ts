@@ -14,14 +14,14 @@ import { DirectionalLight as DirectionalLightBabylon } from '@babylonjs/core/Lig
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 import '@babylonjs/core/Culling/ray'; // @NOTE needed for mesh picking - contains side effects
 
-import { GameObjectComponent } from '@fantasy-console/core/src/world';
+import { GameObjectComponent } from '@polyzone/core/src/world';
 import {
   Transform as TransformRuntime,
   GameObject as GameObjectRuntime,
   DirectionalLightComponent as DirectionalLightComponentRuntime,
   PointLightComponent as PointLightComponentRuntime,
-} from '@fantasy-console/runtime/src/world';
-import { toColor3Babylon } from '@fantasy-console/runtime/src/util';
+} from '@polyzone/runtime/src/world';
+import { toColor3Babylon } from '@polyzone/runtime/src/util';
 
 import { JsoncContainer } from '@lib/util/JsoncContainer';
 import { ProjectController } from '@lib/project/ProjectController';

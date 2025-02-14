@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import { v4 as uuid } from 'uuid';
 
-import { ComponentDefinitionType, type ComponentDefinition, type ScriptComponentDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { ComponentDefinitionType, type ComponentDefinition, type ScriptComponentDefinition } from "@polyzone/runtime/src/cartridge";
 
 import type { ScriptAssetData } from "@lib/project/data/AssetData";
 import { IComposerComponentData } from "./IComposerComponentData";

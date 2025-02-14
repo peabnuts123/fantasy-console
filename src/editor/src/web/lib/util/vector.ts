@@ -1,5 +1,5 @@
 import { makeObservable, observable } from "mobx";
-import { AnyVector, Vector3 } from "@fantasy-console/core/src/util";
+import { AnyVector, Vector3 } from "@polyzone/core/src/util";
 
 /**
  * Thin wrapper for Vector3 that marks its properties as observable properties for mobx

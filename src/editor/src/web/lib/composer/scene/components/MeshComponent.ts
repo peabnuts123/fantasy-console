@@ -1,8 +1,8 @@
 import type { AssetContainer } from "@babylonjs/core/assetContainer";
 import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 
-import { MeshComponent as MeshComponentRuntime } from "@fantasy-console/runtime/src/world/components";
-import type { GameObject } from "@fantasy-console/runtime/src/world";
+import { MeshComponent as MeshComponentRuntime } from "@polyzone/runtime/src/world/components";
+import type { GameObject } from "@polyzone/runtime/src/world";
 
 import { MeshComponentData } from "@lib/project/data/components";
 import type { ISelectableObject } from "./ISelectableObject";

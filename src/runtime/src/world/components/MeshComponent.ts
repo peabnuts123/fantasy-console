@@ -1,7 +1,7 @@
 import type { AssetContainer, InstantiatedEntries } from "@babylonjs/core/assetContainer";
 
-import { MeshComponent as MeshComponentCore } from "@fantasy-console/core/src/world/components";
-import { debug_modTexture } from "@fantasy-console/runtime/src";
+import { MeshComponent as MeshComponentCore } from "@polyzone/core/src/world/components";
+import { debug_modTexture } from "@polyzone/runtime/src";
 
 import { GameObject } from "../GameObject";
 

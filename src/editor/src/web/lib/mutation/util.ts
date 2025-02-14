@@ -1,4 +1,4 @@
-import { GameObjectDefinition } from "@fantasy-console/runtime/src/cartridge";
+import { GameObjectDefinition } from "@polyzone/runtime/src/cartridge";
 
 import { MutationPath, resolvePath, ResolvePathSelector } from "@lib/util/JsoncContainer";
 import { SceneDefinition } from "@lib/project/definition/scene/SceneDefinition";

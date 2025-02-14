@@ -1,4 +1,4 @@
-import type { MeshComponentData } from '@fantasy-console/runtime/src/cartridge';
+import type { MeshComponentData } from '@polyzone/runtime/src/cartridge';
 
 import type { CartridgeArchive } from '../CartridgeArchive';
 import { ComponentDefinitionBase } from "./ComponentDefinition";

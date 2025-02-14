@@ -1,4 +1,4 @@
-import type { GameObjectData } from '@fantasy-console/runtime/src/cartridge'
+import type { GameObjectData } from '@polyzone/runtime/src/cartridge'
 
 import type { CartridgeArchive } from './CartridgeArchive';
 import { ComponentDefinition } from "./components";

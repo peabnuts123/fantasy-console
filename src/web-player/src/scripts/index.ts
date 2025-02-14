@@ -1,10 +1,12 @@
-import { Runtime } from '@fantasy-console/runtime';
+import { Runtime } from '@polyzone/runtime';
 
 const CARTRIDGE_URL = `/sample-cartridge.pzcart`;
 
 async function main() {
-  const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-  const fpsCounter = document.getElementById('debug_framerate') as HTMLDivElement;
+  const canvas = document.getElementById('canvas') as HTMLCanvasElement | null;
+  if (!canvas) throw new Error('Canvas element not found');
+  const fpsCounter = document.getElementById('debug_framerate') as HTMLDivElement | null;
+  if (!fpsCounter) throw new Error('FPS counter element not found');
 
   const runtime = new Runtime(canvas);
 

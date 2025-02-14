@@ -4,7 +4,7 @@ import { Scene } from "@babylonjs/core/scene";
 import { BaseTexture } from "@babylonjs/core/Materials/Textures/baseTexture";
 import "@babylonjs/loaders/OBJ/objFileLoader";
 
-import { Input } from '@fantasy-console/core/src/modules/Input';
+import { Input } from '@polyzone/core/src/modules/Input';
 
 import { readCartridgeArchive, loadCartridge, fetchCartridge, Cartridge, CartridgeArchive } from './cartridge';
 import Resolver from './Resolver';
@@ -15,7 +15,7 @@ export type OnUpdateCallback = () => void;
 export type OnDisposeCallback = () => void;
 
 /**
- * Runtime for Fantasy Console.
+ * Runtime for PolyZone.
  * Use this to run game cartridges.
  */
 export class Runtime {

@@ -3,8 +3,8 @@ const nextConfig = {
   output: "export",
   distDir: "dist",
   transpilePackages: [
-    '@fantasy-console/runtime',
-    '@fantasy-console/core',
+    '@polyzone/runtime',
+    '@polyzone/core',
   ],
 };
 

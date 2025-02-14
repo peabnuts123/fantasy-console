@@ -1,5 +1,5 @@
 import { Color3 as Color3Babylon } from "@babylonjs/core/Maths/math.color";
-import { Color3 as Color3Core } from "@fantasy-console/core/src/util";
+import { Color3 as Color3Core } from "@polyzone/core/src/util";
 
 
 /**

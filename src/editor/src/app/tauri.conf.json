@@ -1,9 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "fantasy-console",
-  "mainBinaryName": "fantasy-console",
+  "productName": "PolyZone",
+  "mainBinaryName": "PolyZone",
   "version": "0.1.0",
-  "identifier": "com.winsauce.fantasy",
+  "identifier": "com.winsauce.polyzone",
   "build": {
     "beforeDevCommand": "npm run start:web",
     "beforeBuildCommand": "npm run build:web",
@@ -14,7 +14,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "Fantasy Console",
+        "title": "PolyZone",
         "width": 800,
         "height": 600,
         "dragDropEnabled": false

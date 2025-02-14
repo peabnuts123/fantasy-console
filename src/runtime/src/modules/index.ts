@@ -1,6 +1,6 @@
-import { IModule } from '@fantasy-console/core/src/modules/IModule';
-import { Input } from '@fantasy-console/core/src/modules/Input';
-import { World } from '@fantasy-console/core/src/modules/World';
+import { IModule } from '@polyzone/core/src/modules/IModule';
+import { Input } from '@polyzone/core/src/modules/Input';
+import { World } from '@polyzone/core/src/modules/World';
 
 export * from './BabylonInputManager';
 

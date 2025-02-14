@@ -1,5 +1,5 @@
 import { FunctionComponent } from "react";
-import { AssetType } from "@fantasy-console/runtime/src/cartridge";
+import { AssetType } from "@polyzone/runtime/src/cartridge";
 import { DocumentIcon, DocumentTextIcon, PhotoIcon, CubeIcon } from '@heroicons/react/24/outline';
 import { observer } from "mobx-react-lite";
 
