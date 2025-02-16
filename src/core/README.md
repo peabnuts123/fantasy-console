@@ -8,7 +8,7 @@ For information on using PolyZone, see the [PolyZone docs](https://github.com/pe
 
 Instead of using `npm install`, it is recommended you add the following to your `package.json` manually:
 
-```JSON
+```JSONC
 {
   // ...
   "dependencies": {
