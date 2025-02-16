@@ -1,25 +1,47 @@
 {
-  "name": "@polyzone/core",
   "private": true,
-  "version": "0.1.0",
+  "name": "@polyzone/core",
+  "version": "0.1.0-0",
+  "description": "PolyZone core API",
+  "author": "peabnuts123",
+  "keywords": [
+    "gamedev",
+    "game development",
+    "fantasy-console",
+    "retro",
+    "retrogaming"
+  ],
+  "homepage": "https://github.com/peabnuts123/polyzone",
+  "bugs": {
+    "url": "https://github.com/peabnuts123/polyzone/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peabnuts123/polyzone.git",
+    "directory": "src/core"
+  },
   "type": "module",
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "main": "dist/index.d.ts",
+  "module": "dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "start": "nodemon --watch src --ext 'ts' --exec npm run build",
     "build": "rm -rf dist && tsc --project tsconfig.json",
     "simulate-ci": "npm run typecheck && npm run lint && npm run test && npm run build && echo 'Build succeeded'",
+    "publish": "npm run simulate-ci && node scripts/publish.js",
     "test": "echo \"No tests yet, sorry\"",
     "lint": "eslint --max-warnings 0 --no-error-on-unmatched-pattern \"*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}\" \"src/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}\" \"test/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}\"",
-    "typecheck": "npm run build"
+    "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",
     "eslint": "^9.20.1",
+    "globals": "^15.15.0",
     "nodemon": "^3.1.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.24.0"
   },
-  "author": "peabnuts123",
   "license": "UNLICENSED"
 }
