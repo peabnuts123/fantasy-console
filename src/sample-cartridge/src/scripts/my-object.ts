@@ -4,11 +4,11 @@ import { World } from '@polyzone/core/modules/World';
 import { CameraComponent, ScriptComponent } from '@polyzone/core/world';
 
 const MOVE_SPEED_PER_SECOND = 3.0;
-const GRAVITY_PER_SECOND = 0.3;
-const JUMP_POWER = 0.09;
+const GRAVITY_PER_SECOND = 0.15;
+const JUMP_POWER = 0.04;
 const CAMERA_SPEED = 0.1;
 
-class MyObject extends ScriptComponent {
+export default class MyObject extends ScriptComponent {
   private camera!: CameraComponent;
   private velocity: Vector3 = Vector3.zero();
   private jumpRequested: boolean = false;
@@ -19,7 +19,7 @@ class MyObject extends ScriptComponent {
   }
 
   public override onUpdate(deltaTime: number): void {
-    let moveDelta = new Vector2(0, 0);
+    const moveDelta = new Vector2(0, 0);
 
     /* MOVEMENT */
     if (Input.isButtonPressed(InputButton.Right)) moveDelta.x += 1;
@@ -56,21 +56,21 @@ class MyObject extends ScriptComponent {
     }
 
     /* CAMERA */
-    let cameraDelta = this.gameObject.position.subtract(this.cameraPoint);
+    const cameraDelta = this.gameObject.position.subtract(this.cameraPoint);
     this.cameraPoint = this.cameraPoint.addSelf(
-      cameraDelta.multiplySelf(CAMERA_SPEED)
+      cameraDelta.multiplySelf(CAMERA_SPEED),
     );
     this.camera.pointAt(this.cameraPoint);
   }
 
-  private requestJump() {
+  private requestJump(): void {
     this.jumpRequested = true;
     setTimeout(() => {
       this.jumpRequested = false;
     }, 100);
   }
 
-  private jump() {
+  private jump(): void {
     this.velocity.y = JUMP_POWER;
     this.jumpRequested = false;
   }
@@ -81,4 +81,3 @@ class MyObject extends ScriptComponent {
   }
 }
 
-export default MyObject;

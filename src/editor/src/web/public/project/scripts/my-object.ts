@@ -8,7 +8,7 @@ const GRAVITY_PER_SECOND = 0.15;
 const JUMP_POWER = 0.04;
 const CAMERA_SPEED = 0.1;
 
-class MyObject extends ScriptComponent {
+export default class MyObject extends ScriptComponent {
   private camera!: CameraComponent;
   private velocity: Vector3 = Vector3.zero();
   private jumpRequested: boolean = false;
@@ -81,4 +81,3 @@ class MyObject extends ScriptComponent {
   }
 }
 
-export default MyObject;
