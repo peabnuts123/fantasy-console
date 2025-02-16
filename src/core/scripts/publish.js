@@ -37,7 +37,7 @@ try {
   await fs.writeFile(PackageJsonPath, JSON.stringify(PackageJson, null, 2));
 
   // Publish package
-  const npmProcess = spawn('npm', ['publish'], { stdio: 'inherit' });
+  const npmProcess = spawn('npm', ['publish', '--access', 'public'], { stdio: 'inherit' });
   await new Promise((resolve, reject) => {
     npmProcess.on('exit', (code) => {
       if (code === 0) {
