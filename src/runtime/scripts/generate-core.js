@@ -104,7 +104,7 @@ function pathToDevImport(path) {
 
   // @NOTE special case for root module
   if (pathSegments.length === 0) {
-    return ImportAliasRoot;
+    return `${ImportAliasRoot}/src`;
   }
 
   return `${ImportAliasRoot}/src/${pathSegments}`;

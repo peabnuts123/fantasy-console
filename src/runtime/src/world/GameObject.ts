@@ -1,7 +1,7 @@
 import type { GameObjectComponent } from '@polyzone/core/src/world';
 import { GameObject as GameObjectCore } from '@polyzone/core/src/world';
-import type { ClassReference, Vector3 } from '@polyzone/core';
-import { World } from '@polyzone/core';
+import { ClassReference, Vector3 } from '@polyzone/core/src/util';
+import { World } from '@polyzone/core/src/modules';
 
 import type { Transform } from './Transform';
 

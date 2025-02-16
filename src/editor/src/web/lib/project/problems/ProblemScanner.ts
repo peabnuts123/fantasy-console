@@ -23,6 +23,7 @@ export interface ScannerContext {
 // - Duplicate files in asset list will cause problems in zip archive
 // - Duplicate scenes in scene list
 // - Types referenced in package.json don't match editor version
+// - Types referenced are correct, but there is a newer version
 
 export class ProblemScanner {
   private readonly projectController: ProjectController;

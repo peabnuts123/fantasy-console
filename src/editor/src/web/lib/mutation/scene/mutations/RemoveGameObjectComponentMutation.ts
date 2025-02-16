@@ -1,4 +1,4 @@
-import { GameObjectComponent } from "@polyzone/core";
+import { GameObjectComponent } from "@polyzone/core/src/world";
 import { CameraComponentData, GameObjectData, IComposerComponentData, MeshComponentData, ScriptComponentData } from "@lib/project/data";
 import { isSelectableObject } from "@lib/composer/scene/components";
 import { resolvePathForSceneObjectMutation } from "@lib/mutation/util";
